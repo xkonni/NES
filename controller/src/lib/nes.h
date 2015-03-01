@@ -45,10 +45,10 @@
 #define NET_OUT           '>'         ///< symbol for outgoing messages
 
 #define STEPS_TOTAL       800         ///< amount of steps in a full turn
-#define STEPS_MAX         10          ///< maximum increase of steps per command
-#define STEPS_MIN         -10         ///< maximum decrease of steps per command
+#define STEPS_MAX         20          ///< maximum increase of steps per command
+#define STEPS_MIN         -20         ///< maximum decrease of steps per command
 
-#define MAX_SAMPLE_DIFF       5       ///< dont report sensor reading greater
+#define MAX_SAMPLE_DIFF       10       ///< dont report sensor reading greater
 #define BLINDSPOT             6       ///< dont send motorcommand when change is smaller
 
 #define TIMEOUT_SENSOR_SAMPLE 5000    ///< timeout between consecutive sensor samples
