@@ -60,14 +60,18 @@ void Controller::calculate_movement (
   command2->set_acc(10);
 }
 
-void Controller::socket_write_sensorcommand (
+void Controller::socket_write_sensorcommand (int sensor,
     messages::sensorcommand *command, messages::sensordata *data) {
   char buffer[BUFFERSIZE];
   bzero(buffer, BUFFERSIZE);
   int client_sockfd;
   int n;
 
-  client_sockfd = socket_connect(SENSOR_PORT, SENSOR_HOST);
+  if (sensor == 1) {
+    client_sockfd = socket_connect(SENSOR1_PORT, SENSOR1_HOST);
+  } else {
+    client_sockfd = socket_connect(SENSOR2_PORT, SENSOR2_HOST);
+  }
   if (! command->SerializeToFileDescriptor(client_sockfd) ) {
     print_error("ERROR writing to socket");
   }

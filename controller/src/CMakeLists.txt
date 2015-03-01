@@ -40,3 +40,22 @@ else()
     nes-socket
   )
 endif()
+
+set(sensor2-daemon_src sensor-daemon.cpp)
+add_executable(sensor2-daemon ${sensor-daemon_src})
+SET_TARGET_PROPERTIES(sensor2-daemon
+  PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -DBBB_SENSOR2"
+)
+if(${HOST} STREQUAL "beaglebone")
+  target_link_libraries(sensor2-daemon
+    lsm303
+    i2cbus
+    nes
+    nes-socket
+  )
+else()
+  target_link_libraries(sensor-daemon
+    nes
+    nes-socket
+  )
+endif()

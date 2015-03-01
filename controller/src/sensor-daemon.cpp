@@ -19,7 +19,14 @@ Sensor::Sensor() :
     sensor2 {}
 {
   // initialize socket
-  sockfd = socket_open(SENSOR_PORT);
+#ifndef BBB_SENSOR2
+  printf("built for SENSOR1\n");
+  sockfd = socket_open(SENSOR1_PORT);
+#else
+  printf("built for SENSOR2\n");
+  sockfd = socket_open(SENSOR2_PORT);
+#endif
+
 }
 
 Sensor::~Sensor() {
@@ -105,9 +112,10 @@ void Sensor::socket_read_sensorcommand () {
 #ifdef HOST_BBB
       mag.readMag();
       convert_coordinates(mag.m[0], mag.m[1], mag.m[2], &sensor1.theta, &sensor1.phi);
-      printf("update: theta %.2f - %.2f = %.2f, phi: %.2f - %.2f = %.2f\n",
-          sensor1.theta, sensor1.theta_offset, sensor1.theta - sensor1.theta_offset,
-          sensor1.phi, sensor1.phi_offset, sensor1.phi - sensor1.phi_offset);
+      // DEBUG
+      // printf("update: theta %.2f - %.2f = %.2f, phi: %.2f - %.2f = %.2f\n",
+      //     sensor1.theta, sensor1.theta_offset, sensor1.theta - sensor1.theta_offset,
+      //     sensor1.phi, sensor1.phi_offset, sensor1.phi - sensor1.phi_offset);
       // TODO sensor2
 #endif
       gettimeofday(&tv_last, NULL);

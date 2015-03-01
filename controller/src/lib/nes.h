@@ -21,13 +21,15 @@
 
 #define BUFFERSIZE        256
 
-#define CONTROLLER_PORT   2020
-#define SENSOR_PORT       2021
-#define SENSOR_HOST       "localhost"
-// #define SENSOR_HOST        "192.168.21.37"
-#define MOTOR_PORT        2022
+#define MOTOR_PORT        2020
 #define MOTOR_HOST        "localhost"
 // #define MOTOR_HOST        "192.168.21.37"
+#define SENSOR1_PORT       2021
+#define SENSOR1_HOST       "localhost"
+// #define SENSOR1_HOST        "192.168.21.37"
+#define SENSOR2_PORT       2022
+// #define SENSOR2_HOST       "localhost"
+#define SENSOR2_HOST        "192.168.7.2"
 
 #define NET_IN            '<'
 #define NET_OUT           '>'

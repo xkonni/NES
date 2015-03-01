@@ -70,13 +70,15 @@ class Controller {
     void socket_write_motorcommand (
         messages::motorcommand *command, messages::motorstatus *status);
 
-    /** @fn void socket_write_sensorcommand (messages::sensorcommand *command);
-      * @brief send sensorcommand
-      *
-      * @param[in]  command the command to send
-      * @param[out] data    the data reply
-      */
-    void socket_write_sensorcommand (
+    /** @fn void socket_write_sensorcommand (int sensor,
+     *          messages::sensorcommand *command, messages::sensordata *data);
+     * @brief send sensorcommand
+     *
+     * @param[in]  sensor   sensor to send to
+     * @param[in]  command  the command to send
+     * @param[out] data     the data reply
+     */
+    void socket_write_sensorcommand (int sensor,
         messages::sensorcommand *command, messages::sensordata *data);
 };
 
