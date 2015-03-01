@@ -60,8 +60,50 @@ void convert_coordinates(int x, int y, int z, int *theta, int *phi) {
   double d_theta;
   double d_phi;
 
+  int tmp_x = x;
+  int tmp_y = y;
+  int tmp_z = z;
+
+  /*
+   * MAGIC
+   * rotate the system
+   */
+  x = tmp_y;
+  y = tmp_z;
+  z = tmp_x;
+
   // radius
   r = sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
+
+  /*
+   * angle phi [0; 2pi]
+   * see https://de.wikipedia.org/wiki/Kugelkoordinaten#Umrechnungen
+   */
+  // first case
+  if (x > 0) {
+    printf("first case\n");
+    d_phi = atan(y/x);
+  }
+  // second case
+  else if (x == 0) {
+    printf("second case\n");
+    // sgn function
+    if (y < 0) d_phi = -1 * M_PI_2;
+    else if (y == 0) d_phi = 0;
+    else d_phi = 1 * M_PI_2;
+  }
+  // third case
+  else if (( x < 0) && (y >= 0)) {
+    printf("third case\n");
+    d_phi = atan(y/x) + M_PI;
+  }
+  // fourth case
+  else if (( x < 0) && (y < 0)) {
+    printf("fourth case\n");
+    d_phi = atan(y/x) - M_PI;
+  }
+  else
+    printf("this should never happen!\n");
 
   /*
    * angle theta [0; pi]
@@ -69,35 +111,12 @@ void convert_coordinates(int x, int y, int z, int *theta, int *phi) {
   if (r != 0) d_theta = acos(z/r);
   else d_theta = 0;
 
-  /*
-   * angle phi [0; 2pi]
-   * see https://de.wikipedia.org/wiki/Kugelkoordinaten#Umrechnungen
-   */
-  // first case
-  if (x > 0)
-    d_phi = atan(y/x);
-  // second case
-  else if (x == 0) {
-    // sgn function
-    if (y < 0) d_phi = -1 * M_PI_2;
-    else if (y == 0) d_phi = 0;
-    else d_phi = 1 * M_PI_2;
-  }
-  // third case
-  else if (( x < 0) && (y >= 0))
-    d_phi = atan(y/x) + M_PI;
-  // fourth case
-  else if (( x < 0) && (y < 0))
-    d_phi = atan(y/x) - M_PI;
-  else
-    printf("this should never happen!\n");
-
   // convert to degrees
   int pi_to_deg = 180/M_PI;
   *theta = (int) (d_theta * pi_to_deg);
   *phi = (int) (d_phi * pi_to_deg);
 
   // DEBUG
-  // printf("x: %d, y: %d, z: %d -> r: %f, theta: %f / %d, phi: %f / %d\n", x, y, z, r,
-  //     d_theta, *theta, d_phi, *phi);
+  printf("x: %5d, y: %5d, z: %5d -> r: %4.2f, theta: %3.2f / %4d, phi: %3.2f / %4d\n", x, y, z, r,
+      d_theta, *theta, d_phi, *phi);
 }
