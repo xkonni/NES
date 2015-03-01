@@ -1,0 +1,43 @@
+#!/bin/sh -e
+### BEGIN INIT INFO
+# Provides:          canbus
+# Required-Start:    $local_fs $network
+# Required-Stop:     $local_fs $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start canbus at boot time
+# Description:       Enable service provided by canbus
+### END INIT INFO
+
+LOGFILE=/var/log/canbus.log
+MODULES="can can-dev can-raw"
+
+case "$1" in
+start)
+  echo "canbus: $(date)" | tee -a $LOGFILE
+  echo BB-DCAN1 > /sys/devices/bone_capemgr.9/slots
+  if [ $? -ne 0 ]; then
+    echo "enabling canbus error" | tee -a $LOGFILE
+  fi
+
+  echo "loading modules"
+  for m in $MODULES; do
+    echo "  $m..." | tee -a $LOGFILE
+    modprobe $m && echo "  done"
+  done
+  if [ $? -eq 0 ]; then
+    echo "done" | tee -a $LOGFILE
+  else
+    echo "modprobe error" | tee -a $LOGFILE
+  fi
+
+  ;;
+reload|force-reload|restart|stop)
+  ;;
+*)
+  echo "Usage: /etc/init.d/canbus {start|stop|reload|restart|force-reload}"
+  exit 1
+  ;;
+esac
+
+exit 0
