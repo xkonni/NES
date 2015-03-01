@@ -8,11 +8,8 @@
 #include "sensor-daemon.h"
 
 #ifdef BBB_HOST
-#ifndef BBB_SENSOR2
 LSM303 lsm303("/dev/i2c-1"); // pin 19,20
-#else
-LSM303 lsm303("/dev/i2c-2"); // pin 17,18
-#endif
+// LSM303 lsm303("/dev/i2c-2"); // pin 17,18
 #endif
 
 Sensor::Sensor() :
@@ -21,19 +18,14 @@ Sensor::Sensor() :
 #ifndef BBB_SENSOR2
   printf("built for SENSOR1, using \"/dev/i2c-1\"\n");
   sensor1.id = 1;
+#else
+  printf("built for SENSOR2, using \"/dev/i2c-1\"\n");
+  sensor1.id = 2;
+#endif
 #ifdef BBB_CAN
   sockfd = can_open();
 #else
   sockfd = socket_open(SENSOR1_PORT);
-#endif
-#else
-  printf("built for SENSOR2, using \"/dev/i2c-2\"\n");
-  sensor1.id = 2;
-#ifdef BBB_CAN
-  sockfd = can_open();
-#else
-  sockfd = socket_open(SENSOR2_PORT);
-#endif
 #endif
 }
 

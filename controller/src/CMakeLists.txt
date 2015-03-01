@@ -52,44 +52,17 @@ endif()
 ## SENSOR-DAEMON
 set(sensor-daemon_src sensor-daemon.cpp)
 add_executable(sensor-daemon ${sensor-daemon_src})
-# BEAGLEBONE
-if(${HOST} STREQUAL "beaglebone")
-  # WITH CAN
-  if($ENV{CAN})
-  target_link_libraries(sensor-daemon
-    lsm303
-    i2cbus
-    nes
-    nes-can
-  )
-  # WITHOUT CAN
-  else()
-  target_link_libraries(sensor-daemon
-    lsm303
-    i2cbus
-    nes
-    nes-socket
-  )
-  endif()
-# NO BEAGLEBONE
-else()
-  target_link_libraries(sensor-daemon
-    nes
-    nes-socket
-  )
-endif()
-
-
-set(sensor2-daemon_src sensor-daemon.cpp)
-add_executable(sensor2-daemon ${sensor-daemon_src})
-SET_TARGET_PROPERTIES(sensor2-daemon
+# SENSOR2
+if($ENV{SENSOR2})
+SET_TARGET_PROPERTIES(sensor-daemon
   PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -DBBB_SENSOR2"
 )
+endif()
 # BEAGLEBONE
 if(${HOST} STREQUAL "beaglebone")
   # WITH CAN
   if($ENV{CAN})
-  target_link_libraries(sensor2-daemon
+  target_link_libraries(sensor-daemon
     lsm303
     i2cbus
     nes
@@ -97,7 +70,7 @@ if(${HOST} STREQUAL "beaglebone")
   )
   # WITHOUT CAN
   else()
-  target_link_libraries(sensor2-daemon
+  target_link_libraries(sensor-daemon
     lsm303
     i2cbus
     nes
@@ -106,7 +79,7 @@ if(${HOST} STREQUAL "beaglebone")
   endif()
 # NO BEAGLEBONE
 else()
-  target_link_libraries(sensor2-daemon
+  target_link_libraries(sensor-daemon
     nes
     nes-socket
   )
