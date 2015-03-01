@@ -35,7 +35,7 @@ void Controller::socket_write_motorcommand (
   close(client_sockfd);
 }
 
-int deg2steps(int deg) {
+int Controller::deg2steps(int deg) {
   // TODO: add global parameter
   int total_steps = 800;
   return floor(total_steps/360*deg);
@@ -101,10 +101,18 @@ int main(int argc, char *argv[])
 
   // calibrate sensor1
   scommand = new messages::sensorcommand();
-  sdata = new messages::sensordata();
+  sdata1 = new messages::sensordata();
   scommand->set_type(messages::sensorcommand::CALIBRATE);
   scommand->set_sensor(1);
   ctrl.socket_write_sensorcommand(scommand, sdata1);
+
+  // calibrate sensor1
+  scommand = new messages::sensorcommand();
+  sdata2 = new messages::sensordata();
+  scommand->set_type(messages::sensorcommand::CALIBRATE);
+    // TODO: select sensor2
+  scommand->set_sensor(1);
+  ctrl.socket_write_sensorcommand(scommand, sdata2);
 
   while (1) {
     // read sensor1 values
@@ -112,7 +120,7 @@ int main(int argc, char *argv[])
     sdata1 = new messages::sensordata();
     scommand->set_type(messages::sensorcommand::GET);
     scommand->set_sensor(1);
-    ctrl.socket_write_sensorcommand(scommand, sdata);
+    ctrl.socket_write_sensorcommand(scommand, sdata1);
 
     // read sensor2 values
     scommand = new messages::sensorcommand();

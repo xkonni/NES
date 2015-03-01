@@ -44,11 +44,14 @@ class Controller {
      *          messages::sensordata *data2);
      *  @brief calculate the necessary movement based on reading from two sensors
      *
-     *  @param[in]  data1   data from first sensor
-     *  @param[in]  data2   data from second sensor
-     *  @param[out] command motorcommand resulting from the data
+     *  @param[in]  data1     data from first sensor
+     *  @param[in]  data2     data from second sensor
+     *  @param[out] command1  first motorcommand resulting from the data
+     *  @param[out] command2  second motorcommand resulting from the data
      */
-    void calculate_movement (messages::sensordata *data1, messages::sensordata *data2);
+    void calculate_movement (
+      messages::sensordata *data1, messages::sensordata *data2,
+      messages::motorcommand *command1, messages::motorcommand *command2);
 
     /** @fn int deg2steps(int deg);
      *  @brief calculate steps from degrees

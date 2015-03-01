@@ -8,7 +8,10 @@
 #include "sensor-daemon.h"
 
 #ifdef HOST_BBB
+// pin 19,20
 LSM303 mag("/dev/i2c-1");
+// pin 17,18
+// LSM303 mag("/dev/i2c-2");
 #endif
 
 Sensor::Sensor() :
@@ -102,6 +105,9 @@ void Sensor::socket_read_sensorcommand () {
 #ifdef HOST_BBB
       mag.readMag();
       convert_coordinates(mag.m[0], mag.m[1], mag.m[2], &sensor1.theta, &sensor1.phi);
+      printf("update: theta %.2f - %.2f = %.2f, phi: %.2f - %.2f = %.2f\n",
+          sensor1.theta, sensor1.theta_offset, sensor1.theta - sensor1.theta_offset,
+          sensor1.phi, sensor1.phi_offset, sensor1.phi - sensor1.phi_offset);
       // TODO sensor2
 #endif
       gettimeofday(&tv_last, NULL);
