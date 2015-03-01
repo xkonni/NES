@@ -81,12 +81,12 @@ void convert_coordinates(int x, int y, int z, int *theta, int *phi) {
    */
   // first case
   if (x > 0) {
-    printf("first case\n");
+    // printf("first case\n");
     d_phi = atan(y/x);
   }
   // second case
   else if (x == 0) {
-    printf("second case\n");
+    // printf("second case\n");
     // sgn function
     if (y < 0) d_phi = -1 * M_PI_2;
     else if (y == 0) d_phi = 0;
@@ -94,12 +94,12 @@ void convert_coordinates(int x, int y, int z, int *theta, int *phi) {
   }
   // third case
   else if (( x < 0) && (y >= 0)) {
-    printf("third case\n");
+    // printf("third case\n");
     d_phi = atan(y/x) + M_PI;
   }
   // fourth case
   else if (( x < 0) && (y < 0)) {
-    printf("fourth case\n");
+    // printf("fourth case\n");
     d_phi = atan(y/x) - M_PI;
   }
   else
@@ -117,6 +117,6 @@ void convert_coordinates(int x, int y, int z, int *theta, int *phi) {
   *phi = (int) (d_phi * pi_to_deg);
 
   // DEBUG
-  printf("x: %5d, y: %5d, z: %5d -> r: %4.2f, theta: %3.2f / %4d, phi: %3.2f / %4d\n", x, y, z, r,
-      d_theta, *theta, d_phi, *phi);
+  // printf("x: %5d, y: %5d, z: %5d -> r: %4.2f, theta: %3.2f / %4d, phi: %3.2f / %4d\n", x, y, z, r,
+  //     d_theta, *theta, d_phi, *phi);
 }
