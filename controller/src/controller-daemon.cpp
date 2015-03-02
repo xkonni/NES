@@ -24,8 +24,9 @@ int Controller::deg2steps(int deg) {
   int steps;
 
   steps = floor(STEPS_TOTAL / 360 * deg);
-  if (steps > STEPS_MAX) steps = STEPS_MAX;
-  if (steps < -STEPS_MAX) steps = -STEPS_MAX;
+  // TODO: this is handled in motor-daemon now
+  // if (steps > STEPS_MAX) steps = STEPS_MAX;
+  // if (steps < -STEPS_MAX) steps = -STEPS_MAX;
 
   return steps;
 }
@@ -35,7 +36,7 @@ void Controller::calculate_movement (
     messages::motorcommand *command1, messages::motorcommand *command2) {
   int theta_diff, phi_diff;
 
-  int BLINDSPOT = 3;
+  int BLINDSPOT = 2;
 
   // motor1 -> theta
   theta_diff = data1->theta() - data2->theta();
@@ -63,14 +64,9 @@ void Controller::calculate_movement (
   }
 }
 
-void Controller::move_motor(int motor, int steps, int acc) {
-  // set acceleration
+void Controller::move_motor(int motor, int steps) {
   messages::motorcommand *command = new messages::motorcommand();
-  command->set_type(messages::motorcommand::LOOP);
-  command->set_motor(motor);
-  command->set_acc(acc);
-  send_motorcommand(command);
-
+  // TODO: here? mhhm
   // correct from [0; 1600] to [-800; 800]
   steps = steps - 800;
 
