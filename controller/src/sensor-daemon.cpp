@@ -129,7 +129,9 @@ int Sensor::sample(int sample_idx, int *samples) {
       samples[NUM_SAMPLES + sample_idx] = last_phi - MAX_SAMPLE_DIFF;
   }
   // DEBUG
-  // printf("t %d, p %d\n", samples[sample_idx], samples[NUM_SAMPLES + sample_idx]);
+  // printf("t %d/%d: %d, p %d/%d: %d\n",
+  // theta, last_theta, samples[sample_idx],
+  // phi, last_phi, samples[NUM_SAMPLES + sample_idx]);
 #else
   sensor1.theta++;
   sensor1.phi++;
@@ -140,6 +142,9 @@ int Sensor::sample(int sample_idx, int *samples) {
 
   // array filled, update saved values
   if (sample_idx == 0) {
+    // DEBUG
+    // last_theta = sensor1.theta;
+    // last_phi = sensor1.phi;
     sensor1.theta = 0;
     sensor1.phi = 0;
     for (i = 0; i < NUM_SAMPLES; i++) {
@@ -148,6 +153,10 @@ int Sensor::sample(int sample_idx, int *samples) {
     }
     sensor1.theta = sensor1.theta / NUM_SAMPLES;
     sensor1.phi = sensor1.phi / NUM_SAMPLES;
+    // DEBUG
+    // printf("theta: %d -> %d: %d, phi: %d -> %d: %d\n",
+    //     last_theta, sensor1.theta, last_theta - sensor1.theta,
+    //     last_phi, sensor1.phi, last_phi - sensor1.phi);
   }
 
   return(sample_idx);

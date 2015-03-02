@@ -24,42 +24,34 @@ int Controller::deg2steps(int deg) {
   int steps;
 
   steps = floor(STEPS_TOTAL / 360 * deg);
-  // TODO: this is handled in motor-daemon now
-  // if (steps > STEPS_MAX) steps = STEPS_MAX;
-  // if (steps < -STEPS_MAX) steps = -STEPS_MAX;
-
+  if ((steps < BLINDSPOT) && (steps > -BLINDSPOT)) {
+    printf("steps: %d, hit blindspot\n", steps);
+    steps = 0;
+  }
+  // dont move too much
+  steps = floor(steps * 0.8);
   return steps;
 }
 
 void Controller::calculate_movement (
     messages::sensordata *data1, messages::sensordata *data2,
     messages::motorcommand *command1, messages::motorcommand *command2) {
-  int theta_diff, phi_diff;
+  int steps;
 
   // motor1 -> theta
-  theta_diff = data1->theta() - data2->theta();
   command1->set_type(messages::motorcommand::LOOP);
   command1->set_motor(1);
+  steps = deg2steps(data1->theta() - data2->theta());
   // modify steps [-800; 800] -> [0; 1600]
-  if ((theta_diff > BLINDSPOT) || (theta_diff < -BLINDSPOT))
-    command1->set_steps(deg2steps(theta_diff) + 800);
-  else {
-    command1->set_steps(800);
-    printf("steps: %d, hit blindspot\n", theta_diff);
-  }
+  command1->set_steps(steps + 800);
 
 
   // motor2 -> phi
-  phi_diff = data1->phi() - data2->phi();
   command2->set_type(messages::motorcommand::LOOP);
   command2->set_motor(2);
+  steps = deg2steps(data1->phi() - data2->phi());
   // modify steps [-800; 800] -> [0; 1600]
-  if ((phi_diff > BLINDSPOT) || (phi_diff < -BLINDSPOT))
-    command2->set_steps(deg2steps(phi_diff) + 800);
-  else {
-    printf("steps: %d, hit blindspot\n", phi_diff);
-    command2->set_steps(800);
-  }
+  command2->set_steps(steps + 800);
 }
 
 int Controller::send_motorcommand(messages::motorcommand *command) {

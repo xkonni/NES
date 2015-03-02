@@ -40,7 +40,7 @@ void Motor::handle_motorcommand (messages::motorcommand *command, messages::moto
     if (steps < STEPS_MIN) steps = STEPS_MIN;
 
     if (m == 1) {
-      motor1.steps += steps;
+      motor1.steps = steps;
       // make sure we dont exceed the limits
       if (motor1.pos + motor1.steps > motor1.maxpos)
         motor1.steps = motor1.maxpos - motor1.pos;
@@ -49,7 +49,7 @@ void Motor::handle_motorcommand (messages::motorcommand *command, messages::moto
       printf("motor1 steps to go: %d\n", motor1.steps);
     }
     else if (m == 2) {
-      motor2.steps += steps;
+      motor2.steps = steps;
       // make sure we dont exceed the limits
       if (motor2.pos + motor2.steps > motor2.maxpos)
         motor2.steps = motor2.maxpos - motor2.pos;
