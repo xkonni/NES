@@ -36,8 +36,6 @@ void Controller::calculate_movement (
     messages::motorcommand *command1, messages::motorcommand *command2) {
   int theta_diff, phi_diff;
 
-  int BLINDSPOT = 3;
-
   // motor1 -> theta
   theta_diff = data1->theta() - data2->theta();
   command1->set_type(messages::motorcommand::LOOP);
