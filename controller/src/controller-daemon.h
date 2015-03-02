@@ -79,14 +79,6 @@ class Controller {
       messages::sensordata *data1, messages::sensordata *data2,
       messages::motorcommand *command1, messages::motorcommand *command2);
 
-    /** @fn   void Controller:move_motor(int motor, int steps);
-     *  @brief move a motor
-     *
-     *  @param[in]  motor     id of the motor
-     *  @param[in]  steps     steps to move
-     */
-    void move_motor(int motor, int steps);
-
     /** @fn   int Controller:send_motorcommand(messages::motorcommand *command)
      *  @brief send a motorcommand to the motor-daemon
      *
