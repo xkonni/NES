@@ -71,7 +71,7 @@ class Motor {
       int maxpos;    ///< maximum position
 
       /**
-       * @fn motor(int header_in, int step_in, int dir_in, int pos_in,
+       * @fn motor(int header_in, int step_in, int dir_in, int acc_in, int pos_in,
                 int minpos_in, int maxpos_in)
        * @brief constructor for the motor struct
        * @param[in] header    initial value for the pin header

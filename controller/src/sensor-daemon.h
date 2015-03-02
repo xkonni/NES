@@ -34,9 +34,6 @@
 #include "I2CBus.h"
 #endif
 
-#define NUM_SAMPLES 10
-#define SAMPLE_TIMEOUT 100000
-
 class Sensor {
   public:
     /**

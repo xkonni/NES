@@ -18,8 +18,9 @@ void print_motorcommand (char inout, messages::motorcommand *command) {
   sprintf(msg, "[%c][MOTOR  | COMMAND | ID %d] %s",
       inout, command->motor(),
       messages::motorcommand::commandType_Name(command->type()).c_str());
+  // keep in mind that steps have +800 to be positive
   if(command->has_steps())
-    sprintf(msg, "%s steps: %d", msg, command->steps());
+    sprintf(msg, "%s steps: %d", msg, command->steps()-800);
   if(command->has_acc())
     sprintf(msg, "%s acc: %d", msg, command->acc());
   sprintf(msg, "%s [%d byte]\n", msg, command->ByteSize());

@@ -12,8 +12,10 @@ Motor::Motor() :
            12,  11,  10,   9,   8,   7,   6,   6,   5,   5,
             5,   4,   4,   4,   3,   3,   3,   3,   3,   2,
             2,   2,   2,   2,   2,   2,   2,   2,   2,   2 },
-    motor1 { 9, 11, 12, 10, 0, -200, 200 },
-    motor2 { 9, 13, 14, 10, 0, -200, 200 }
+
+    // header_in, step_in, dir_in, acc_in, pos_in, minpos_in, maxpos_in
+    motor1 { 9, 11, 12, 5, 0, -200, 200 },
+    motor2 { 9, 13, 14, 5, 0, -200, 200 }
 {
   // initialize socket
 #ifdef BBB_CAN
@@ -37,10 +39,10 @@ void Motor::handle_motorcommand (messages::motorcommand *command, messages::moto
    */
   if (command->type() == messages::motorcommand::LOOP) {
     if (m == 1) {
-      motor_loop(&motor1, command->steps());
+      motor_loop(&motor1, command->steps() - 800);
     }
     else if (m == 2) {
-      motor_loop(&motor2, command->steps());
+      motor_loop(&motor2, command->steps() - 800);
     }
   }
 
@@ -178,13 +180,6 @@ int main(int argc, char *argv[]) {
       print_motorcommand(NET_IN, message);
       mtr.handle_motorcommand(message, response);
     }
-    // TODO: fix
-    // command requested response
-    // if (response->motor_size() > 0) {
-    //   bzero(buffer, BUFFERSIZE);
-    //   response->SerializeToArray(buffer, response->ByteSize());
-    //   socket_write(CONTROLLER_PORT, CONTROLLER_HOST, buffer, response->ByteSize());
-    // }
   }
 
   return 0;

@@ -21,22 +21,33 @@ Controller::~Controller() {
 }
 
 int Controller::deg2steps(int deg) {
-  // TODO: add global parameter
-  int total_steps = 800;
-  return floor(total_steps/360*deg);
+  int steps;
+
+  steps = floor(STEPS_TOTAL / 360 * deg);
+  if (steps > STEPS_MAX) steps = STEPS_MAX;
+  if (steps < -STEPS_MAX) steps = -STEPS_MAX;
+
+  return steps;
 }
 
 void Controller::calculate_movement (
     messages::sensordata *data1, messages::sensordata *data2,
     messages::motorcommand *command1, messages::motorcommand *command2) {
-  double theta_diff, phi_diff;
+  int theta_diff, phi_diff;
+
+  int BLINDSPOT = 3;
 
   // motor1 -> theta
   theta_diff = data1->theta() - data2->theta();
   command1->set_type(messages::motorcommand::LOOP);
   command1->set_motor(1);
   // modify steps [-800; 800] -> [0; 1600]
-  command1->set_steps(deg2steps(theta_diff) + 800);
+  if ((theta_diff > BLINDSPOT) || (theta_diff < -BLINDSPOT))
+    command1->set_steps(deg2steps(theta_diff) + 800);
+  else {
+    command1->set_steps(800);
+    printf("steps: %d, hit blindspot\n", theta_diff);
+  }
 
 
   // motor2 -> phi
@@ -44,7 +55,12 @@ void Controller::calculate_movement (
   command2->set_type(messages::motorcommand::LOOP);
   command2->set_motor(2);
   // modify steps [-800; 800] -> [0; 1600]
-  command2->set_steps(deg2steps(phi_diff) + 800);
+  if ((phi_diff > BLINDSPOT) || (phi_diff < -BLINDSPOT))
+    command2->set_steps(deg2steps(phi_diff) + 800);
+  else {
+    printf("steps: %d, hit blindspot\n", phi_diff);
+    command2->set_steps(800);
+  }
 }
 
 void Controller::move_motor(int motor, int steps, int acc) {
@@ -111,8 +127,6 @@ int main(int argc, char *argv[])
   messages::motorcommand *mcommand2 = new messages::motorcommand();
 
   struct timeval tv_now, tv_last;
-  // update timeout [usec]
-  int update_timeout = 1000000;
   long int t_diff;
   int n;
   char buffer[BUFFERSIZE];
@@ -143,7 +157,8 @@ int main(int argc, char *argv[])
       messages::sensordata *message = new messages::sensordata();
       // parse message
       message->ParseFromArray(buffer, n);
-      print_sensordata(NET_IN, message);
+      // DEBUG
+      // print_sensordata(NET_IN, message);
       if (message->sensor() == SENSOR1) {
         sdata1->CopyFrom(*message);
       } else {
@@ -156,13 +171,16 @@ int main(int argc, char *argv[])
     t_diff = (tv_now.tv_usec - tv_last.tv_usec) + (tv_now.tv_sec - tv_last.tv_sec) * 1000000;
 
     // time to update the motors
-    if (t_diff > update_timeout) {
+    if (t_diff > TIMEOUT_MOTOR) {
       // DEBUG
       // printf("updating motors\n");
       mcommand1->Clear();
       mcommand2->Clear();
 
       ctrl.calculate_movement(sdata1, sdata2, mcommand1, mcommand2);
+      // DEBUG
+      print_sensordata(NET_IN, sdata1);
+      print_sensordata(NET_IN, sdata2);
       ctrl.send_motorcommand(mcommand1);
       ctrl.send_motorcommand(mcommand2);
 

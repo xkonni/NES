@@ -42,7 +42,6 @@ void Sensor::handle_sensorcommand (messages::sensorcommand *command, messages::s
    * GET current values
    */
   if (command->type() == messages::sensorcommand::GET) {
-    // return the current sensor position minus the saved offset
     // TODO: we may need to compress the values by making sure they're positive
     // data->set_theta((sensor1.theta - sensor1.theta_offset + 360) % 360);
     // data->set_phi((sensor1.phi - sensor1.phi_offset + 360) % 360);
@@ -130,8 +129,6 @@ int Sensor::sample(int sample_idx, int *samples) {
 
   return(sample_idx);
 }
-
-
 
 int main(void) {
   Sensor snsr;
@@ -227,7 +224,7 @@ int main(void) {
         + (tv_now.tv_sec - tv_last_sample.tv_sec) * 1000000;
 
     // sample sensor values, maybe update
-    if (t_diff_sample > SAMPLE_TIMEOUT) {
+    if (t_diff_sample > TIMEOUT_SENSOR_SAMPLE) {
       sample_idx = snsr.sample(sample_idx, samples);
 
       if (sample_idx == 0) {

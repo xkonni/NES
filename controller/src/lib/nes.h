@@ -49,6 +49,14 @@
 #define NET_IN            '<'
 #define NET_OUT           '>'
 
+#define STEPS_TOTAL       800
+#define STEPS_MAX         30
+
+#define TIMEOUT_MOTOR         1000000
+#define TIMEOUT_SENSOR_SAMPLE 10000
+#define NUM_SAMPLES           50
+// TIMEOUT_SENSOR_UPDATE = TIMEOUT_SENSOR_SAMPLE * NUM_SAMPLES
+
 /** @fn         void print_error(const char *reply);
   * @brief      print message, error and exit
   *
