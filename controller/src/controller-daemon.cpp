@@ -153,8 +153,7 @@ int main(int argc, char *argv[])
       messages::sensordata *message = new messages::sensordata();
       // parse message
       message->ParseFromArray(buffer, n);
-      // DEBUG
-      // print_sensordata(NET_IN, message);
+      print_sensordata(NET_IN, message);
       if (message->sensor() == SENSOR1) {
         sdata1->CopyFrom(*message);
       } else {
@@ -174,9 +173,6 @@ int main(int argc, char *argv[])
       mcommand2->Clear();
 
       ctrl.calculate_movement(sdata1, sdata2, mcommand1, mcommand2);
-      // DEBUG
-      print_sensordata(NET_IN, sdata1);
-      print_sensordata(NET_IN, sdata2);
       ctrl.send_motorcommand(mcommand1);
       ctrl.send_motorcommand(mcommand2);
 
