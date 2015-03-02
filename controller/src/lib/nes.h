@@ -58,6 +58,8 @@
 #define TIMEOUT_SENSOR_UPDATE TIMEOUT_SENSOR_SAMPLE * NUM_SAMPLES
 #define TIMEOUT_MOTOR         TIMEOUT_SENSOR_UPDATE * 1.5
 
+#define MAX_SAMPLE_DIFF       5
+
 /** @fn         void print_error(const char *reply);
   * @brief      print message, error and exit
   *
