@@ -1,18 +1,31 @@
 cmake_minimum_required(VERSION 2.8)
 
 site_name(HOST)
+# BEAGLEBONE
 if(${HOST} STREQUAL "beaglebone")
   message("building on beaglebone")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBBB_HOST")
+# PC
 else()
   message("not building on beaglebone")
 endif()
 
+# CAN BUS
 if($ENV{CAN})
-  message("using CAN bus")
+  message("  using CAN bus")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBBB_CAN")
+# TCP SOCKETS
 else()
-  message("using tcp sockets")
+  message("  using tcp sockets")
+endif()
+
+# SENSOR2
+if($ENV{SENSOR2})
+  message("  using sensor2")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBBB_CAN")
+# SENSOR1
+else()
+  message("  using sensor1")
 endif()
 
 project(controller)
