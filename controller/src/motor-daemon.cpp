@@ -1,6 +1,6 @@
 /**
   * @file motor-daemon.cpp
-  * @brief receive protobuf messages containing motorcommands, use them to control 
+  * @brief receive protobuf messages containing motorcommands, use them to control
   *   two step motors
   *
   * @author Konstantin Koslowski <konstantin.koslowski@mailbox.org>
@@ -13,9 +13,9 @@ Motor::Motor() :
             5,   4,   4,   4,   3,   3,   3,   3,   3,   2,
             2,   2,   2,   2,   2,   2,   2,   2,   2,   2 },
 
-    // header_in, step_in, dir_in, acc_in, pos_in, minpos_in, maxpos_in
-    motor1 { 9, 11, 12, 5, 0, -200, 200 },
-    motor2 { 9, 13, 14, 5, 0, -200, 200 }
+    //      hdr, step, dir, acc, pos, steps, minpos, maxpos
+    motor1 {  9,   11,  12,   5,   0,     0,   -200,    200 },
+    motor2 {  9,   13,  14,   5,   0,     0,   -200,    200 }
 {
   // initialize socket
 #ifdef BBB_CAN
@@ -33,50 +33,34 @@ Motor::~Motor() {
 
 void Motor::handle_motorcommand (messages::motorcommand *command, messages::motorstatus *status) {
   int m = command->motor();
+  int steps;
 
   /*
    * LOOP
    */
   if (command->type() == messages::motorcommand::LOOP) {
+    steps = command->steps() - STEPS_TOTAL;
+    // add [STEPS_MIN; STEPS_MAX] steps to current counter
+    if (steps > STEPS_MAX) steps = STEPS_MAX;
+    if (steps < STEPS_MIN) steps = STEPS_MIN;
+
     if (m == 1) {
-      motor_loop(&motor1, command->steps() - 800);
+      motor1.steps += steps;
+      // make sure we dont exceed the limits
+      if (motor1.pos + motor1.steps > motor1.maxpos)
+        motor1.steps = motor1.maxpos - motor1.pos;
+      if (motor1.pos + motor1.steps < motor1.minpos)
+        motor1.steps = motor1.minpos - motor1.pos;
+      printf("motor1 steps to go: %d\n", motor1.steps);
     }
     else if (m == 2) {
-      motor_loop(&motor2, command->steps() - 800);
-    }
-  }
-
-  /*
-   * ACC
-   */
-  else if (command->type() == messages::motorcommand::ACC) {
-    int acc = command->acc();
-    if (acc < 1) {
-      printf("acc too low, setting from %d to 1\n", acc);
-      acc = 1;
-    }
-    else if (acc > 10) {
-      printf("acc too high, setting from %d to 10\n", acc);
-      acc = 10;
-    }
-
-    if ( m == 1 ) {
-      motor1.acc = acc;
-    }
-    else if ( m == 2 ) {
-      motor2.acc = acc;
-    }
-  }
-
-  /*
-   * RESET
-   */
-  else if (command->type() == messages::motorcommand::RESET) {
-    if ( m == 1 ) {
-      motor1.pos = 0;
-    }
-    else if ( m == 2 ) {
-      motor2.pos = 0;
+      motor2.steps += steps;
+      // make sure we dont exceed the limits
+      if (motor2.pos + motor2.steps > motor2.maxpos)
+        motor2.steps = motor2.maxpos - motor2.pos;
+      if (motor2.pos + motor2.steps < motor2.minpos)
+        motor2.steps = motor2.minpos - motor2.pos;
+      printf("motor2 steps to go: %d\n", motor2.steps);
     }
   }
 
@@ -179,6 +163,32 @@ int main(int argc, char *argv[]) {
       message->ParseFromArray(buffer, n);
       print_motorcommand(NET_IN, message);
       mtr.handle_motorcommand(message, response);
+    }
+
+    // do a step
+    if (mtr.motor1.steps > 0) {
+      mtr.motor_dir(&mtr.motor1, 0);
+      mtr.motor_step(&mtr.motor1, GPIO_TIMEOUT);
+      mtr.motor1.steps--;
+      usleep(10000);
+    }
+    else if (mtr.motor1.steps < 0) {
+      mtr.motor_dir(&mtr.motor1, 1);
+      mtr.motor_step(&mtr.motor1, GPIO_TIMEOUT);
+      mtr.motor1.steps++;
+      usleep(10000);
+    }
+    if (mtr.motor2.steps > 0) {
+      mtr.motor_dir(&mtr.motor2, 0);
+      mtr.motor_step(&mtr.motor2, GPIO_TIMEOUT);
+      mtr.motor2.steps--;
+      usleep(10000);
+    }
+    else if (mtr.motor2.steps < 0) {
+      mtr.motor_dir(&mtr.motor2, 1);
+      mtr.motor_step(&mtr.motor2, GPIO_TIMEOUT);
+      mtr.motor2.steps++;
+      usleep(10000);
     }
   }
 

@@ -62,13 +62,14 @@ class Motor {
       *   800 steps
       */
     struct motor {
-      int header;    ///< the pin header
-      int step;      ///< pin for the step signal
-      int dir;       ///< pin for the direction signal
-      int pos;       ///< current position
-      int acc;       ///< current acceleration
-      int minpos;    ///< minimum position
-      int maxpos;    ///< maximum position
+      int header;     ///< the pin header
+      int step;       ///< pin for the step signal
+      int dir;        ///< pin for the direction signal
+      int pos;        ///< current position
+      int acc;        ///< current acceleration
+      int steps;      ///< steps to go
+      int minpos;     ///< minimum position
+      int maxpos;     ///< maximum position
 
       /**
        * @fn motor(int header_in, int step_in, int dir_in, int acc_in, int pos_in,
@@ -77,18 +78,20 @@ class Motor {
        * @param[in] header    initial value for the pin header
        * @param[in] step      initial value for pin for the step signal
        * @param[in] dir       initial value for pin for the direction signal
-       * @param[in] acc       initial value for current acceleration
        * @param[in] pos       initial value for current position
+       * @param[in] acc       initial value for current acceleration
+       * @param[in] steps     initial value for steps to go
        * @param[in] minpos    initial value for minimum position
        * @param[in] maxpos    initial value for maximum position
        */
       motor(int header_in, int step_in, int dir_in, int acc_in, int pos_in,
-          int minpos_in, int maxpos_in) {
+          int steps_in, int minpos_in, int maxpos_in) {
         header  = header_in;
         step    = step_in;
         dir     = dir_in;
         acc     = acc_in;
         pos     = pos_in;
+        steps   = steps_in;
         minpos  = minpos_in;
         maxpos  = maxpos_in;
       };

@@ -24,8 +24,9 @@ int Controller::deg2steps(int deg) {
   int steps;
 
   steps = floor(STEPS_TOTAL / 360 * deg);
-  if (steps > STEPS_MAX) steps = STEPS_MAX;
-  if (steps < -STEPS_MAX) steps = -STEPS_MAX;
+  // TODO: this is handled in motor-daemon now
+  // if (steps > STEPS_MAX) steps = STEPS_MAX;
+  // if (steps < -STEPS_MAX) steps = -STEPS_MAX;
 
   return steps;
 }
