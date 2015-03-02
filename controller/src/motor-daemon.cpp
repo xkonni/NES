@@ -46,7 +46,8 @@ void Motor::handle_motorcommand (messages::motorcommand *command, messages::moto
         motor1.steps = motor1.maxpos - motor1.pos;
       if (motor1.pos + motor1.steps < motor1.minpos)
         motor1.steps = motor1.minpos - motor1.pos;
-      printf("motor1 steps to go: %d\n", motor1.steps);
+      // printf("motor1 pos: %d/[%d, %d], steps to go: %d\n",
+      //     motor1.pos, motor1.minpos, motor1.maxpos, motor1.steps);
     }
     else if (m == 2) {
       motor2.steps = steps;
@@ -55,7 +56,8 @@ void Motor::handle_motorcommand (messages::motorcommand *command, messages::moto
         motor2.steps = motor2.maxpos - motor2.pos;
       if (motor2.pos + motor2.steps < motor2.minpos)
         motor2.steps = motor2.minpos - motor2.pos;
-      printf("motor2 steps to go: %d\n", motor2.steps);
+      // printf("motor2 pos: %d/[%d, %d], steps to go: %d\n",
+      //     motor2.pos, motor2.minpos, motor2.maxpos, motor2.steps);
     }
   }
 
@@ -130,30 +132,35 @@ int main(int argc, char *argv[]) {
       mtr.handle_motorcommand(message, response);
     }
 
+    int TIMEOUT_STEP = 5000;
     // do a step
     if (mtr.motor1.steps > 0) {
       mtr.motor_dir(&mtr.motor1, 0);
       mtr.motor_step(&mtr.motor1, GPIO_TIMEOUT);
       mtr.motor1.steps--;
-      usleep(10000);
+      mtr.motor1.pos++;
+      usleep(TIMEOUT_STEP);
     }
     else if (mtr.motor1.steps < 0) {
       mtr.motor_dir(&mtr.motor1, 1);
       mtr.motor_step(&mtr.motor1, GPIO_TIMEOUT);
       mtr.motor1.steps++;
-      usleep(10000);
+      mtr.motor1.pos--;
+      usleep(TIMEOUT_STEP);
     }
     if (mtr.motor2.steps > 0) {
       mtr.motor_dir(&mtr.motor2, 0);
       mtr.motor_step(&mtr.motor2, GPIO_TIMEOUT);
       mtr.motor2.steps--;
-      usleep(10000);
+      mtr.motor2.pos++;
+      usleep(TIMEOUT_STEP);
     }
     else if (mtr.motor2.steps < 0) {
       mtr.motor_dir(&mtr.motor2, 1);
       mtr.motor_step(&mtr.motor2, GPIO_TIMEOUT);
       mtr.motor2.steps++;
-      usleep(10000);
+      mtr.motor2.pos--;
+      usleep(TIMEOUT_STEP);
     }
   }
 
