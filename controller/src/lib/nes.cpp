@@ -21,8 +21,6 @@ void print_motorcommand (char inout, messages::motorcommand *command) {
   // keep in mind that steps have +800 to be positive
   if(command->has_steps())
     sprintf(msg, "%s steps: %d", msg, command->steps()-800);
-  if(command->has_acc())
-    sprintf(msg, "%s acc: %d", msg, command->acc());
   sprintf(msg, "%s [%d byte]\n", msg, command->ByteSize());
   printf("%s", msg);
 }

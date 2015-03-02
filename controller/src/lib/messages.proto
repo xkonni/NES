@@ -33,15 +33,12 @@ package messages;
 message motorcommand {
   enum commandType {
     LOOP    = 1;
-    ACC     = 2;
-    RESET   = 3;
-    STATUS  = 4;
-    UNKNOWN = 5;
+    STATUS  = 2;
+    UNKNOWN = 3;
   }
   required commandType type = 1 [default = UNKNOWN];
   required int32 motor      = 2;
   optional int32 steps      = 3;
-  optional int32 acc        = 4;
 }
 
 // II MOTORSTATUS

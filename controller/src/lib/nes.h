@@ -50,10 +50,10 @@
 #define NET_OUT           '>'
 
 #define STEPS_TOTAL       800
-#define STEPS_MAX         10
-#define STEPS_MIN         -10
+#define STEPS_MAX         50
+#define STEPS_MIN         -50
 
-#define TIMEOUT_SENSOR_SAMPLE 10000
+#define TIMEOUT_SENSOR_SAMPLE 2000
 #define NUM_SAMPLES           50
 #define TIMEOUT_SENSOR_UPDATE TIMEOUT_SENSOR_SAMPLE * NUM_SAMPLES
 #define TIMEOUT_MOTOR         TIMEOUT_SENSOR_UPDATE * 1.5

@@ -8,14 +8,9 @@
 #include "motor-daemon.h"
 
 Motor::Motor() :
-    ramp {100,  71,  53,  42,  33,  27,  23,  19,  16,  14,
-           12,  11,  10,   9,   8,   7,   6,   6,   5,   5,
-            5,   4,   4,   4,   3,   3,   3,   3,   3,   2,
-            2,   2,   2,   2,   2,   2,   2,   2,   2,   2 },
-
-    //      hdr, step, dir, acc, pos, steps, minpos, maxpos
-    motor1 {  9,   11,  12,   5,   0,     0,   -200,    200 },
-    motor2 {  9,   13,  14,   5,   0,     0,   -200,    200 }
+    //      hdr, step, dir, pos, steps, minpos, maxpos
+    motor1 {  9,   11,  12,   0,     0,   -200,    200 },
+    motor2 {  9,   13,  14,   0,     0,   -200,    200 }
 {
   // initialize socket
 #ifdef BBB_CAN
@@ -98,36 +93,6 @@ void Motor::motor_dir(motor *m, int dir) {
       pin_high(m->header, m->dir);
   }
 #endif
-}
-
-void Motor::motor_loop (motor *m, int steps) {
-  if (steps > 0) {
-    steps = m->pos + steps <= m->maxpos ? steps : m->maxpos - m->pos;
-    motor_dir(m, 0);
-  }
-  else {
-    steps = m->pos + steps >= m->minpos ? steps : m->minpos - m->pos;
-    motor_dir(m, 1);
-  }
-
-  int n;
-  float delay;
-  for (n = 0; n < abs(steps); n++) {
-    // acceleration
-    if ( n < rampN ) {
-      delay = (10*ramp[n])/m->acc;
-      // printf("delay+: %f\n", GPIO_TIMEOUT * delay);
-    }
-    // deceleration
-    else if ( abs(steps) - n < rampN) {
-      delay = (10*ramp[abs(steps)-n])/m->acc;
-      // printf("delay-: %f\n", GPIO_TIMEOUT * delay);
-    }
-    // run
-    else delay = 1;
-    motor_step(m, GPIO_TIMEOUT * delay);
-  }
-  m->pos += steps;
 }
 
 int main(int argc, char *argv[]) {
