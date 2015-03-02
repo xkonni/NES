@@ -36,7 +36,7 @@ void Controller::calculate_movement (
     messages::motorcommand *command1, messages::motorcommand *command2) {
   int theta_diff, phi_diff;
 
-  int BLINDSPOT = 2;
+  int BLINDSPOT = 3;
 
   // motor1 -> theta
   theta_diff = data1->theta() - data2->theta();
@@ -62,20 +62,6 @@ void Controller::calculate_movement (
     printf("steps: %d, hit blindspot\n", phi_diff);
     command2->set_steps(800);
   }
-}
-
-void Controller::move_motor(int motor, int steps) {
-  messages::motorcommand *command = new messages::motorcommand();
-  // TODO: here? mhhm
-  // correct from [0; 1600] to [-800; 800]
-  steps = steps - 800;
-
-  // set steps
-  command->Clear();
-  command->set_type(messages::motorcommand::LOOP);
-  command->set_motor(motor);
-  command->set_steps(steps);
-  send_motorcommand(command);
 }
 
 int Controller::send_motorcommand(messages::motorcommand *command) {
