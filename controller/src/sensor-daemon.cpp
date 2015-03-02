@@ -91,30 +91,55 @@ int Sensor::get_sensordatabuffer (char *buffer) {
 
 int Sensor::sample(int sample_idx, int *samples) {
   int i;
+  int theta, phi;
+  int last_theta = samples[sample_idx];
+  int last_phi = samples[NUM_SAMPLES + sample_idx];
+
+#ifdef BBB_HOST
+  lsm303.readAcc();
+  convert_coordinates(lsm303.a[0], lsm303.a[1], lsm303.a[2], &theta, &phi);
 
   // DEBUG
-  // printf("sampling...");
-#ifdef BBB_HOST
-  // use MAG
-  // lsm303.readMag();
-  // convert_coordinates(lsm303.m[0], lsm303.m[1], lsm303.m[2],
-  //     &samples[sample_idx], &samples[NUM_SAMPLES + sample_idx]);
-  // use ACC
-  lsm303.readAcc();
-  convert_coordinates(lsm303.a[0], lsm303.a[1], lsm303.a[2],
-      &samples[sample_idx], &samples[NUM_SAMPLES + sample_idx]);
+  // printf("t %d/%d, p %d/%d\n", theta, last_theta, phi, last_phi);
+  // theta increased
+  if (theta > last_theta) {
+    if (theta - last_theta < MAX_SAMPLE_DIFF)
+      samples[sample_idx] = theta;
+    else
+      samples[sample_idx] = last_theta + MAX_SAMPLE_DIFF;
+  // theta decreased
+  } else {
+    if (last_theta - theta < MAX_SAMPLE_DIFF)
+      samples[sample_idx] = theta;
+    else
+      samples[sample_idx] = last_theta - MAX_SAMPLE_DIFF;
+  }
+
+  // phi increased
+  if (phi > last_phi) {
+    if (phi - last_phi < MAX_SAMPLE_DIFF)
+      samples[NUM_SAMPLES + sample_idx] = phi;
+    else
+      samples[NUM_SAMPLES + sample_idx] = last_phi + MAX_SAMPLE_DIFF;
+  // phi decreased
+  } else {
+    if (last_phi - phi < MAX_SAMPLE_DIFF)
+      samples[NUM_SAMPLES + sample_idx] = phi;
+    else
+      samples[NUM_SAMPLES + sample_idx] = last_phi - MAX_SAMPLE_DIFF;
+  }
+  // DEBUG
+  // printf("t %d, p %d\n", samples[sample_idx], samples[NUM_SAMPLES + sample_idx]);
 #else
   sensor1.theta++;
   sensor1.phi++;
 #endif
-  // DEBUG
-  // printf("sample %d, %d\n", samples[sample_idx], samples[NUM_SAMPLES + sample_idx]);
+
+  // increment index
   sample_idx = (sample_idx + 1) % NUM_SAMPLES;
 
+  // array filled, update saved values
   if (sample_idx == 0) {
-    // update values to average of sampled data
-    // DEBUG
-    // printf("updating values...");
     sensor1.theta = 0;
     sensor1.phi = 0;
     for (i = 0; i < NUM_SAMPLES; i++) {
@@ -123,8 +148,6 @@ int Sensor::sample(int sample_idx, int *samples) {
     }
     sensor1.theta = sensor1.theta / NUM_SAMPLES;
     sensor1.phi = sensor1.phi / NUM_SAMPLES;
-    // DEBUG
-    // printf("value %d, %d\n", sensor1.theta, sensor1.phi);
   }
 
   return(sample_idx);
@@ -134,7 +157,7 @@ int main(void) {
   Sensor snsr;
   struct timeval tv_now, tv_last_sample;
   long int t_diff_sample;
-  int *samples = (int *)malloc(2*NUM_SAMPLES*sizeof(int));
+  int samples[2*NUM_SAMPLES];
   int sample_idx;
   int n;
   char buffer[BUFFERSIZE];
@@ -174,6 +197,9 @@ int main(void) {
   // printf("steps 1600 %d size: %d\n", commandfoo->steps(), commandfoo->ByteSize());
 
   // exit(0);
+
+  // initialize samples to 90deg
+  std::fill_n(samples, 2*NUM_SAMPLES, 90);
 
   // initialize time
   gettimeofday(&tv_last_sample, NULL);
