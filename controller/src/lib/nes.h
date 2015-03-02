@@ -49,14 +49,14 @@
 #define STEPS_MIN         -10         ///< maximum decrease of steps per command
 
 #define MAX_SAMPLE_DIFF       5       ///< dont report sensor reading greater
-#define BLINDSPOT             3       ///< dont send motorcommand when change is smaller
+#define BLINDSPOT             6       ///< dont send motorcommand when change is smaller
 
-#define TIMEOUT_SENSOR_SAMPLE 10000   ///< timeout between consecutive sensor samples
-#define NUM_SAMPLES           10      ///< number of samples, save average
+#define TIMEOUT_SENSOR_SAMPLE 5000    ///< timeout between consecutive sensor samples
+#define NUM_SAMPLES           20      ///< number of samples, save average
 /// timeout between two consecutive sensor data reports
 #define TIMEOUT_SENSOR_UPDATE TIMEOUT_SENSOR_SAMPLE * NUM_SAMPLES
 /// timeout between two consecutive motor commands
-#define TIMEOUT_MOTOR         TIMEOUT_SENSOR_UPDATE * 1.1
+#define TIMEOUT_MOTOR         TIMEOUT_SENSOR_UPDATE * 1.25
 
 /** @fn         void print_error(const char *reply);
   * @brief      print message, error and exit
