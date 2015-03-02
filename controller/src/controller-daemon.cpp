@@ -25,7 +25,6 @@ int Controller::deg2steps(int deg) {
 
   steps = floor(STEPS_TOTAL / 360 * deg);
   if ((steps < BLINDSPOT) && (steps > -BLINDSPOT)) {
-    printf("steps: %d, hit blindspot\n", steps);
     steps = 0;
   }
   // dont move too much
