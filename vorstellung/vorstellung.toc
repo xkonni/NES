@@ -1,4 +1,4 @@
 \beamer@endinputifotherversion {3.33pt}
 \select@language {english}
 \beamer@sectionintoc {1}{Networked Embedded Systems}{2}{0}{1}
-\beamer@subsectionintoc {1}{1}{Foo}{2}{0}{1}
+\beamer@subsectionintoc {1}{1}{Project}{2}{0}{1}
