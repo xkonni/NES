@@ -44,11 +44,12 @@
 
 \usepackage{times}
 \usepackage[T1]{fontenc}
+\usepackage{eurosym}
 
 % TODO: Milestone 1 huebsch unterbringen
 \title[NES Project: Milestone Presentation]{Position Sensing and Imitation\\Milestone Presentation}
 
-\author[Koslowski, Schmieder, Birk?]{Konstantin Koslowski, Mathis Schmieder, Moksha Birk?}
+\author[Koslowski, Schmieder, Birk]{Konstantin Koslowski, Mathis Schmieder, Moksha Birk}
 
 \institute[]
 {TU Berlin \\
@@ -75,30 +76,76 @@
 	\begin{itemize}
 		\item \textbf{Goal:} Mimic position and motion of a plate
 		\vfill
-		\item \textbf{Sensing:} MEMS attitude sensor embedded in a plate
-		\item \textbf{Communicating:} Implement industrial bus, likely PROFIBUS
+		\item \textbf{Sensing:} 3-axis MEMS attitude sensor embedded in a plate
+		\item \textbf{Communicating:} Implement industrial bus, likely ModBus
 		\item \textbf{Actuating:} Rotate a plate using motors
 	\end{itemize}
 \end{frame}
 
+\subsection{Functional Specification}
 \begin{frame}
-  \frametitle{Functional Specification}
+  \frametitle{Overview}
+\begin{figure}
+\includegraphics[width=\textwidth]{functionalspecification.pdf} 
+\caption{Diagram of the Functional Specification}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Sensing}
 	\begin{itemize}
-		\item ...
+		\item \textbf{Sensor:} LSM303DLH 3D Compass and Accelerometer
+		\item \textbf{Controller:} Arduino Pro Micro
+		\item \textbf{Communication:} TTL to RS-485 Module
+		\item Attitude in 3 dimensions is sensed and communicated via bus
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Computation \& Communication}
+	\begin{itemize}
+		\item \textbf{Controller:} Beagle Bone Black
+		\item \textbf{Communication:} TTL to RS-485 Module
+		\item \textbf{Bus Protocol:} Industrial bus with open implementation, likely ModBus
+		\item Controller receives sensor data \& computes desired motor movement
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Actuation}
+	\begin{itemize}
+		\item \textbf{Motor:} NEMA 11 Stepper
+		\item \textbf{Controller:} Arduino Pro Micro, Pololu A4988 Motor Driver
+		\item \textbf{Communication:} TTL to RS-485 Module
+		\item Motor is rotated the desired amount
 	\end{itemize}
 \end{frame}
 
 \begin{frame}
   \frametitle{Hardware Components}
 	\begin{itemize}
-		\item ...
+		\item 2x LSM303DLH MEMS Sensors, 10 Euro each
+		\item 3x Arduino Pro Micro,  5 Euro each
+		\item 2x A4988 Motor Driver, 3 Euro each
+		\item 2x NEMA11 Stepper Motors, 25 Euro each
+		\item 4x TTL to RS-485 Modules, <1 Euro each
+		\item Beagle Bone Black
 	\end{itemize}
 \end{frame}
 
 \begin{frame}
   \frametitle{Major Milestones}
 	\begin{itemize}
-		\item ...
+		\item \textbf{Sensing:} Read and process MEMS data on Arduino\\
+			\small{Konstantin Koslowski}
+		\item \textbf{Actuation:} Control stepper motors\\
+			\small{Mathis Schmieder, Konstantin Koslowski}
+		\item \textbf{Mechanics:} Construct movable plate\\
+			\small{Mathis Schmieder}
+		\item \textbf{Communication:} Implement industrial bus\\
+			\small{Moksha Birk}
+		\item \textbf{Controller:} Bus master, main computational unit\\
+			\small{Moksha Birk}
 	\end{itemize}
 \end{frame}
 
