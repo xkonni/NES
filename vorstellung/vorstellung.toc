@@ -3,3 +3,5 @@
 \beamer@sectionintoc {1}{Networked Embedded Systems}{2}{0}{1}
 \beamer@subsectionintoc {1}{1}{Project}{2}{0}{1}
 \beamer@subsectionintoc {1}{2}{Functional Specification}{3}{0}{1}
+\beamer@subsectionintoc {1}{3}{Milestones}{8}{0}{1}
+\beamer@subsectionintoc {1}{4}{Discussion}{9}{0}{1}
