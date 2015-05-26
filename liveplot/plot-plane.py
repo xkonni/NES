@@ -8,7 +8,7 @@ import serial
 ser = serial.Serial('/dev/ttyUSB0', 9600)
 
 # reference point
-point  = np.array([0, 0, 0])
+point  = np.array([0, 0, 1])
 # create x,y,z
 xx, yy = np.meshgrid(range(50), range(50))
 zz = [0] * 50
@@ -24,7 +24,7 @@ plt3d.set_zlim(-100, 100)
 while True:
   surf.remove()
   data = ser.readline().rstrip()
-  if (len(data) == 0):
+  if (len(data) < 5):
     print('bad things happened, try again')
     exit(1)
 
@@ -42,10 +42,10 @@ while True:
   y = round(y/m, 2)
   z = round(z/m, 2)
 
-  print('%.2f %.2f %.2f' % (x,y,z))
-  d = -np.sum(point*[x, y, z])
+  d = np.sum(point*[x, y, z])
+  print('%.2f %.2f %.2f' % (x, y, z))
   # calculate corresponding z
-  zz = (-x*xx - y*yy - d)*1./z
+  zz = (x*xx + y*yy + d)*1./z
   surf =  plt3d.plot_surface(xx, yy, zz, color='blue')
   plt.draw()
   plt.pause(100E-6)
