@@ -1,0 +1,77 @@
+\beamer@endinputifotherversion {3.33pt}
+\headcommand {\slideentry {0}{0}{1}{1/1}{}{0}}
+\headcommand {\beamer@framepages {1}{1}}
+\headcommand {\slideentry {0}{0}{2}{2/2}{}{0}}
+\headcommand {\beamer@framepages {2}{2}}
+\headcommand {\sectionentry {1}{Introduction}{3}{Introduction}{0}}
+\headcommand {\beamer@sectionpages {1}{2}}
+\headcommand {\beamer@subsectionpages {1}{2}}
+\headcommand {\beamer@subsectionentry {0}{1}{1}{3}{Motivation}}\headcommand {\beamer@subsectionpages {3}{2}}
+\headcommand {\slideentry {1}{1}{1}{3/3}{Motivation}{0}}
+\headcommand {\beamer@framepages {3}{3}}
+\headcommand {\beamer@subsectionentry {0}{1}{2}{4}{Development of CAN}}\headcommand {\beamer@subsectionpages {3}{3}}
+\headcommand {\slideentry {1}{2}{1}{4/4}{Development of CAN}{0}}
+\headcommand {\beamer@framepages {4}{4}}
+\headcommand {\beamer@subsectionentry {0}{1}{3}{5}{Protocol Basics}}\headcommand {\beamer@subsectionpages {4}{4}}
+\headcommand {\beamer@subsectionentry {0}{1}{4}{5}{Motivation}}\headcommand {\beamer@subsectionpages {5}{4}}
+\headcommand {\slideentry {1}{4}{1}{5/5}{Motivation}{0}}
+\headcommand {\beamer@framepages {5}{5}}
+\headcommand {\sectionentry {2}{Physical Layer}{6}{Physical Layer}{0}}
+\headcommand {\beamer@sectionpages {3}{5}}
+\headcommand {\beamer@subsectionpages {5}{5}}
+\headcommand {\beamer@subsectionentry {0}{2}{1}{6}{Overview}}\headcommand {\beamer@subsectionpages {6}{5}}
+\headcommand {\slideentry {2}{1}{1}{6/6}{Overview}{0}}
+\headcommand {\beamer@framepages {6}{6}}
+\headcommand {\beamer@subsectionentry {0}{2}{2}{7}{Network Topology}}\headcommand {\beamer@subsectionpages {6}{6}}
+\headcommand {\slideentry {2}{2}{1}{7/7}{Network Topology}{0}}
+\headcommand {\beamer@framepages {7}{7}}
+\headcommand {\slideentry {2}{2}{2}{8/8}{Network Topology}{0}}
+\headcommand {\beamer@framepages {8}{8}}
+\headcommand {\slideentry {2}{2}{3}{9/9}{Network Topology}{0}}
+\headcommand {\beamer@framepages {9}{9}}
+\headcommand {\slideentry {2}{2}{4}{10/10}{Network Topology}{0}}
+\headcommand {\beamer@framepages {10}{10}}
+\headcommand {\beamer@subsectionentry {0}{2}{3}{11}{Signalling}}\headcommand {\beamer@subsectionpages {7}{10}}
+\headcommand {\slideentry {2}{3}{1}{11/11}{Signalling}{0}}
+\headcommand {\beamer@framepages {11}{11}}
+\headcommand {\slideentry {2}{3}{2}{12/12}{Signalling}{0}}
+\headcommand {\beamer@framepages {12}{12}}
+\headcommand {\sectionentry {3}{Data Link Layer}{13}{Data Link Layer}{0}}
+\headcommand {\beamer@sectionpages {6}{12}}
+\headcommand {\beamer@subsectionpages {11}{12}}
+\headcommand {\beamer@subsectionentry {0}{3}{1}{13}{Frame Format}}\headcommand {\beamer@subsectionpages {13}{12}}
+\headcommand {\slideentry {3}{1}{1}{13/13}{Frame Format}{0}}
+\headcommand {\beamer@framepages {13}{13}}
+\headcommand {\slideentry {3}{1}{2}{14/14}{Frame Format}{0}}
+\headcommand {\beamer@framepages {14}{14}}
+\headcommand {\slideentry {3}{1}{3}{15/15}{Frame Format}{0}}
+\headcommand {\beamer@framepages {15}{15}}
+\headcommand {\slideentry {3}{1}{4}{16/16}{Frame Format}{0}}
+\headcommand {\beamer@framepages {16}{16}}
+\headcommand {\slideentry {3}{1}{5}{17/17}{Frame Format}{0}}
+\headcommand {\beamer@framepages {17}{17}}
+\headcommand {\slideentry {3}{1}{6}{18/18}{Frame Format}{0}}
+\headcommand {\beamer@framepages {18}{18}}
+\headcommand {\beamer@subsectionentry {0}{3}{2}{19}{Access Technique}}\headcommand {\beamer@subsectionpages {13}{18}}
+\headcommand {\slideentry {3}{2}{1}{19/19}{Access Technique}{0}}
+\headcommand {\beamer@framepages {19}{19}}
+\headcommand {\slideentry {3}{2}{2}{20/20}{Access Technique}{0}}
+\headcommand {\beamer@framepages {20}{20}}
+\headcommand {\slideentry {3}{2}{3}{21/21}{Access Technique}{0}}
+\headcommand {\beamer@framepages {21}{21}}
+\headcommand {\beamer@subsectionentry {0}{3}{3}{22}{Error Management}}\headcommand {\beamer@subsectionpages {19}{21}}
+\headcommand {\slideentry {3}{3}{1}{22/22}{Error Management}{0}}
+\headcommand {\beamer@framepages {22}{22}}
+\headcommand {\sectionentry {4}{Application Layer}{23}{Application Layer}{0}}
+\headcommand {\beamer@sectionpages {13}{22}}
+\headcommand {\beamer@subsectionpages {22}{22}}
+\headcommand {\sectionentry {5}{Discussion}{23}{Discussion}{0}}
+\headcommand {\beamer@sectionpages {23}{22}}
+\headcommand {\beamer@subsectionpages {23}{22}}
+\headcommand {\slideentry {5}{0}{2}{23/23}{}{0}}
+\headcommand {\beamer@framepages {23}{23}}
+\headcommand {\beamer@partpages {1}{23}}
+\headcommand {\beamer@subsectionpages {23}{23}}
+\headcommand {\beamer@sectionpages {23}{23}}
+\headcommand {\beamer@documentpages {23}}
+\headcommand {\def \inserttotalframenumber {23}}
