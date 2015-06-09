@@ -22,10 +22,14 @@ plt.axis([-1, 1, -1, 1])
 
 while True:
   data = ser.readline().rstrip()
-  angle = int(data.decode('utf-8'))
+  if (len(data) < 10):
+    print('bad things happened, trying again')
+    continue
+
+  angle = float(data.decode('utf-8'))
   xdata[1] = np.cos(angle/180 * np.pi)
   ydata[1] = np.sin(angle/180 * np.pi)
-  print('%d' % angle)
+  print('%.2f' % angle)
 
   line.set_xdata(xdata)
   line.set_ydata(ydata)
