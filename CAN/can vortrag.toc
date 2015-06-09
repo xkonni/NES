@@ -13,4 +13,8 @@
 \beamer@subsectionintoc {3}{1}{Frame Format}{13}{0}{3}
 \beamer@subsectionintoc {3}{2}{Access Technique}{19}{0}{3}
 \beamer@subsectionintoc {3}{3}{Error Management}{22}{0}{3}
-\beamer@sectionintoc {4}{Application Layer}{23}{0}{4}
+\beamer@subsectionintoc {3}{4}{Communication Services}{23}{0}{3}
+\beamer@sectionintoc {4}{Application Layer}{25}{0}{4}
+\beamer@subsectionintoc {4}{1}{CAN-based Application Protocols}{25}{0}{4}
+\beamer@sectionintoc {5}{Summary}{26}{0}{5}
+\beamer@subsectionintoc {5}{1}{Main Features of CAN}{26}{0}{5}

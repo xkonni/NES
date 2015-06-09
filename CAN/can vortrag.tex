@@ -231,6 +231,7 @@
 			\item Extended: 29 bit identifier
 		\end{itemize}
 		\item Standard frame format mostly used
+		\item Identifier describes meaning of message
 		\item Protocol foresees four kinds of frames: \emph{data, remote, error} and \emph{overload}
 	\end{itemize}
 \end{frame}
@@ -361,23 +362,109 @@
 	\end{itemize}	
 \end{frame}
 
+\subsection{Communication Services}
+\begin{frame}
+	\frametitle{Logical Link Layer}
+	\begin{itemize}
+		\item Sublayer of Data Link Layer
+		\item Provides communication services to higher layers
+		\item Exports only two types of frames:
+		\begin{itemize}
+			\item \textbf{L\_DATA}: Broadcast value over the network
+			\item \textbf{L\_REMOTE}: Ask for value over the network
+		\end{itemize}
+		\item Error and overload frames invisible to higher layers
+		\item Provides \emph{frame acceptance filtering} function
+	\end{itemize}
+\end{frame}
 
-%"CAN ISO11898-2 Network" by EE JRW - Own work. Licensed under CC BY-SA 4.0 via Wikimedia Commons - http://commons.wikimedia.org/wiki/File:CAN_ISO11898-2_Network.png#/media/File:CAN_ISO11898-2_Network.png
-%"CAN ISO11898-3 Network" by EE JRW - Own work. Licensed under CC BY-SA 4.0 via Wikimedia Commons - http://commons.wikimedia.org/wiki/File:CAN_ISO11898-3_Network.png#/media/File:CAN_ISO11898-3_Network.png
-%"Canbus levels| by Plupp -  Own work. Licensed under CC BY-SA 3.0 via Wikimedia Commons - http://commons.wikimedia.org/wiki/File:Canbus_levels.svg#/media/File:Canbus_levels.svg
+\begin{frame}
+	\frametitle{Frame Acceptance Filtering (FAF)}
+	\begin{itemize}
+		\item Producer transmits information on the bus
+		\item Frame is read by every node in a receive buffer
+		\item FAF determines if information is relevant to the node
+	\end{itemize}
+	
+		\begin{figure}
+		\includegraphics[width=.5\textwidth]{filtering.png} 
+		\caption{Producer/consumer model}%Quelle
+	\end{figure}
+\end{frame}
 
 
 \section{Application Layer}
+\subsection{CAN-based Application Protocols}
+\begin{frame}
+	\frametitle{Higher Layer Implementations}
+	\begin{itemize}
+		\item CAN specifications do not include application layer tasks
+		\begin{itemize}
+			\item Flow Control
+			\item Device Addressing
+			\item Fragmentation/Defragmentation
+		\end{itemize}
+		\item Several higher layer protocols rely on CAN
+		\item Industrial automation: CANopen, DeviceNet
+		\item Passenger cars: Each manufacturer has its own standard
+	\end{itemize}
+\end{frame}
 
-%\begin{figure}
-%\includegraphics[width=\textwidth]{functionalspecification.pdf} 
-%\caption{Diagram of the Functional Specification}
-%\end{figure}
+\section{Summary}
+\subsection{Main Features of CAN}
+\begin{frame}
+	\frametitle{Advantages \& Disadvantages of CAN}
+	CAN implements a distributed priority-based multi-master communication system.
+	\vfill
+	\begin{itemize}
+		\item Advantages:
+		\begin{itemize}
+			\item Much more simple and robust than token based access schemes
+			\item More flexible than TDMA approaches
+			\item No message will be delayed by lower priority exchanges
+		\end{itemize}
+		\item Drawbacks:
+		\begin{itemize}
+			\item Relatively low maximum throughput
+			\item Bus length limited by bandwidth, arbitration, timing
+			\item Offers no security or authentification schemes
+		\end{itemize}
+	\end{itemize}
+\end{frame}
 
 \section*{Discussion}
 \begin{frame}
 	\frametitle{Thanks for your attention!}
 	\huge{Questions? Ideas? Suggestions?}
 \end{frame}
+
+\section*{References}
+\begin{frame}[allowframebreaks]
+  \frametitle{References}    
+  \begin{thebibliography}{10}    
+  \beamertemplatebookbibitems
+  \bibitem{[1]}
+    Gianluca Cena and Adriano Valenzano.
+    \newblock {\em Operating Principles and Features of CAN Networks}.
+    \newblock IEIIT-CNR, 2005.
+  \beamertemplatearticlebibitems
+	  \bibitem{[3]}
+    EE JRW - Own work.
+    \newblock {\em CAN ISO11898-2 Network}.
+    \newblock Licensed under CC BY-SA 4.0 via Wikimedia Commons, 2015.
+		\bibitem{[4]}
+    EE JRW - Own work.
+    \newblock {\em CAN ISO11898-3 Network}.
+    \newblock Licensed under CC BY-SA 4.0 via Wikimedia Commons, 2015.
+	  \bibitem{[5]}
+    Plupp - Own work.
+    \newblock {\em Canbus levels}.
+    \newblock Licensed under CC BY-SA 3.0 via Wikimedia Commons, 2015.		
+	\end{thebibliography}
+\end{frame}
+
+%"CAN ISO11898-2 Network" by EE JRW - Own work. Licensed under CC BY-SA 4.0 via Wikimedia Commons - http://commons.wikimedia.org/wiki/File:CAN_ISO11898-2_Network.png#/media/File:CAN_ISO11898-2_Network.png
+%"CAN ISO11898-3 Network" by EE JRW - Own work. Licensed under CC BY-SA 4.0 via Wikimedia Commons - http://commons.wikimedia.org/wiki/File:CAN_ISO11898-3_Network.png#/media/File:CAN_ISO11898-3_Network.png
+%"Canbus levels| by Plupp -  Own work. Licensed under CC BY-SA 3.0 via Wikimedia Commons - http://commons.wikimedia.org/wiki/File:Canbus_levels.svg#/media/File:Canbus_levels.svg
 
 \end{document}
