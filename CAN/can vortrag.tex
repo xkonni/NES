@@ -38,16 +38,16 @@
 % just show sections and subsections in table of contents
 \setcounter{tocdepth}{2}
 
-
 \usepackage[english]{babel}
 \usepackage[latin1]{inputenc}
 
 \usepackage{times}
 \usepackage[T1]{fontenc}
 
+\usepackage{hyperref}
+
 \newcommand{\foo}{\hspace{-2.3pt}$\bullet$ \hspace{5pt}}
 
-% TODO: Milestone 1 huebsch unterbringen
 \title[CAN Bus]{Controller Area Network}
 
 \author[Schmieder]{Mathis Schmieder (316110)}
@@ -58,7 +58,7 @@
  Telecommunication Networks Group \\
 }
 
-\date{May 22nd, 2015}
+\date{June 12th, 2015}
 
 \pgfdeclareimage[height=0.5cm]{university-logo}{tu-tkn-logo.jpg}
 \logo{\pgfuseimage{university-logo}}
@@ -77,14 +77,14 @@
 
 \section{Introduction}
 
-\subsection{Motivation}
-\begin{frame}
-\frametitle{In Vehicle Networks}
-\begin{figure}
-\includegraphics[width=0.7\textwidth]{vehicularnetworks.png} 
-\caption{Vehicular Network Architecture}%todo source
-\end{figure}
-\end{frame}
+%\subsection{Motivation}
+%\begin{frame}
+%\frametitle{In Vehicle Networks}
+%\begin{figure}
+%\includegraphics[width=0.7\textwidth]{vehicularnetworks.png} 
+%\caption{Vehicular Network Architecture \cite{expanding}}
+%\end{figure}
+%\end{frame}
 
 \subsection{Development of CAN}
 \begin{frame}
@@ -98,14 +98,13 @@
 1987 & First chips by Intel and Philips\\
 1991 & Bosch publishes CAN 2.0 for standardization\\
 1993 & Approved and published as ISO 11989\\
-1995 & Standard split into 11989-1,2,3\\
+%1995 & Standard split into 11989-1,2,3\\
 2012 & CAN FD 1.0 released by Bosch
 \end{tabular}
 }
 \end{frame}
 
 \subsection{Protocol Basics}
-\subsection{Motivation}
 \begin{frame}
 \frametitle{CAN protocol basics}
 \begin{itemize}
@@ -113,7 +112,7 @@
 	\item Only physical and data link layer specified
 	\item Physical Layer
 	\begin{itemize}
-		\item Manages effective transmission of data
+		\item Effective transmission of data
 		\item Bit timing \& Synchronization
 		\item High \& Low Speed standards exist
 	\end{itemize}
@@ -124,10 +123,13 @@
 	\end{itemize}
 	\item Numerous application layers rely on CAN
 \end{itemize}
-
 \end{frame}
 
 \section{Physical Layer}
+\begin{frame}
+  \frametitle{Table of Contents}
+  \tableofcontents[currentsection]
+\end{frame}
 \subsection{Overview}
 
 \begin{frame}
@@ -174,7 +176,7 @@
 	\end{itemize}
 	\begin{figure}
 \includegraphics[width=.75\textwidth]{highspeed.png} 
-\caption{High Speed CAN Network}%Quelle
+\caption{High Speed CAN Network \cite{iso118982}}
 \end{figure}
 \end{frame}
 
@@ -183,10 +185,11 @@
 	\begin{itemize}
 		\item Maximum bit rate 125 kbps
 		\item Linear or star bus terminated at node with about $100 \Omega$
+		\item Features energy-saving sleep mode
 	\end{itemize}
 	\begin{figure}
-\includegraphics[width=.5\textwidth]{lowspeed.png} 
-\caption{Low Speed CAN Network}%Quelle
+\includegraphics[width=.4\textwidth]{lowspeed.png} 
+\caption{Low Speed CAN Network \cite{iso118983}}
 \end{figure}
 \end{frame}
 
@@ -203,7 +206,7 @@
 	\end{itemize}
 	\begin{figure}
 	\includegraphics[width=.4\textwidth]{Canbus_levels.png} 
-\caption{Levels on the CAN bus}%Quelle
+\caption{Levels on the CAN bus \cite{canlevels}}
 \end{figure}
 \end{frame}
 
@@ -216,11 +219,15 @@
 	\end{itemize}
 		\begin{figure}
 	\includegraphics[width=.6\textwidth]{bitstuffing.pdf} 
-\caption{Bit stuffing technique}%Quelle
+\caption{Bit stuffing technique \cite{principles}}
 \end{figure}
 \end{frame}
 
 \section{Data Link Layer}
+\begin{frame}
+  \frametitle{Table of Contents}
+  \tableofcontents[currentsection]
+\end{frame}
 \subsection{Frame Format}
 \begin{frame}
 	\frametitle{Frame Format}
@@ -240,7 +247,7 @@
 	\frametitle{Data Frames}
 	\begin{figure}
 		\includegraphics[width=.6\textwidth]{dataframe.pdf} 
-		\caption{Format of standard data frames}%Quelle
+		\caption{Format of standard data frames \cite{principles}}
 	\end{figure}
 	\begin{itemize}
 		\item Dominant \emph{start of frame} (SOF) bit
@@ -314,13 +321,13 @@
 			\item When network is idle, transmission starts immediately
 		\end{itemize}
 		\item Collisions are improbable but not impossible
-		\item CAN introduces collision resolution scheme: Bus arbitration
+		\item CAN introduces collision resolution scheme: \textbf{Bus arbitration}
 	\end{itemize}	
 \end{frame}
 
 \begin{frame}
 	\frametitle{CSMA/CR: Bus Arbitration}
-	Bus arbitration essentially finds out the most urgent frame.
+	Bus arbitration essentially identifies the most urgent frame.
 	\vfill
 	\begin{itemize}
 		\item Level on bus is dominant if one node is sending dominant bit
@@ -387,13 +394,17 @@
 	\end{itemize}
 	
 		\begin{figure}
-		\includegraphics[width=.5\textwidth]{filtering.png} 
+		\includegraphics[width=.5\textwidth]{filtering.pdf} 
 		\caption{Producer/consumer model}%Quelle
 	\end{figure}
 \end{frame}
 
 
 \section{Application Layer}
+\begin{frame}
+  \frametitle{Table of Contents}
+  \tableofcontents[currentsection]
+\end{frame}
 \subsection{CAN-based Application Protocols}
 \begin{frame}
 	\frametitle{Higher Layer Implementations}
@@ -411,6 +422,10 @@
 \end{frame}
 
 \section{Summary}
+\begin{frame}
+  \frametitle{Table of Contents}
+  \tableofcontents[currentsection]
+\end{frame}
 \subsection{Main Features of CAN}
 \begin{frame}
 	\frametitle{Advantages \& Disadvantages of CAN}
@@ -427,7 +442,7 @@
 		\begin{itemize}
 			\item Relatively low maximum throughput
 			\item Bus length limited by bandwidth, arbitration, timing
-			\item Offers no security or authentification schemes
+			\item Offers no security or authentication schemes
 		\end{itemize}
 	\end{itemize}
 \end{frame}
@@ -443,23 +458,29 @@
   \frametitle{References}    
   \begin{thebibliography}{10}    
   \beamertemplatebookbibitems
-  \bibitem{[1]}
+  \bibitem{principles}
     Gianluca Cena and Adriano Valenzano.
     \newblock {\em Operating Principles and Features of CAN Networks}.
     \newblock IEIIT-CNR, 2005.
+  \bibitem{expanding}
+  Gabriel Leen, Donal Heffernan.
+  \newblock {\em Expanding Automotive Electronic Systems}
   \beamertemplatearticlebibitems
-	  \bibitem{[3]}
+	  \bibitem{iso118982}
     EE JRW - Own work.
     \newblock {\em CAN ISO11898-2 Network}.
     \newblock Licensed under CC BY-SA 4.0 via Wikimedia Commons, 2015.
-		\bibitem{[4]}
+    \newblock \url{http://commons.wikimedia.org/wiki/File:CAN_ISO11898-2_Network.png}
+		\bibitem{iso118983}
     EE JRW - Own work.
     \newblock {\em CAN ISO11898-3 Network}.
     \newblock Licensed under CC BY-SA 4.0 via Wikimedia Commons, 2015.
-	  \bibitem{[5]}
+    \newblock \url{http://commons.wikimedia.org/wiki/File:CAN_ISO11898-3_Network.png}
+	  \bibitem{canlevels}
     Plupp - Own work.
     \newblock {\em Canbus levels}.
-    \newblock Licensed under CC BY-SA 3.0 via Wikimedia Commons, 2015.		
+    \newblock Licensed under CC BY-SA 3.0 via Wikimedia Commons, 2015.
+    \newblock \url{http://commons.wikimedia.org/wiki/File:Canbus_levels.svg}    		
 	\end{thebibliography}
 \end{frame}
 
