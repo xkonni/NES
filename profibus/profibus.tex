@@ -45,6 +45,7 @@
 \usepackage[T1]{fontenc}
 
 \usepackage{hyperref}
+\usepackage{multicol}
 
 \newcommand{\todo}{\hspace{-2.3pt}$\bullet$ \hspace{5pt}}
 
@@ -106,7 +107,7 @@
 \begin{frame}
   \frametitle{System Structure: Introduction}
   \begin{itemize}
-    \item Profibus is a multi-master system
+    \item \textit{Profibus} is a multi-master system
     \item Operation of multiple systems over a single bus
     \item Three protocols available
       \begin{itemize}
@@ -124,7 +125,7 @@
 
 \begin{frame}
   \frametitle{System Structure: Layer}
-  Profibus in the OSI reference model~\cite{profibusmanual}
+  \textit{Profibus} in the OSI reference model~\cite{profibusmanual}
   \center
   \footnotesize
   \begin{tabular}[h]{l|l|l}
@@ -162,12 +163,12 @@
 \begin{frame}
   \frametitle{Physical Layer}
   \begin{itemize}
-    \item Profibus FMS and DP
+    \item \textit{Profibus FMS} and \textit{Profibus DP}
       \begin{itemize}
         \item Mostly using RS 485 transmission
         \item Optical transmission via FOC \textit{(fibre optical cable)} possible
       \end{itemize}
-    \item Profibus PA
+    \item \textit{Profibus PA}
       \begin{itemize}
         \item Uses MBP \textit{(Manchester bus powered)}, providing power supply
       \end{itemize}
@@ -195,6 +196,17 @@
     \item Twisted-pair cables with $150\Omega$
     \item Data rates from $9.6kbit/s$ to $12Mbit/s$
     \item Distance between repeaters $100m$ to $1200m$
+    \item UART coding \\
+      \footnotesize
+      \begin{itemize}
+        \item Start = 0, Parity = EVEN, Stop = 1 \\
+        \item
+          \begin{tabular}[h]{|c|c|c|c|c|c|c|c|c|c|c|}
+            \hline
+            Start & Databit 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & Parity & Stop \\
+            \hline
+          \end{tabular}
+      \end{itemize}
   \end{itemize}
   Mainly used with \textit{Profibus DP}
 \end{frame}
@@ -218,14 +230,38 @@
     \item Bus length up to $1900m$
     \item Allows branches up to $60m$ to field devices
   \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Physical Layer: MBP}
+  Manchester coding \\
+  \begin{itemize}
+    \begin{multicols}{2}
+    \item Every bit is coded as a change
+      \begin{itemize}
+        \item Positive change: ``0''
+        \item Negative change: ``1''
+        \item Every bit has the same average value
+        \item Average used to power the peripherals
+        \item Time synchronization possible with every bit
+      \end{itemize}
+      \columnbreak
+      \begin{figure}[h]
+        \centering
+        \includegraphics[width=140pt]{img/mbp}
+        \caption{Manchester coding}
+        \label{fig:mbp}
+      \end{figure}
+    \end{multicols}
+  \end{itemize}
   Mainly used with \textit{Profibus PA}
 \end{frame}
 
 \section{Layer 2: Data Link Layer}
 \begin{frame}
   \frametitle{Data Link Layer}
-  The data transmission in Profibus is handled by the fieldbus data link \textit{(FDL)}
-  layer. \\
+  The data transmission in \textit{Profibus} is handled by the \textit{fieldbus data link
+    (FDL)} layer. \\
   FDL consists of three functions:
   \begin{itemize}
     \item Medium Access Control \textit{(MAC)}
@@ -247,7 +283,7 @@
       \end{itemize}
     \item Slaves only respond to requests by a master
   \end{itemize}
-  Profibus FDL combines master-slave and token passing in a hybrid access principle
+  \textit{Profibus FDL} combines master-slave and token passing in a hybrid access principle
 \end{frame}
 
 \begin{frame}
@@ -258,7 +294,7 @@
       \item Set parameters
       \item Get parameters
       \item Inform the user about events or errors
-      \item Activate/Deactivate service access point \textit{(SAP)}
+      \item Activate/Deactivate \textit{service access point (SAP)}
     \end{itemize}
 \end{frame}
 
@@ -334,17 +370,84 @@
 \end{frame}
 
 \begin{frame}
+  \frametitle{Application Layer: Telegram Formats}
+  \begin{itemize}
+    \item Without data field \\
+      % \footnotesize
+      % \begin{tabular}[h]{|c|c|c|c|c|c|}
+      %   \hline
+      %   SD1 & DA & SA & FC & FCS & ED \\
+      %   \hline
+      % \end{tabular}
+      % \vspace{5pt}
+      % \tiny
+      % SD1: Delimiter, DA: Destination Address, SA: Source Address, \\
+      % FC: Function Code, FCS: Frame Check Sequence, ED: End Delimiter
+      % \normalsize
+    \item Variable length from $4-249$ byte, payload $1-246$ byte \\
+      \footnotesize
+      \begin{tabular}[h]{|c|c|c|c|c|c|c|c|c|c|}
+        \hline
+        SD2 & LE & LEr & SD2 & DA & SA & FC & PDU & FCS & ED \\
+        \hline
+      \end{tabular} \\
+      \vspace{3pt}
+      \tiny
+      SD2: Delimiter, LE: Length, LEr: Length repeated, DA: Destination Address,
+      SA: Source Address, FC: Function Code, \\
+      \vspace{-5pt}
+      PDU: Protocol Data Unit, FCS: Frame Check Sequence, ED: End Delimiter
+      \normalsize
+    \item Fixed payload length of $8$ bytes
+      % \footnotesize
+      % \begin{tabular}[h]{|c|c|c|c|c|c|c|}
+      %   \hline
+      %   SD3 & DA & SA & FC & PDU & FCS & ED \\
+      %   \hline
+      % \end{tabular}
+      % \normalsize
+    \item Token telegram
+      % \footnotesize
+      % \begin{tabular}[h]{|c|c|c|}
+      %   \hline
+      %   SD4 & DA & SA \\
+      %   \hline
+      % \end{tabular}
+      % \normalsize
+    \item Short telegram
+      % \footnotesize
+      % \begin{tabular}[h]{|c|}
+      %   \hline
+      %   SDC \\
+      %   \hline
+      % \end{tabular}
+      % \normalsize
+      \hfill \\
+    \item Telegram Delimiter, featuring a Hamming distance of 4 \\
+      \footnotesize
+      \begin{tabular}[h]{|c|c|c|c|c|c|}
+        \hline
+        SD1   & SD2   & SD3   & SD4   & ED    & SC \\
+        \hline
+        0x10  & 0x68  & 0xA2  & 0xDC  & 0x16  & 0xE5 \\
+        \hline
+      \end{tabular}
+      \normalsize
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
   \frametitle{Application Layer: FMS}
   \begin{itemize}
     \item FMS master controls the relationship with FMS slaves
-    \item Replaced by Profibus DP
+    \item Replaced by \textit{Profibus DP}
   \end{itemize}
 \end{frame}
 
 \begin{frame}
   \frametitle{Application Layer: DP}
   \begin{itemize}
-    \item DP masters are separated into classes
+    \item \textit{Profibus DP} masters are separated into classes
       \begin{itemize}
         \item Class 1: control a DP system and the slaves assigned, mostly PLC based
         \item Class 2: tool for commissioning, engineering and maintenance, mostly PC
