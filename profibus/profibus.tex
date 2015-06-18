@@ -229,6 +229,7 @@
     \item Data rate is fixed to $31.25kbit/s$
     \item Bus length up to $1900m$
     \item Allows branches up to $60m$ to field devices
+    \item Manchester coding
   \end{itemize}
 \end{frame}
 
@@ -510,16 +511,13 @@
 \begin{frame}
   \frametitle{Application Layer: PA}
   \begin{itemize}
-    \item foo <+todo+>
-  \end{itemize}<++>
-\end{frame}
-
-\section{Layer 8: User Layer}
-\begin{frame}
-  \frametitle{User Layer}
-  \begin{itemize}
-    \item foo <+todo+>
-  \end{itemize}<++>
+    \item Uses the same protocol as \textit{Profibus DP}
+    \item Can be connected to an existing \textit{Profibus DP} network
+      \begin{itemize}
+        \item Using a DP/PA coupler
+        \item The faster \textit{DP} network is used as a backbone
+      \end{itemize}
+  \end{itemize}
 \end{frame}
 
 % \begin{frame}
@@ -827,6 +825,16 @@
     Max Felser
     \newblock Profibus Manual: A collection of information explaining PROFIBUS networks
     \newblock http://www.profibus.felser.ch
+
+    \bibitem{profibuswiki}
+    Wikipedia
+    \newblock Profibus
+    \newblock https://en.wikipedia.org/wiki/Profibus
+
+    \bibitem{fieldbuswiki}
+    Wikipedia
+    \newblock Fieldbus
+    \newblock https://en.wikipedia.org/wiki/Fieldbus
 %   \bibitem{expanding}
 %   Gabriel Leen, Donal Heffernan.
 %   \newblock {\em Expanding Automotive Electronic Systems}
