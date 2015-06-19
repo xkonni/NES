@@ -123,12 +123,22 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{System Structure: Protocols}
-  Three protocols available
+  \frametitle{System Structure: Master Station}
   \begin{itemize}
-    \item FMS \textit{(field-bus message specification)}
-    \item DP \textit{(decentralized peripheral)}
-    \item PA \textit{(process automation)}
+    \item Active station
+    \item Control the data traffic on the bus
+    \item When having the \textit{bus access token}: \\
+      send messages without external requests
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{System Structure: Slave Station}
+  \begin{itemize}
+    \item Passive station
+    \item No self-initiated bus access
+    \item Immediate response to data requested by a master
+    \item Can only be controlled by a single master
   \end{itemize}
 \end{frame}
 
@@ -147,24 +157,13 @@
   \end{tabular} \\
 \end{frame}
 
-
 \begin{frame}
-  \frametitle{Device Type: Master}
+  \frametitle{System Structure: Protocols}
+  Three protocols available
   \begin{itemize}
-    \item Active station
-    \item Control the data traffic on the bus
-    \item When having the \textit{bus access token}: \\
-      send messages without external requests
-  \end{itemize}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Device Type: Slave}
-  \begin{itemize}
-    \item Passive station
-    \item No self-initiated bus access
-    \item Immediate response to data requested by a master
-    \item Can only be controlled by a single master
+    \item FMS \textit{(field-bus message specification)}
+    \item DP \textit{(decentralized peripheral)}
+    \item PA \textit{(process automation)}
   \end{itemize}
 \end{frame}
 
@@ -182,6 +181,7 @@
         \item Uses MBP \textit{(Manchester bus powered)}, providing power supply
       \end{itemize}
   \end{itemize}
+  \vspace{-15pt}
   \center
   \footnotesize
   \begin{tabular}[h]{l|l}
@@ -195,7 +195,7 @@
   \end{tabular} \\
   \hfill \\
   \normalsize
-  Transmission technology (IRC 61784)~\cite{profibusmanual}
+Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
 \end{frame}
 
 \begin{frame}
@@ -217,7 +217,7 @@
           \end{tabular}
       \end{itemize}
   \end{itemize}
-  Mainly used with \textit{Profibus DP}
+  Mainly used with \textit{Profibus FMS} and \textit{Profibus DP}
 \end{frame}
 
 \begin{frame}
