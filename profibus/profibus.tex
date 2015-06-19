@@ -115,15 +115,17 @@
         \item Slaves
       \end{itemize}
   \end{itemize}
+  \vspace{-30pt}
       \center
       \begin{figure}
-        \includegraphics[width=.50\textwidth]{img/dp_system.png}
+        \includegraphics[width=.55\textwidth]{img/dp_system.png}
         \caption{Structure of a DP system~\cite{profibusmanual}}
       \end{figure}
 \end{frame}
 
 \begin{frame}
   \frametitle{System Structure: Master Station}
+  \textbf{Master Station}
   \begin{itemize}
     \item Active station
     \item Control the data traffic on the bus
@@ -134,6 +136,7 @@
 
 \begin{frame}
   \frametitle{System Structure: Slave Station}
+  \textbf{Slave Station}
   \begin{itemize}
     \item Passive station
     \item No self-initiated bus access
@@ -145,25 +148,22 @@
 \begin{frame}
   \frametitle{System Structure: Layer}
   \textit{Profibus} in the OSI reference model~\cite{profibusmanual}
-  \center
-  \footnotesize
-  \begin{tabular}[h]{l|l|l}
-    \textbf{Layer}  & \textbf{Name}     & \textbf{Content} \\
-    \hline
-    Layer 8         & User Layer        & Profiles \\
-    Layer 7         & Application Layer & FMS / DP / PA protocol \\
-    Layer 2         & Data Link Layer   & FDL protocol \\
-    Layer 1         & Physical Layer    & Transmission Technology
-  \end{tabular} \\
-\end{frame}
-
-\begin{frame}
-  \frametitle{System Structure: Protocols}
-  Three protocols available
+  \begin{center}
+    \footnotesize
+    \begin{tabular}[h]{l|l|l}
+      \textbf{Layer}  & \textbf{Name}     & \textbf{Content} \\
+      \hline
+      Layer 7         & Application Layer & FMS / DP / PA protocol \\
+      Layer 2         & Data Link Layer   & Field Data Link (FDL) protocol \\
+      Layer 1         & Physical Layer    & Transmission Technology
+    \end{tabular}
+    \normalsize
+  \end{center}
+  Protocols
   \begin{itemize}
-    \item FMS \textit{(field-bus message specification)}
-    \item DP \textit{(decentralized peripheral)}
-    \item PA \textit{(process automation)}
+    \item FMS \textit{(Fieldbus Message Specification)}
+    \item DP \textit{(Decentralized Peripheral)}
+    \item PA \textit{(Process Automation)}
   \end{itemize}
 \end{frame}
 
@@ -200,6 +200,7 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
 
 \begin{frame}
   \frametitle{Physical Layer: RS 485}
+  \textbf{RS 485}
   \begin{itemize}
     \item Bus-topology
     \item Twisted-pair cables with $150\Omega$
@@ -222,6 +223,7 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
 
 \begin{frame}
   \frametitle{Physical Layer: FOC}
+  \textbf{Fibre Optical Cable (FOC)}
   \begin{itemize}
     \item Star-, bus or ring-topology
     \item Fibre optical cables
@@ -231,6 +233,7 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
 
 \begin{frame}
   \frametitle{Physical Layer: MBP}
+  \textbf{Manchester Bus Powered (MBP)}
   \begin{itemize}
     \item Bus-topology
     \item Stations are powered through the bus
@@ -238,13 +241,25 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
     \item Data rate is fixed to $31.25kbit/s$
     \item Bus length up to $1900m$
     \item Allows branches up to $60m$ to field devices
-    \item Manchester coding
   \end{itemize}
 \end{frame}
 
 \begin{frame}
   \frametitle{Physical Layer: MBP}
-  Manchester coding \\
+  \textbf{Manchester Bus Powered (MBP)}
+  \begin{itemize}
+    \item Can be connected to an existing \textit{Profibus DP} network
+      \begin{itemize}
+        \item Using a DP/PA coupler
+        \item The faster \textit{DP} network is used as a backbone
+      \end{itemize}
+    \item Uses Manchester coding
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Physical Layer: MBP}
+  \textbf{Manchester coding} \\
   \begin{itemize}
     \begin{multicols}{2}
     \item Every bit is coded as a change
@@ -270,8 +285,9 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
 \section{Layer 2: Data Link Layer}
 \begin{frame}
   \frametitle{Data Link Layer}
-  The data transmission in \textit{Profibus} is handled by the \textit{fieldbus data link
-    (FDL)} layer. \\
+  Data transmission in \textit{Profibus} is handled by the \\
+  \textit{fieldbus data link (FDL)} layer \\
+  \hfill \\
   FDL consists of three functions:
   \begin{itemize}
     \item Medium Access Control \textit{(MAC)}
@@ -282,6 +298,7 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
 
 \begin{frame}
   \frametitle{Data Link Layer: MAC}
+  \textbf{Medium Access Control (MAC)}
   \begin{itemize}
     \item Make sure only one station transmits data on the bus
     \item When multiple masters are present
@@ -298,7 +315,7 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
 
 \begin{frame}
   \frametitle{Data Link Layer: FMA}
-  Fieldbus Management provides functions to manage the layer 1 and 2
+  \textbf{Fieldbus Management (FMA)} provides functions to manage the layers 1 and 2
     \begin{itemize}
       \item Reset the layers
       \item Set parameters
@@ -322,16 +339,18 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Data Link Layer: Error detection and correction}
-  Error Detection
+  \frametitle{Data Link Layer: Error detection}
+  \textbf{Error Detection}
   \begin{itemize}
     \item Hamming distance of 4 by adding a checksum to each packet
     \item At least 4 bits must change to result in an undetected error
     \item This results in \textit{integrity class 2} after standard \textbf{IEC 870-5-1}
   \end{itemize}
+\end{frame}
 
-  \vspace{10pt}
-  \textit{Send Data with No acknowledge (SDN)} service
+\begin{frame}
+  \frametitle{Data Link Layer: Error correction}
+  \textbf{Send Data with No acknowledge (SDN)} service
   \begin{itemize}
     \item Mainly used for synchronization and status messages
     \item The erroneous telegram is discarded
@@ -340,15 +359,15 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Data Link Layer: Error detection and correction}
-  \textit{Send Data with Acknowledge (SDA)}
+  \frametitle{Data Link Layer: Error correction}
+  \textbf{Send Data with Acknowledge (SDA)} service
   \begin{itemize}
     \item Mainly used between masters, slaves may not always send an acknowledgement
     \item When the sender does not get a response, the telegram is retransmitted
   \end{itemize}
 
   \vspace{10pt}
-  \textit{Send and Request Data (SRD)}
+  \textbf{Send and Request Data (SRD)} service
   \begin{itemize}
     \item Service used between masters and slaves
     \item Acknowledgement is packed on top of the data telegram
@@ -360,22 +379,23 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
 \section{Layer 7: Application Layer}
 \begin{frame}
   \frametitle{Application Layer: Addressing}
-  \begin{itemize}
-    \item Every station has a unique address, coded in 1 byte
-      \center
-      \footnotesize
-      \begin{tabular}[h]{l|l}
-        \textbf{Address}  & \textbf{Use} \\
-        \hline
-        $0$               & reserved for tools, e.g.\ programming devices \\
-        $1 - n$           & $n$ master stations \\
-        $n - 125$         & slave stations \\
-        $126$             & reserved as \textit{delivery address} \\
-                          & used for changing the address of a slave during runtime \\
-        $127$             & reserved as broadcast address
-      \end{tabular}
-  \end{itemize}
-  Components used for the infrastructure, e.g.\ repeaters transmit the data transparently
+  Every station has a unique address, coded in 1 byte
+  \begin{center}
+    \footnotesize
+    \begin{tabular}[h]{l|l}
+      \textbf{Address}  & \textbf{Use} \\
+      \hline
+      $0$               & reserved for tools, e.g.\ programming devices \\
+      $1 - n$           & $n$ master stations \\
+      $n - 125$         & slave stations \\
+      $126$             & reserved as \textit{delivery address} \\
+                        & used for changing the address of a slave during runtime \\
+      $127$             & reserved as broadcast address
+    \end{tabular}
+    \normalsize
+  \end{center}
+  \hfill \\
+  Components used for the infrastructure, e.g.\ repeaters, couplers transmit the data transparently
   and do not require an address \\
 \end{frame}
 
@@ -448,6 +468,7 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
 
 \begin{frame}
   \frametitle{Application Layer: FMS}
+  \textbf{Fieldbus Message Specification (FMS)}
   \begin{itemize}
     \item FMS master controls the relationship with FMS slaves
     \item Replaced by \textit{Profibus DP}
@@ -455,31 +476,32 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Application Layer: DP}
+  \frametitle{Application Layer: DP/PA}
+  \textbf{Profibus DP} masters are separated into classes
   \begin{itemize}
-    \item \textit{Profibus DP} masters are separated into classes
-      \begin{itemize}
-        \item Class 1: control a DP system and the slaves assigned, mostly PLC based
-        \item Class 2: tool for commissioning, engineering and maintenance, mostly PC
-          based
-        \item Class 3: clock master, used for time synchronization
-      \end{itemize}
+    \item Class 1: control a DP system and the slaves assigned, mostly PLC based
+    \item Class 2: tool for commissioning, engineering and maintenance, mostly PC
+      based
+    \item Class 3: clock master, used for time synchronization
   \end{itemize}
+  \vspace{10pt}
+  \textbf{Profibus PA} uses the same protocol as \textit{Profibus DP}
 \end{frame}
 
 \begin{frame}
   \frametitle{Application Layer: DP - Cyclic process data}
-  Data exchange between masters and slaves is separated into three
+  The exchange of data between masters and slaves is separated into three
   phases:~\cite{profibusmanual}
-  \center
-  \footnotesize
-  \begin{tabular}[h]{l|l}
-    \textbf{Phase}  & \textbf{Action} \\
-    \hline
-    Diagnosis       & Master requests diagnostic data from slaves \\
-    Initialization  & Master sets parameters and checks configuration of slaves \\
-    Data Exchange   & Master sends and requests data from the slaves
-  \end{tabular} \\
+  \begin{center}
+    \footnotesize
+    \begin{tabular}[h]{l|l}
+      \textbf{Phase}  & \textbf{Action} \\
+      \hline
+      Diagnosis       & Master requests diagnostic data from slaves \\
+      Initialization  & Master sets parameters and checks configuration of slaves \\
+      Data Exchange   & Master cyclically sends and requests data from the slaves
+    \end{tabular}
+  \end{center}
 \end{frame}
 
 \begin{frame}
@@ -494,11 +516,11 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
   \end{itemize}
   \vspace{10pt}
   The minimum cycle time $T_{BCycle}$ can be calculated:
-  \begin{align}
+  \begin{align*}
     T_{BCycle} = \frac{380 + (N_{Slaves} \cdot 300) + (N_{Bytes} \cdot 11)}{Bitrate} + 75
     \mu s
     \label{minimumcycletime}
-  \end{align}
+  \end{align*}
 \end{frame}
 
 \begin{frame}
@@ -509,18 +531,6 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
     \item Can simultaneously be a class 1 master
     \item Relationship with a slave is called \textit{MS1}
     \item Acyclic communication with a slave in an existing MS0 relationship
-  \end{itemize}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Application Layer: PA}
-  \begin{itemize}
-    \item Uses the same protocol as \textit{Profibus DP}
-    \item Can be connected to an existing \textit{Profibus DP} network
-      \begin{itemize}
-        \item Using a DP/PA coupler
-        \item The faster \textit{DP} network is used as a backbone
-      \end{itemize}
   \end{itemize}
 \end{frame}
 
