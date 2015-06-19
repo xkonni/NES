@@ -128,9 +128,10 @@
   \textbf{Master Station}
   \begin{itemize}
     \item Active station
-    \item Control the data traffic on the bus
+    \item Can control multiple slaves
+    \item Requests data from slaves
     \item When having the \textit{bus access token}: \\
-      send messages without external requests
+      send telegrams on the bus
   \end{itemize}
 \end{frame}
 
@@ -147,7 +148,7 @@
 
 \begin{frame}
   \frametitle{System Structure: Layer}
-  \textit{Profibus} in the OSI reference model~\cite{profibusmanual}
+  \textbf{Profibus} in the OSI reference model~\cite{profibusmanual}
   \begin{center}
     \footnotesize
     \begin{tabular}[h]{l|l|l}
@@ -159,7 +160,7 @@
     \end{tabular}
     \normalsize
   \end{center}
-  Protocols
+  \textbf{Protocols}
   \begin{itemize}
     \item FMS \textit{(Fieldbus Message Specification)}
     \item DP \textit{(Decentralized Peripheral)}
@@ -169,17 +170,15 @@
 
 \section{Layer 1: Physical Layer}
 \begin{frame}
-  \frametitle{Physical Layer}
+  \frametitle{Physical Layer: Transmission Technology}
+  \textbf{Profibus FMS} and \textbf{Profibus DP}
   \begin{itemize}
-    \item \textit{Profibus FMS} and \textit{Profibus DP}
-      \begin{itemize}
-        \item Mostly using RS 485 transmission
-        \item Optical transmission via FOC \textit{(fibre optical cable)} possible
-      \end{itemize}
-    \item \textit{Profibus PA}
-      \begin{itemize}
-        \item Uses MBP \textit{(Manchester bus powered)}, providing power supply
-      \end{itemize}
+    \item Mostly using RS 485 transmission
+    \item Optical transmission via FOC \textit{(fibre optical cable)} possible
+  \end{itemize}
+  \textbf{Profibus PA}
+  \begin{itemize}
+    \item Uses MBP \textit{(Manchester bus powered)}, providing power supply
   \end{itemize}
   \vspace{-15pt}
   \center
@@ -225,8 +224,8 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
   \frametitle{Physical Layer: FOC}
   \textbf{Fibre Optical Cable (FOC)}
   \begin{itemize}
-    \item Star-, bus or ring-topology
-    \item Fibre optical cables
+    \item Star-, bus- or ring-topology
+    \item Resistant against electromagnetic noise
     \item Distance between repeaters up to $15km$
   \end{itemize}
 \end{frame}
@@ -285,8 +284,8 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
 \section{Layer 2: Data Link Layer}
 \begin{frame}
   \frametitle{Data Link Layer}
-  Data transmission in \textit{Profibus} is handled by the \\
-  \textit{fieldbus data link (FDL)} layer \\
+  The \textbf{Fieldbus Data Link (FDL)} layer handles data transmission in
+  \textit{Profibus} \\
   \hfill \\
   FDL consists of three functions:
   \begin{itemize}
@@ -318,8 +317,7 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
   \textbf{Fieldbus Management (FMA)} provides functions to manage the layers 1 and 2
     \begin{itemize}
       \item Reset the layers
-      \item Set parameters
-      \item Get parameters
+      \item Get/set parameters
       \item Inform the user about events or errors
       \item Activate/Deactivate \textit{service access point (SAP)}
     \end{itemize}
@@ -327,22 +325,23 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
 
 \begin{frame}
   \frametitle{Data Link Layer: Error handling}
-  Errors can be caused by
+  \textbf{Errors} can be caused by
   \begin{itemize}
     \item Faulty transmitters
     \item Badly shielded cables
     \item Signal reflections
     \item Large divergences in time synchronization between stations
   \end{itemize}
-  Error rate is smaller than $10^{-4}$ and can be reduced further by error detection and
-  correction
+  \vspace{10pt}
+  The error rate in a typical \textit{Profibus} network is smaller than $10^{-4}$ and can
+  be reduced further by error detection and correction
 \end{frame}
 
 \begin{frame}
   \frametitle{Data Link Layer: Error detection}
   \textbf{Error Detection}
   \begin{itemize}
-    \item Hamming distance of 4 by adding a checksum to each packet
+    \item \textit{Hamming Distance} of 4 by adding a checksum to each packet
     \item At least 4 bits must change to result in an undetected error
     \item This results in \textit{integrity class 2} after standard \textbf{IEC 870-5-1}
   \end{itemize}
@@ -356,21 +355,21 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
     \item The erroneous telegram is discarded
     \item Telegram from the next cycle is used instead
   \end{itemize}
+
+  \vspace{10pt}
+  \textbf{Send Data with Acknowledge (SDA)} service
+  \begin{itemize}
+    \item Mainly used between masters, slaves may not access the bus without request
+    \item When the sender does not get a response, the telegram is retransmitted
+  \end{itemize}
 \end{frame}
 
 \begin{frame}
   \frametitle{Data Link Layer: Error correction}
-  \textbf{Send Data with Acknowledge (SDA)} service
-  \begin{itemize}
-    \item Mainly used between masters, slaves may not always send an acknowledgement
-    \item When the sender does not get a response, the telegram is retransmitted
-  \end{itemize}
-
-  \vspace{10pt}
   \textbf{Send and Request Data (SRD)} service
   \begin{itemize}
     \item Service used between masters and slaves
-    \item Acknowledgement is packed on top of the data telegram
+    \item Acknowledgement is piggybacked on top of the data telegram
     \item When the sender does not get a response, the telegram is retransmitted
   \end{itemize}
 \end{frame}
@@ -453,7 +452,7 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
       % \end{tabular}
       % \normalsize
       \hfill \\
-    \item Telegram Delimiter, featuring a Hamming distance of 4 \\
+    \item Telegram Delimiter, featuring a \textit{Hamming Distance} of 4 \\
       \footnotesize
       \begin{tabular}[h]{|c|c|c|c|c|c|}
         \hline
@@ -467,7 +466,7 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Application Layer: FMS}
+  \frametitle{Application Layer: FMS Protocol}
   \textbf{Fieldbus Message Specification (FMS)}
   \begin{itemize}
     \item FMS master controls the relationship with FMS slaves
@@ -476,10 +475,11 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Application Layer: DP/PA}
+  \frametitle{Application Layer: DP/PA Protocol}
   \textbf{Profibus DP} masters are separated into classes
   \begin{itemize}
-    \item Class 1: control a DP system and the slaves assigned, mostly PLC based
+    \item Class 1: control a DP system and the slaves assigned, mostly
+      \textit{Programmable Logic Controller (PLC)} based
     \item Class 2: tool for commissioning, engineering and maintenance, mostly PC
       based
     \item Class 3: clock master, used for time synchronization
@@ -506,7 +506,7 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
 
 \begin{frame}
   \frametitle{Application Layer: DP - Data Exchange}
-  Class 1 master station:
+  \textbf{Class 1 master station}
   \begin{itemize}
     \item Relationship with a slave is called \textit{MS0}
     \item Data exchange is cyclic
@@ -525,7 +525,7 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
 
 \begin{frame}
   \frametitle{Application Layer: DP - Data Exchange}
-  Class 2 master station:
+  \textbf{Class 2 master station}
   \begin{itemize}
     \item Can exist in addition class 1 masters
     \item Can simultaneously be a class 1 master
