@@ -109,17 +109,26 @@
   \begin{itemize}
     \item \textit{Profibus} is a multi-master system
     \item Operation of multiple systems over a single bus
-    \item Three protocols available
-      \begin{itemize}
-        \item FMS \textit{(field-bus message specification)}
-        \item DP \textit{(decentralized peripheral)}
-        \item PA \textit{(process automation)}
-      \end{itemize}
     \item Devices are categorized in different types
       \begin{itemize}
         \item Masters
         \item Slaves
       \end{itemize}
+  \end{itemize}
+      \center
+      \begin{figure}
+        \includegraphics[width=.50\textwidth]{img/dp_system.png}
+        \caption{Structure of a DP system~\cite{profibusmanual}}
+      \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{System Structure: Protocols}
+  Three protocols available
+  \begin{itemize}
+    \item FMS \textit{(field-bus message specification)}
+    \item DP \textit{(decentralized peripheral)}
+    \item PA \textit{(process automation)}
   \end{itemize}
 \end{frame}
 
@@ -455,11 +464,6 @@
           based
         \item Class 3: clock master, used for time synchronization
       \end{itemize}
-      \center
-      \begin{figure}
-        \includegraphics[width=.50\textwidth]{img/dp_system.png}
-        \caption{Structure of a DP system~\cite{profibusmanual}}
-      \end{figure}
   \end{itemize}
 \end{frame}
 
