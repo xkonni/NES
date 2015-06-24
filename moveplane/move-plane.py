@@ -2,10 +2,11 @@
 import serial
 import Adafruit_BBIO.GPIO as GPIO
 import time
+import math
 
 # initialize serial port
-#ser1 = serial.Serial('/dev/ttyUSB0', 9600)
-#ser2 = serial.Serial('/dev/ttyUSB1', 9600)
+# ser1 = serial.Serial('/dev/ttyUSB0', 9600)
+# ser2 = serial.Serial('/dev/ttyUSB1', 9600)
 # wrong usb ports, dont replug, reboot and pray
 ser2 = serial.Serial('/dev/ttyUSB0', 9600)
 ser1 = serial.Serial('/dev/ttyUSB1', 9600)
@@ -21,17 +22,19 @@ GPIO.setup("P8_12", GPIO.OUT)
 GPIO.setup("P8_14", GPIO.OUT)
 
 # some variables
-delta = 0.03
+delta = 100
 
 # single step on rising edge
 def step (pin):
   GPIO.output(pin, GPIO.HIGH)
-  time.sleep(1E-6)
+  time.sleep(1E-3)
   GPIO.output(pin, GPIO.LOW)
+  time.sleep(1E-3)
 
 # do some steps
 def loop (pin, num):
-  # num = max(num, 10)
+  # upper limit
+  num = max(num, 20)
   for i in range(0, num):
     step(pin)
 
@@ -40,78 +43,102 @@ offset_y = 0
 offset_z = 0
 run = 0
 
+def test():
+  while True:
+    GPIO.output("P8_10", GPIO.LOW)
+    for i in range(1, 50):
+      step("P8_8")
+
+    GPIO.output("P8_10", GPIO.HIGH)
+    for i in range(1, 50):
+      step("P8_8")
+
+    GPIO.output("P8_14", GPIO.LOW)
+    for i in range(1, 50):
+      step("P8_12")
+
+    GPIO.output("P8_14", GPIO.HIGH)
+    for i in range(1, 50):
+      step("P8_12")
+
+def serialToFloat(m):
+  m[0] = float(m[0])
+  m[1] = float(m[1])
+  m[2] = float(m[2])
+
+def normalize(m):
+  m_max = max(abs(m[0]), abs(m[1]), abs(m[2]))
+  m[0] = m[0] / m_max
+  m[1] = m[1] / m_max
+  m[2] = m[2] / m_max
+
+## DEBUG
+# test()
+
 # update plane position
 # first 10 cycles are used to calibrate offsets between the sensors
+data1 = ser1.readline().rstrip()
+data2 = ser2.readline().rstrip()
 while True:
+
   data1 = ser1.readline().rstrip()
-  if (len(data1) < 10):
+  if (len(data1) < 15):
     print('serial1: bad things happened, trying again')
     continue
+
   data2 = ser2.readline().rstrip()
-  if (len(data2) < 10):
+  if (len(data2) < 15):
     print('serial2: bad things happened, trying again')
     continue
 
   data1 = data1.decode('utf-8')
   data2 = data2.decode('utf-8')
-  # split serial data1
-  sx1, sy1, sz1 = data1.split(',')
-  sx2, sy2, sz2 = data2.split(',')
+  # split data
+  s1 = data1.split(',')
+  s2 = data2.split(',')
   # convert to number
-  x1 = float(sx1)
-  x2 = float(sx2)
-  y1 = float(sy1)
-  y2 = float(sy2)
-  z1 = float(sz1)
-  z2 = float(sz2)
-  # calculate max
-  m1 = max(abs(x1), abs(y1), abs(z1))
-  m2 = max(abs(x2), abs(y2), abs(z2))
-  # normalize to 1
-  x1 = round(x1/m1, 2)
-  x2 = round(x2/m2, 2)
-  y1 = round(y1/m1, 2)
-  y2 = round(y2/m2, 2)
-  z1 = round(z1/m1, 2)
-  z2 = round(z2/m2, 2)
+  serialToFloat(s1)
+  serialToFloat(s2)
 
   if run < 10:
     print("calibrating...");
-    offset_x += (x1 - x2)/10
-    offset_y += (y1 - y2)/10
-    offset_z += (z1 - z2)/10
+    offset_x += (s1[0] - s2[0])/10
+    offset_y += (s1[1] - s2[1])/10
+    offset_z += (s1[2] - s2[2])/10
     run += 1
     if run == 10:
       print("calibration done")
       print("offset x:%.2f y:%.2f z:%.2f" % (offset_x, offset_y, offset_z))
 
   else:
-    x = x1 - x2 - offset_x
-    y = y1 - y2 - offset_y
-    z = z1 - z2 - offset_z
-    #print("x: %.2f - y: %.2f - z:%.2f" % ( x, y, z ))
+    x = s1[0] - s2[0] - offset_x
+    y = s1[1] - s2[1] - offset_y
+    z = s1[2] - s2[2] - offset_z
+    # print("x: %5d/%5d - y: %5d/%5d - z:%5d/%5d" % ( s1[0], s2[0] + offset_x, s1[1], s2[1] + offset_y, s1[2], s2[2] + offset_z))
+
+    nx = math.trunc(x/delta)
+    ny = math.trunc(y/delta)
+    print("x: %d (%d), y: %d (%d)" % (x, nx, y, ny))
 
     # move x axis
-    n = int(x/delta)
-    if n > 0:
-      print("inc x: %d" % (n))
-      GPIO.output("P8_10", GPIO.LOW)
-      loop("P8_8", abs(n))
-    elif n < 0:
-      print("dec x: %d" % (abs(n)))
+    if nx > 1:
       GPIO.output("P8_10", GPIO.HIGH)
-      loop("P8_8", abs(n))
+      loop("P8_8", abs(nx))
+      # step("P8_8")
+    elif nx < -1:
+      GPIO.output("P8_10", GPIO.LOW)
+      loop("P8_8", abs(nx))
+      # step("P8_8")
 
     # move y axis
-    n = int(y/delta)
-    if n < 0:
-      print("inc y: %d" % (n))
-      GPIO.output("P8_14", GPIO.LOW)
-      loop("P8_12", abs(n))
-    elif n > 0:
-      print("dec y: %d" % (abs(n)))
-      GPIO.output("P8_14", GPIO.HIGH)
-      loop("P8_12", abs(n))
+    #if ny > 1:
+    #  GPIO.output("P8_14", GPIO.LOW)
+    #  loop("P8_12", abs(ny))
+    #  # step("P8_12")
+    #elif ny < 1:
+    #  GPIO.output("P8_14", GPIO.HIGH)
+    #  loop("P8_12", abs(ny))
+    #  # step("P8_12")
 
-  # wait for sensor data1
-  time.sleep(1E-3)
+  # wait for sensor data
+  time.sleep(1E-2)
