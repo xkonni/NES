@@ -273,7 +273,7 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
       \begin{figure}[h]
         \centering
         \includegraphics[width=140pt]{img/mbp}
-        \caption{Manchester coding}
+        \caption{Manchester coding~\cite{profibusmanual}}
         \label{fig:mbp}
       \end{figure}
     \end{multicols}
@@ -305,7 +305,7 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
         \item Masters need the access token to send data
         \item Token is cyclically passed via token telegram
         \item To ensure that all master stations can access the bus, token must be passed
-          on after a certain ``token rotation time''
+          on after a certain \textit{token rotation time}
       \end{itemize}
     \item Slaves only respond to requests by a master
   \end{itemize}
@@ -314,7 +314,8 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
 
 \begin{frame}
   \frametitle{Data Link Layer: FMA}
-  \textbf{Fieldbus Management (FMA)} provides functions to manage the layers 1 and 2
+  \textbf{Fieldbus Management (FMA)} provides functions to manage the \textit{Physical
+  Layer (1)} and \textit{Data Link Layer (2)}
     \begin{itemize}
       \item Reset the layers
       \item Get/set parameters
@@ -360,7 +361,8 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
   \textbf{Send Data with Acknowledge (SDA)} service
   \begin{itemize}
     \item Mainly used between masters, slaves may not access the bus without request
-    \item When the sender does not get a response, the telegram is retransmitted
+    \item When the sender does not receive an acknowledgement, the telegram is
+      retransmitted
   \end{itemize}
 \end{frame}
 
@@ -394,13 +396,13 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
     \normalsize
   \end{center}
   \hfill \\
-  Components used for the infrastructure, e.g.\ repeaters, couplers transmit the data transparently
-  and do not require an address \\
+  Components used for the infrastructure, e.g.\ repeaters, couplers, transmit the data
+  transparently and do not require an address \\
 \end{frame}
 
 \begin{frame}
   \frametitle{Application Layer: Telegram Formats}
-  \begin{itemize}
+  \begin{enumerate}
     \item Without data field \\
       % \footnotesize
       % \begin{tabular}[h]{|c|c|c|c|c|c|}
@@ -452,17 +454,17 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
       % \end{tabular}
       % \normalsize
       \hfill \\
-    \item Telegram Delimiter, featuring a \textit{Hamming Distance} of 4 \\
-      \footnotesize
-      \begin{tabular}[h]{|c|c|c|c|c|c|}
-        \hline
-        SD1   & SD2   & SD3   & SD4   & ED    & SC \\
-        \hline
-        0x10  & 0x68  & 0xA2  & 0xDC  & 0x16  & 0xE5 \\
-        \hline
-      \end{tabular}
-      \normalsize
-  \end{itemize}
+  \end{enumerate}
+  Telegram Delimiter, featuring a \textit{Hamming Distance} of 4 \\
+  \footnotesize
+  \begin{tabular}[h]{|c|c|c|c|c|c|}
+    \hline
+    SD1   & SD2   & SD3   & SD4   & ED    & SC \\
+    \hline
+    0x10  & 0x68  & 0xA2  & 0xDC  & 0x16  & 0xE5 \\
+    \hline
+  \end{tabular}
+  \normalsize
 \end{frame}
 
 \begin{frame}
@@ -478,8 +480,8 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
   \frametitle{Application Layer: DP/PA Protocol}
   \textbf{Profibus DP} masters are separated into classes
   \begin{itemize}
-    \item Class 1: control a DP system and the slaves assigned, mostly
-      \textit{Programmable Logic Controller (PLC)} based
+    \item Class 1: control a system and the slaves assigned, mostly \textit{Programmable
+      Logic Controller (PLC)} based
     \item Class 2: tool for commissioning, engineering and maintenance, mostly PC
       based
     \item Class 3: clock master, used for time synchronization
@@ -527,8 +529,8 @@ Transmission technology after standard \textbf{IEC 61784}~\cite{profibusmanual}
   \frametitle{Application Layer: DP - Data Exchange}
   \textbf{Class 2 master station}
   \begin{itemize}
-    \item Can exist in addition class 1 masters
-    \item Can simultaneously be a class 1 master
+    \item Can exist in addition to \textit{class 1} masters
+    \item Can simultaneously be a \textit{class 1} master
     \item Relationship with a slave is called \textit{MS1}
     \item Acyclic communication with a slave in an existing MS0 relationship
   \end{itemize}
