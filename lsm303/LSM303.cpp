@@ -490,3 +490,4 @@ int LSM303::testReg(byte address, regAddr reg)
     return TEST_REG_ERROR;
   }
 }
+
