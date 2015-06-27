@@ -17,6 +17,14 @@
 #define D_WHO_ID    0x49
 #define DLM_WHO_ID  0x3C
 
+// FIXES
+
+int millis()
+{
+  // TODO implement the millis function if timeouts are required
+  return 0;
+}
+
 // Constructors ////////////////////////////////////////////////////////////////
 
 LSM303::LSM303(void)

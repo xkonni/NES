@@ -1,7 +1,10 @@
 #ifndef LSM303_h
 #define LSM303_h
 
-#include <Arduino.h> // for byte data type
+#include <stdint.h>
+#include <math.h>
+
+typedef uint8_t byte;
 
 class LSM303
 {
@@ -261,6 +264,4 @@ template <typename Ta, typename Tb> float LSM303::vector_dot(const vector<Ta> *a
 }
 
 #endif
-
-
 
