@@ -1,0 +1,1 @@
+tmp//home/koslowski/Arduino/hardware/arduino/avr/cores/arduino/hooks.d tmp//home/koslowski/Arduino/hardware/arduino/avr/cores/arduino/
