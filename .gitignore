@@ -216,3 +216,7 @@ Temporary Items
 
 # manually added
 daemon
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
