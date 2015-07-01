@@ -129,6 +129,16 @@ int main(int argc, char *argv[])
   int ret;
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
+
+  // gpio
+  // FILE *fp;
+  // fp = fopen("/sys/class/gpio/export", "w");
+  // fprintf(fp, "7");
+  iolib_init();
+  iolib_setdir(8, 12, BBBIO_DIR_OUT);
+  pin_high(8,12);  
+  pin_low(8,12);  
+
   // initialize
   status_pos = 0;
   status_dir = 0;

@@ -7,6 +7,8 @@
  * Konstantin Koslowski <konstantin.koslowski@mailbox.org>
  */
 
+#include "BBBiolib.h"
+
 #define BUFFERSIZE 256
 #define PORT 2020
 #define MIN_POS -70
