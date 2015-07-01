@@ -157,7 +157,11 @@
   \framesubtitle{Bus master, main computational unit}
   \textbf{Status:}
 	\begin{itemize}
-		\item ??? TODO
+		\item Modular design to fit CAN and EtherCAT
+		\item High-level controller class receives periodic sensor input events
+		\item ... and computes angle corrections for all drives
+		\item CAN or EtherCAT wrapped into classes to provide the events and send corrections
+		\item Build on a BeagleBone Black
 	\end{itemize}
 \end{frame}
 
