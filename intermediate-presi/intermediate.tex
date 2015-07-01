@@ -1,0 +1,186 @@
+\documentclass{beamer}
+
+\mode<presentation>
+ {\usetheme{CambridgeUS}
+  \usecolortheme{beaver}
+  \setbeamercovered{transparent}
+  % appearance of bullets
+  \useinnertheme{rectangles}
+  \definecolor{mybullets}{rgb}{0.6,0.0,0.0}
+  \setbeamercolor{structure}{fg=mybullets}
+
+  \definecolor{mycolor}{rgb}{0.2,0.2,0.2}
+  % bars
+  %\setbeamercolor{section in toc}{fg=black,bg=white}
+  %\setbeamercolor{alerted text}{fg=mycolor!80!gray}
+  %\setbeamercolor*{palette primary}{fg=mycolor!60!black,bg=gray!30!white}
+  %\setbeamercolor*{palette secondary}{fg=mycolor!70!black,bg=gray!15!white}
+  %\setbeamercolor*{palette tertiary}{bg=mycolor!80!black,fg=gray!10!white}
+  %\setbeamercolor*{palette quaternary}{fg=mycolor,bg=gray!5!white}
+  %\setbeamercolor*{sidebar}{fg=mycolor,bg=gray!15!white}
+
+  \setbeamercolor*{palette sidebar primary}{fg=mycolor!10!black}
+  \setbeamercolor*{palette sidebar secondary}{fg=white}
+  \setbeamercolor*{palette sidebar tertiary}{fg=mycolor!50!black}
+  \setbeamercolor*{palette sidebar quaternary}{fg=gray!10!white}
+
+  \setbeamercolor{titlelike}{parent=palette primary,fg=mycolor}
+  \setbeamercolor{frametitle}{bg=gray!10!white}
+  \setbeamercolor{frametitle right}{bg=gray!60!white}
+
+  \setbeamercolor*{separation line}{}
+  \setbeamercolor*{fine separation line}{}
+}
+
+ \def\Tiny{\fontsize{5pt}{5pt}\selectfont}
+ \renewcommand{\arraystretch}{1.2}
+
+% just show sections and subsections in table of contents
+\setcounter{tocdepth}{2}
+
+
+\usepackage[english]{babel}
+\usepackage[latin1]{inputenc}
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage{eurosym}
+
+\title[NES Project: Intermediate Presentation]{Position Sensing and Imitation\\Intermediate Presentation}
+
+\author[Koslowski, Schmieder, Birk]{Konstantin Koslowski, Mathis Schmieder, Moksha Birk}
+
+\institute[]
+{TU Berlin \\
+ Department of Telecommunication Systems \\
+ Telecommunication Networks Group \\
+}
+
+\date{July 3rd, 2015}
+
+\pgfdeclareimage[height=0.5cm]{university-logo}{tu-tkn-logo.jpg}
+\logo{\pgfuseimage{university-logo}}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Introduction}
+\subsection{Reminder}
+
+\begin{frame}
+  \frametitle{Reminder: Goal Statement}
+	\begin{itemize}
+		\item \textbf{Goal:} Mimic position and motion of a plate
+		\vfill
+		\item \textbf{Sensing:} 3D MEMS attitude sensor embedded in a plate
+		\item \textbf{Communicating:} Implement industrial bus
+		\item \textbf{Actuating:} Rotate a plate using motors
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Reminder: Functional Overview}
+\begin{figure}
+\includegraphics[width=\textwidth]{functionalspecification.pdf} 
+\caption{Diagram of the Functional Specification}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Reminder: Major Milestones}
+	\begin{itemize}
+		\item \textbf{Sensing:} Read and process MEMS data\\
+		\item \textbf{Actuation:} Control stepper motors\\
+		\item \textbf{Mechanics:} Construct movable plate\\
+		\item \textbf{Communication:} Implement industrial bus\\
+		\item \textbf{Controller:} Bus master, main computational unit\\
+	\end{itemize}
+\end{frame}
+
+\section{Current Status}
+% wie die aktuellen milestones so aussehen
+\subsection{Sensing}
+\begin{frame}
+  \frametitle{Milestone: Sensing}
+  \framesubtitle{Read and process MEMS data}
+  \textbf{Status:}
+	\begin{itemize}
+		\item Reading data via I2C works
+		\item Computing plate position from data works
+		\item Additional filtering might be required
+	\end{itemize}
+\end{frame}
+
+\subsection{Actuation}
+\begin{frame}
+  \frametitle{Milestone: Actuation}
+  \framesubtitle{Control stepper motors}
+  \textbf{Status:}
+	\begin{itemize}
+		\item Communication with stepper drivers via SPI works
+		\item Control of stepper motors works
+		\item Additional work on control daemon necessary
+	\end{itemize}
+\end{frame}
+
+\subsection{Mechanics}
+\begin{frame}
+  \frametitle{Milestone: Mechanics}
+  \framesubtitle{Construct movable plate}
+  \textbf{Status:}
+	\begin{itemize}
+		\item First version of plate construction printed
+		\item Works for now
+		\item Design on second, refined version in progress
+	\end{itemize}
+\end{frame}
+
+\subsection{Communication}
+\begin{frame}
+  \frametitle{Milestone: Communication}
+  \framesubtitle{Implement industrial bus}
+  \textbf{Status:}
+	\begin{itemize}
+		\item A lot of research was done
+		\item Ethercat selected as most interesting
+		\item CAN selected as fallback
+		\item Work in progress
+	\end{itemize}
+\end{frame}
+
+\subsection{Controller}
+\begin{frame}
+  \frametitle{Milestone: Controller}
+  \framesubtitle{Bus master, main computational unit}
+  \textbf{Status:}
+	\begin{itemize}
+		\item ??? TODO
+	\end{itemize}
+\end{frame}
+
+\subsection{Todo}
+\begin{frame}
+  \frametitle{Future work}
+  	\begin{itemize}
+		\item Implement bus communication
+		\item Finish master controller
+		\item ... TODO
+	\end{itemize}
+\end{frame}
+
+\section{System Specifications}
+% delay krams, was genau passieren soll
+% platten alle 100ms sampeln, wenn position signifikant anders neue position senden
+% master vergleicht positionen der platten und schickt evtl drehbefehl an die motoren
+% noch etwas ausschmücken & was aus den fingern saugen, ich hab jetzt kopfweh. :)
+
+\subsection{Discussion}
+\begin{frame}
+	\frametitle{Thanks for your attention!}
+	\huge{Questions? Ideas? Suggestions?}
+\end{frame}
+
+\end{document}
