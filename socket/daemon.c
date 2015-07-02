@@ -15,7 +15,6 @@
 #include <netinet/in.h>
 #include "daemon.h"
 
-int status_pos, status_dir;
 
 /*
  * print error and exit
@@ -28,37 +27,37 @@ void error(const char *reply) {
 /*
  * do a single step
  */
-void motor_step(motor m) {
-	pin_high(m.header, m.step);
+void motor_step(motor *m) {
+	pin_high(m->header, m->step);
 	usleep(GPIO_HOLD);
-	pin_low(m.header, m.step);
+	pin_low(m->header, m->step);
 	usleep(GPIO_TIMEOUT);
 }
 
 /*
  * change direction
  */
-void motor_dir(motor m, int dir) {
-	if (dir == 0) {
-	  pin_low(m.header, m.dir);
-	  status_dir = 0;
-	}
-	else {
-	  pin_high(m.header, m.dir);
-	  status_dir = 1;
-	}
+void motor_dir(motor *m, int dir) {
+  if (dir == 0) {
+		if (is_high(m->header, m->dir))
+			pin_low(m->header, m->dir);
+  }
+  else {
+		if (is_low(m->header, m->dir))
+			pin_high(m->header, m->dir);
+  }
 }
 
 /*
  * do n steps
  */
-int motor_loop (motor m, int steps) {
+int motor_loop (motor *m, int steps) {
   if (steps > 0) {
-    steps = status_pos + steps <= MAX_POS ? steps : MAX_POS - status_pos;
+    steps = m->pos + steps <= MAX_POS ? steps : MAX_POS - m->pos;
     motor_dir(m, 0);
   }
   else {
-    steps = status_pos + steps >= MIN_POS ? steps : MIN_POS - status_pos;
+    steps = m->pos + steps >= MIN_POS ? steps : MIN_POS - m->pos;
     motor_dir(m, 1);
   }
 
@@ -66,7 +65,7 @@ int motor_loop (motor m, int steps) {
 	for (n = 0; n < abs(steps); n++) {
 		motor_step(m);
   }
-  status_pos += steps;
+  m->pos += steps;
 
   return(0);
 }
@@ -85,6 +84,7 @@ int socket_write (int sock, char *buf) {
 
 int socket_read (int sock, char *buf) {
   int n;
+	int m;
   int steps;
   char *substr;
   char msg[BUFFERSIZE];
@@ -107,25 +107,59 @@ int socket_read (int sock, char *buf) {
     }
 
     /*
-     * turn DIR STEPS
+     * turn MOTOR STEPS
      */
-    else if (!strncmp (buf, "turn", 4)) {
+    else if (!strncmp (buf, "loop", 4)) {
       substr = strtok(buf, " ");
+      substr = strtok (NULL, " ");
+      m = atoi(substr);
       substr = strtok (NULL, " ");
       steps = atoi(substr);
 
-      sprintf(msg, "TURN steps: %d", steps);
+			// select motor
+			if (m == 1) {
+				motor_loop(&motor1, steps);
+			}
+			else if (m == 2) {
+				motor_loop(&motor2, steps);
+			}
+
+      sprintf(msg, "LOOP motor: %d steps: %d", m, steps);
       printf("%s\n", msg);
       socket_write(sock, msg);
-      motor_loop(motor1, steps);
+
       return(0);
     }
+
+    else if (!strncmp (buf, "reset", 5)) {
+      substr = strtok(buf, " ");
+      substr = strtok (NULL, " ");
+      m = atoi(substr);
+
+			// select motor
+			if (m == 0) {
+				motor1.pos = 0;
+				motor2.pos = 0;
+				sprintf(msg, "RESET motor1 and motor2");
+			}
+			else if (m == 1) {
+				motor1.pos = 0;
+				sprintf(msg, "RESET motor1");
+			}
+			else if (m == 2) {
+				motor2.pos = 0;
+				sprintf(msg, "RESET motor2");
+			}
+
+      printf("%s\n", msg);
+      socket_write(sock, msg);
+		}
 
     /*
      * status
      */
     else if (!strncmp (buf, "status", 6)) {
-      sprintf(msg, "STATUS position: %d", status_pos);
+      sprintf(msg, "STATUS position: %d/%d", motor1.pos, motor2.pos);
       socket_write(sock, msg);
       printf("%s\n", msg);
       return(0);
@@ -189,10 +223,10 @@ int main(int argc, char *argv[])
     }
 
     ret = socket_read(client_sockfd, buffer);
+		shutdown(client_sockfd, 0);
+		close(client_sockfd);
   }
-  shutdown(client_sockfd, 0);
   shutdown(sockfd, 0);
-  close(client_sockfd);
   close(sockfd);
   return 0;
 }
