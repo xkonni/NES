@@ -26,20 +26,47 @@ void error(const char *reply) {
 }
 
 /*
- * turn the motor
+ * do a single step
  */
-int motor_turn (int dir, int steps) {
-  if (dir == 0) {
+void motor_step(motor m) {
+	pin_high(m.header, m.step);
+	usleep(GPIO_HOLD);
+	pin_low(m.header, m.step);
+	usleep(GPIO_TIMEOUT);
+}
+
+/*
+ * change direction
+ */
+void motor_dir(motor m, int dir) {
+	if (dir == 0) {
+	  pin_low(m.header, m.dir);
+	  status_dir = 0;
+	}
+	else {
+	  pin_high(m.header, m.dir);
+	  status_dir = 1;
+	}
+}
+
+/*
+ * do n steps
+ */
+int motor_loop (motor m, int steps) {
+  if (steps > 0) {
     steps = status_pos + steps <= MAX_POS ? steps : MAX_POS - status_pos;
-    // TODO
-    status_pos += steps;
+    motor_dir(m, 0);
   }
   else {
-    steps = status_pos - steps >= MIN_POS ? steps : -MIN_POS + status_pos;
-    // TODO
-    status_pos -= steps;
+    steps = status_pos + steps >= MIN_POS ? steps : MIN_POS - status_pos;
+    motor_dir(m, 1);
   }
 
+	int n;
+	for (n = 0; n < abs(steps); n++) {
+		motor_step(m);
+  }
+  status_pos += steps;
 
   return(0);
 }
@@ -58,7 +85,7 @@ int socket_write (int sock, char *buf) {
 
 int socket_read (int sock, char *buf) {
   int n;
-  int dir, steps;
+  int steps;
   char *substr;
   char msg[BUFFERSIZE];
 
@@ -85,14 +112,12 @@ int socket_read (int sock, char *buf) {
     else if (!strncmp (buf, "turn", 4)) {
       substr = strtok(buf, " ");
       substr = strtok (NULL, " ");
-      dir = atoi(substr);
-      substr = strtok (NULL, " ");
       steps = atoi(substr);
 
-      sprintf(msg, "TURN direction: %d, steps: %d", dir, steps);
+      sprintf(msg, "TURN steps: %d", steps);
       printf("%s\n", msg);
       socket_write(sock, msg);
-      motor_turn(dir, steps);
+      motor_loop(motor1, steps);
       return(0);
     }
 
@@ -100,7 +125,7 @@ int socket_read (int sock, char *buf) {
      * status
      */
     else if (!strncmp (buf, "status", 6)) {
-      sprintf(msg, "STATUS position: %d, direction: %d", status_pos, status_dir);
+      sprintf(msg, "STATUS position: %d", status_pos);
       socket_write(sock, msg);
       printf("%s\n", msg);
       return(0);
@@ -127,23 +152,20 @@ int main(int argc, char *argv[])
   char buffer[256];
   struct sockaddr_in serv_addr, cli_addr;
   int ret;
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
-
-  // gpio
-  // FILE *fp;
-  // fp = fopen("/sys/class/gpio/export", "w");
-  // fprintf(fp, "7");
+  // initialize GPIOs
   iolib_init();
-  iolib_setdir(8, 12, BBBIO_DIR_OUT);
-  pin_high(8,12);  
-  pin_low(8,12);  
+  iolib_setdir(motor1.header, motor1.step, BBBIO_DIR_OUT);
+  iolib_setdir(motor1.header, motor1.dir, BBBIO_DIR_OUT);
+  iolib_setdir(motor2.header, motor2.step, BBBIO_DIR_OUT);
+  iolib_setdir(motor2.header, motor2.dir, BBBIO_DIR_OUT);
 
-  // initialize
-  status_pos = 0;
-  status_dir = 0;
+  // initialize status
   ret = 0;
 
+  // initialize socket
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  // avoid "this address is already in use"
   int so_reuseaddr = 1;
   setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &so_reuseaddr, sizeof(so_reuseaddr));
 
