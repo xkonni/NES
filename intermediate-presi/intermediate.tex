@@ -145,7 +145,7 @@
   \textbf{Status:}
 	\begin{itemize}
 		\item A lot of research was done
-		\item Ethercat selected as most interesting
+		\item EtherCAT selected as most interesting
 		\item CAN selected as fallback
 		\item Work in progress
 	\end{itemize}
@@ -161,10 +161,40 @@
 		\item High-level controller class receives periodic sensor input events
 		\item ... and computes angle corrections for all drives
 		\item CAN or EtherCAT wrapped into classes to provide the events and send corrections
-		\item Build on a BeagleBone Black
+		\item Built on a BeagleBone Black
 	\end{itemize}
 \end{frame}
 
+
+\section{System Specifications}
+\subsection{Timing}
+\begin{frame}
+	\frametitle{Timing}
+	\textbf{Timing goal:} Move plate to desired position within 1 second
+	
+	\vfill
+	
+	\textbf{Fixed timings:}
+	\begin{itemize}
+		\item Sensors
+			\begin{itemize}
+				\item Sample every 10 ms
+				\item Report mean value every 100 ms
+			\end{itemize}
+		\item Actuation takes up to 500 ms
+	\end{itemize}
+	
+	\vfill
+	
+	\textbf{Delay constraint:} 500 ms to compute \& communicate
+\end{frame}
+% delay krams, was genau passieren soll
+% platten alle 100ms sampeln, wenn position signifikant anders neue position senden
+% master vergleicht positionen der platten und schickt evtl drehbefehl an die motoren
+% noch etwas ausschmücken & was aus den fingern saugen, ich hab jetzt kopfweh. :)
+
+
+\section{Future Work}
 \subsection{Todo}
 \begin{frame}
   \frametitle{Future work}
@@ -175,13 +205,7 @@
 	\end{itemize}
 \end{frame}
 
-\section{System Specifications}
-% delay krams, was genau passieren soll
-% platten alle 100ms sampeln, wenn position signifikant anders neue position senden
-% master vergleicht positionen der platten und schickt evtl drehbefehl an die motoren
-% noch etwas ausschmücken & was aus den fingern saugen, ich hab jetzt kopfweh. :)
-
-\subsection{Discussion}
+\section{Discussion}
 \begin{frame}
 	\frametitle{Thanks for your attention!}
 	\huge{Questions? Ideas? Suggestions?}
