@@ -6,15 +6,7 @@
  *
  * Konstantin Koslowski <konstantin.koslowski@mailbox.org>
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include "daemon.h"
-
 
 /*
  * print error and exit
@@ -51,7 +43,7 @@ void motor_dir(motor *m, int dir) {
 /*
  * do n steps
  */
-int motor_loop (motor *m, int steps) {
+void motor_loop (motor *m, int steps) {
   if (steps > 0) {
     steps = m->pos + steps <= MAX_POS ? steps : MAX_POS - m->pos;
     motor_dir(m, 0);
@@ -66,51 +58,63 @@ int motor_loop (motor *m, int steps) {
 		motor_step(m);
   }
   m->pos += steps;
-
-  return(0);
 }
 
 /*
  * write reply to socket
  */
-int socket_write (int sock, char *buf) {
+void socket_write (int client_sockfd, char *msg) {
   int n;
-  n = write(sock, buf, BUFFERSIZE);
+  n = write(client_sockfd, msg, BUFFERSIZE);
   if (n < 0) {
     error("ERROR writing to socket");
   }
-  return(0);
 }
 
-int socket_read (int sock, char *buf) {
+int socket_read (int sockfd) {
   int n;
 	int m;
   int steps;
+	int client_sockfd;
+  struct sockaddr_in cli_addr;
   char *substr;
+  char buffer[BUFFERSIZE];
   char msg[BUFFERSIZE];
+  socklen_t clilen;
 
-  bzero(buf, BUFFERSIZE);
+  bzero(buffer, BUFFERSIZE);
   bzero(msg, BUFFERSIZE);
-  n = read(sock, buf, BUFFERSIZE);
+
+  clilen = sizeof(cli_addr);
+  client_sockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
+  if (client_sockfd < 0) {
+    error("ERROR on accept");
+    exit(1);
+  }
+
+  n = read(client_sockfd, buffer, BUFFERSIZE);
   if (n < 0) {
     error("ERROR reading from socket");
     exit(1);
   }
-  if (n > 0) {
 
+  /*
+	 * received a command
+	 */
+  if (n > 0) {
     /*
      * quit
      */
-    if (!strncmp (buf, "quit", 4)) {
+    if (!strncmp (buffer, "quit", 4)) {
       printf("quit\n");
-      return(1);
+      return(0);
     }
 
     /*
      * turn MOTOR STEPS
      */
-    else if (!strncmp (buf, "loop", 4)) {
-      substr = strtok(buf, " ");
+    else if (!strncmp (buffer, "loop", 4)) {
+      substr = strtok(buffer, " ");
       substr = strtok (NULL, " ");
       m = atoi(substr);
       substr = strtok (NULL, " ");
@@ -126,13 +130,13 @@ int socket_read (int sock, char *buf) {
 
       sprintf(msg, "LOOP motor: %d steps: %d", m, steps);
       printf("%s\n", msg);
-      socket_write(sock, msg);
+      socket_write(client_sockfd, msg);
 
-      return(0);
+      return(1);
     }
 
-    else if (!strncmp (buf, "reset", 5)) {
-      substr = strtok(buf, " ");
+    else if (!strncmp (buffer, "reset", 5)) {
+      substr = strtok(buffer, " ");
       substr = strtok (NULL, " ");
       m = atoi(substr);
 
@@ -152,40 +156,40 @@ int socket_read (int sock, char *buf) {
 			}
 
       printf("%s\n", msg);
-      socket_write(sock, msg);
+      socket_write(client_sockfd, msg);
+      return(1);
 		}
 
     /*
      * status
      */
-    else if (!strncmp (buf, "status", 6)) {
+    else if (!strncmp (buffer, "status", 6)) {
       sprintf(msg, "STATUS position: %d/%d", motor1.pos, motor2.pos);
-      socket_write(sock, msg);
+      socket_write(client_sockfd, msg);
       printf("%s\n", msg);
-      return(0);
+      return(1);
     }
 
     /*
      * all else
      */
     else
-      printf("received unknown command: %s\n", buf);
-      // char reply[] = "i got your message";
-      // socket_write(sock, reply);
-      return(0);
+      sprintf(msg, "received unknown command: %s\n", buffer);
+      socket_write(client_sockfd, msg);
+      printf("%s\n", msg);
+      return(1);
   }
 
-  return(0);
+	shutdown(client_sockfd, 0);
+	close(client_sockfd);
+  return(1);
 }
 
 int main(int argc, char *argv[])
 {
   // define variables
-  int sockfd, client_sockfd;
-  socklen_t clilen;
-  char buffer[256];
-  struct sockaddr_in serv_addr, cli_addr;
-  int ret;
+  int sockfd;
+  struct sockaddr_in serv_addr;
 
   // initialize GPIOs
   iolib_init();
@@ -193,9 +197,6 @@ int main(int argc, char *argv[])
   iolib_setdir(motor1.header, motor1.dir, BBBIO_DIR_OUT);
   iolib_setdir(motor2.header, motor2.step, BBBIO_DIR_OUT);
   iolib_setdir(motor2.header, motor2.dir, BBBIO_DIR_OUT);
-
-  // initialize status
-  ret = 0;
 
   // initialize socket
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -214,18 +215,10 @@ int main(int argc, char *argv[])
     error("ERROR on binding");
   listen(sockfd,5);
 
-  clilen = sizeof(cli_addr);
-  while (ret == 0) {
-    client_sockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
-    if (client_sockfd < 0) {
-      error("ERROR on accept");
-      exit(1);
-    }
+  // main loop
+  while (socket_read(sockfd));
 
-    ret = socket_read(client_sockfd, buffer);
-		shutdown(client_sockfd, 0);
-		close(client_sockfd);
-  }
+	printf("shutting down\n");
   shutdown(sockfd, 0);
   close(sockfd);
   return 0;

@@ -26,18 +26,16 @@ def sendrcv(msg):
 	time.sleep(0.2)
 	
 def main():
-  sendrcv('status')
-  sendrcv('loop 1 -10')
   sendrcv('reset 0')
   while (True):
-		sendrcv('loop 1 140')
+	#	sendrcv('loop 1 140')
+	#	sendrcv('status')
+		sendrcv('loop 2 140')
 		sendrcv('status')
-		# sendrcv('loop 2 140')
-		# sendrcv('status')
-		sendrcv('loop 1 -140')
+	#	sendrcv('loop 1 -140')
+	#	sendrcv('status')
+		sendrcv('loop 2 -140')
 		sendrcv('status')
-		# sendrcv('loop 2 -140')
-		# sendrcv('status')
 
 if __name__ == "__main__":
   main()
