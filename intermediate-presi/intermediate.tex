@@ -158,8 +158,11 @@
   \textbf{Status:}
   \begin{itemize}
     \item Modular design to fit CAN and EtherCAT
-    \item High-level controller class receives periodic sensor input events
-    \item ... and computes angle corrections for all drives
+    \item High-level controller class
+      \begin{itemize}
+        \item Receives periodic sensor input events
+        \item Computes angle corrections for all drives
+      \end{itemize}
     \item CAN or EtherCAT wrapped into classes to provide the events and send corrections
     \item Built on a BeagleBone Black
   \end{itemize}
@@ -212,8 +215,10 @@ Stepper Driver & 4 & Slave
 \begin{tabular}{l | c | c }
 Description & Data Request & Length \\
 \hline \hline
-Sensor Position & Allowed & 6 Bytes \\
-Rotation Command & Not Allowed & 3 Bytes
+Sensor Position   & Allowed     & 6 Bytes \\
+Motor Status      & Allowed     & 4 Bytes \\
+Rotation Command  & Not Allowed & 3 Bytes \\
+Reset Command     & Not Allowed & 3 Bytes
 \end{tabular}
 \caption{Possible messages in the network}
 \end{table}
