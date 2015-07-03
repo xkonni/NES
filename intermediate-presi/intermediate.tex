@@ -188,11 +188,36 @@
 	
 	\textbf{Delay constraint:} 500 ms to compute \& communicate
 \end{frame}
-% delay krams, was genau passieren soll
-% platten alle 100ms sampeln, wenn position signifikant anders neue position senden
-% master vergleicht positionen der platten und schickt evtl drehbefehl an die motoren
-% noch etwas ausschmücken & was aus den fingern saugen, ich hab jetzt kopfweh. :)
 
+\subsection{Nodes}
+\begin{frame}
+  \frametitle{Node Description}
+	\begin{table}
+\begin{tabular}{l | c | c }
+Node Name & ID / Priority & Master / Slave \\
+\hline \hline
+Controller & 1 & Master \\
+Source Sensor & 2 & Slave \\
+Target Sensor & 3 & Slave \\
+Stepper Driver & 4 & Slave
+\end{tabular}
+\caption{Nodes in the network}
+\end{table}
+\end{frame}
+
+\subsection{Messages}
+\begin{frame}
+  \frametitle{Message Description}
+	\begin{table}
+\begin{tabular}{l | c | c }
+Description & Data Request & Length \\
+\hline \hline
+Sensor Position & Allowed & 6 Bytes \\
+Rotation Command & Not Allowed & 3 Bytes
+\end{tabular}
+\caption{Possible messages in the network}
+\end{table}
+\end{frame}
 
 \section{Future Work}
 \subsection{Todo}
@@ -201,7 +226,8 @@
   	\begin{itemize}
 		\item Implement bus communication
 		\item Finish master controller
-		\item ... TODO
+		\item Tune motor timings
+		\item Refine plate construction
 	\end{itemize}
 \end{frame}
 
