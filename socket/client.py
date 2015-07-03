@@ -7,25 +7,36 @@
 #
 # Konstantin Koslowski <konstantin.koslowski@mailbox.org>
 #
-import socket
 
+import socket
+import time
+
+#def __init__(self):
+#	host = socket.gethostname()
+#	port = 2020
 host = socket.gethostname()
 port = 2020
 
-s = socket.socket()
-s.connect((host, port))
-s.send('status')
-print (s.recv(1024))
-s.close()
+def sendrcv(msg):
+	s = socket.socket()
+	s.connect((host, port))
+	s.send(msg)
+	print (s.recv(1024))
+	s.close()
+	time.sleep(0.2)
+	
+def main():
+  sendrcv('reset 0')
+  while (True):
+	#	sendrcv('loop 1 140')
+	#	sendrcv('status')
+		sendrcv('loop 2 140')
+		sendrcv('status')
+	#	sendrcv('loop 1 -140')
+	#	sendrcv('status')
+		sendrcv('loop 2 -140')
+		sendrcv('status')
 
-s = socket.socket()
-s.connect((host, port))
-s.send('turn 0 20')
-print (s.recv(1024))
-s.close()
+if __name__ == "__main__":
+  main()
 
-s = socket.socket()
-s.connect((host, port))
-s.send('status')
-print (s.recv(1024))
-s.close()

@@ -6,16 +6,7 @@
  *
  * Konstantin Koslowski <konstantin.koslowski@mailbox.org>
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include "daemon.h"
-
-int status_pos, status_dir;
 
 /*
  * print error and exit
@@ -26,124 +17,190 @@ void error(const char *reply) {
 }
 
 /*
- * turn the motor
+ * do a single step
  */
-int motor_turn (int dir, int steps) {
+void motor_step(motor *m) {
+	pin_high(m->header, m->step);
+	usleep(GPIO_HOLD);
+	pin_low(m->header, m->step);
+	usleep(GPIO_TIMEOUT);
+}
+
+/*
+ * change direction
+ */
+void motor_dir(motor *m, int dir) {
   if (dir == 0) {
-    steps = status_pos + steps <= MAX_POS ? steps : MAX_POS - status_pos;
-    // TODO
-    status_pos += steps;
+		if (is_high(m->header, m->dir))
+			pin_low(m->header, m->dir);
   }
   else {
-    steps = status_pos - steps >= MIN_POS ? steps : -MIN_POS + status_pos;
-    // TODO
-    status_pos -= steps;
+		if (is_low(m->header, m->dir))
+			pin_high(m->header, m->dir);
+  }
+}
+
+/*
+ * do n steps
+ */
+void motor_loop (motor *m, int steps) {
+  if (steps > 0) {
+    steps = m->pos + steps <= MAX_POS ? steps : MAX_POS - m->pos;
+    motor_dir(m, 0);
+  }
+  else {
+    steps = m->pos + steps >= MIN_POS ? steps : MIN_POS - m->pos;
+    motor_dir(m, 1);
   }
 
-
-  return(0);
+	int n;
+	for (n = 0; n < abs(steps); n++) {
+		motor_step(m);
+  }
+  m->pos += steps;
 }
 
 /*
  * write reply to socket
  */
-int socket_write (int sock, char *buf) {
+void socket_write (int client_sockfd, char *msg) {
   int n;
-  n = write(sock, buf, BUFFERSIZE);
+  n = write(client_sockfd, msg, BUFFERSIZE);
   if (n < 0) {
     error("ERROR writing to socket");
   }
-  return(0);
 }
 
-int socket_read (int sock, char *buf) {
+int socket_read (int sockfd) {
   int n;
-  int dir, steps;
+	int m;
+  int steps;
+	int client_sockfd;
+  struct sockaddr_in cli_addr;
   char *substr;
+  char buffer[BUFFERSIZE];
   char msg[BUFFERSIZE];
+  socklen_t clilen;
 
-  bzero(buf, BUFFERSIZE);
+  bzero(buffer, BUFFERSIZE);
   bzero(msg, BUFFERSIZE);
-  n = read(sock, buf, BUFFERSIZE);
+
+  clilen = sizeof(cli_addr);
+  client_sockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
+  if (client_sockfd < 0) {
+    error("ERROR on accept");
+    exit(1);
+  }
+
+  n = read(client_sockfd, buffer, BUFFERSIZE);
   if (n < 0) {
     error("ERROR reading from socket");
     exit(1);
   }
-  if (n > 0) {
 
+  /*
+	 * received a command
+	 */
+  if (n > 0) {
     /*
      * quit
      */
-    if (!strncmp (buf, "quit", 4)) {
+    if (!strncmp (buffer, "quit", 4)) {
       printf("quit\n");
-      return(1);
+      return(0);
     }
 
     /*
-     * turn DIR STEPS
+     * turn MOTOR STEPS
      */
-    else if (!strncmp (buf, "turn", 4)) {
-      substr = strtok(buf, " ");
+    else if (!strncmp (buffer, "loop", 4)) {
+      substr = strtok(buffer, " ");
       substr = strtok (NULL, " ");
-      dir = atoi(substr);
+      m = atoi(substr);
       substr = strtok (NULL, " ");
       steps = atoi(substr);
 
-      sprintf(msg, "TURN direction: %d, steps: %d", dir, steps);
+			// select motor
+			if (m == 1) {
+				motor_loop(&motor1, steps);
+			}
+			else if (m == 2) {
+				motor_loop(&motor2, steps);
+			}
+
+      sprintf(msg, "LOOP motor: %d steps: %d", m, steps);
       printf("%s\n", msg);
-      socket_write(sock, msg);
-      motor_turn(dir, steps);
-      return(0);
+      socket_write(client_sockfd, msg);
+
+      return(1);
     }
+
+    else if (!strncmp (buffer, "reset", 5)) {
+      substr = strtok(buffer, " ");
+      substr = strtok (NULL, " ");
+      m = atoi(substr);
+
+			// select motor
+			if (m == 0) {
+				motor1.pos = 0;
+				motor2.pos = 0;
+				sprintf(msg, "RESET motor1 and motor2");
+			}
+			else if (m == 1) {
+				motor1.pos = 0;
+				sprintf(msg, "RESET motor1");
+			}
+			else if (m == 2) {
+				motor2.pos = 0;
+				sprintf(msg, "RESET motor2");
+			}
+
+      printf("%s\n", msg);
+      socket_write(client_sockfd, msg);
+      return(1);
+		}
 
     /*
      * status
      */
-    else if (!strncmp (buf, "status", 6)) {
-      sprintf(msg, "STATUS position: %d, direction: %d", status_pos, status_dir);
-      socket_write(sock, msg);
+    else if (!strncmp (buffer, "status", 6)) {
+      sprintf(msg, "STATUS position: %d/%d", motor1.pos, motor2.pos);
+      socket_write(client_sockfd, msg);
       printf("%s\n", msg);
-      return(0);
+      return(1);
     }
 
     /*
      * all else
      */
     else
-      printf("received unknown command: %s\n", buf);
-      // char reply[] = "i got your message";
-      // socket_write(sock, reply);
-      return(0);
+      sprintf(msg, "received unknown command: %s\n", buffer);
+      socket_write(client_sockfd, msg);
+      printf("%s\n", msg);
+      return(1);
   }
 
-  return(0);
+	shutdown(client_sockfd, 0);
+	close(client_sockfd);
+  return(1);
 }
 
 int main(int argc, char *argv[])
 {
   // define variables
-  int sockfd, client_sockfd;
-  socklen_t clilen;
-  char buffer[256];
-  struct sockaddr_in serv_addr, cli_addr;
-  int ret;
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  int sockfd;
+  struct sockaddr_in serv_addr;
 
-
-  // gpio
-  // FILE *fp;
-  // fp = fopen("/sys/class/gpio/export", "w");
-  // fprintf(fp, "7");
+  // initialize GPIOs
   iolib_init();
-  iolib_setdir(8, 12, BBBIO_DIR_OUT);
-  pin_high(8,12);  
-  pin_low(8,12);  
+  iolib_setdir(motor1.header, motor1.step, BBBIO_DIR_OUT);
+  iolib_setdir(motor1.header, motor1.dir, BBBIO_DIR_OUT);
+  iolib_setdir(motor2.header, motor2.step, BBBIO_DIR_OUT);
+  iolib_setdir(motor2.header, motor2.dir, BBBIO_DIR_OUT);
 
-  // initialize
-  status_pos = 0;
-  status_dir = 0;
-  ret = 0;
-
+  // initialize socket
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  // avoid "this address is already in use"
   int so_reuseaddr = 1;
   setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &so_reuseaddr, sizeof(so_reuseaddr));
 
@@ -158,19 +215,11 @@ int main(int argc, char *argv[])
     error("ERROR on binding");
   listen(sockfd,5);
 
-  clilen = sizeof(cli_addr);
-  while (ret == 0) {
-    client_sockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
-    if (client_sockfd < 0) {
-      error("ERROR on accept");
-      exit(1);
-    }
+  // main loop
+  while (socket_read(sockfd));
 
-    ret = socket_read(client_sockfd, buffer);
-  }
-  shutdown(client_sockfd, 0);
+	printf("shutting down\n");
   shutdown(sockfd, 0);
-  close(client_sockfd);
   close(sockfd);
   return 0;
 }
