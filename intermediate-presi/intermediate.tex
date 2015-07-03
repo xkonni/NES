@@ -72,32 +72,32 @@
 
 \begin{frame}
   \frametitle{Reminder: Goal Statement}
-	\begin{itemize}
-		\item \textbf{Goal:} Mimic position and motion of a plate
-		\vfill
-		\item \textbf{Sensing:} 3D MEMS attitude sensor embedded in a plate
-		\item \textbf{Communicating:} Implement industrial bus
-		\item \textbf{Actuating:} Rotate a plate using motors
-	\end{itemize}
+  \begin{itemize}
+    \item \textbf{Goal:} Mimic position and motion of a plate
+    \vfill
+    \item \textbf{Sensing:} 3D MEMS attitude sensor embedded in a plate
+    \item \textbf{Communicating:} Implement industrial bus
+    \item \textbf{Actuating:} Rotate a plate using motors
+  \end{itemize}
 \end{frame}
 
 \begin{frame}
   \frametitle{Reminder: Functional Overview}
 \begin{figure}
-\includegraphics[width=\textwidth]{functionalspecification.pdf} 
+\includegraphics[width=\textwidth]{functionalspecification.pdf}
 \caption{Diagram of the Functional Specification}
 \end{figure}
 \end{frame}
 
 \begin{frame}
   \frametitle{Reminder: Major Milestones}
-	\begin{itemize}
-		\item \textbf{Sensing:} Read and process MEMS data\\
-		\item \textbf{Actuation:} Control stepper motors\\
-		\item \textbf{Mechanics:} Construct movable plate\\
-		\item \textbf{Communication:} Implement industrial bus\\
-		\item \textbf{Controller:} Bus master, main computational unit\\
-	\end{itemize}
+  \begin{itemize}
+    \item \textbf{Sensing:} Read and process MEMS data\\
+    \item \textbf{Actuation:} Control stepper motors\\
+    \item \textbf{Mechanics:} Construct movable plate\\
+    \item \textbf{Communication:} Implement industrial bus\\
+    \item \textbf{Controller:} Bus master, main computational unit\\
+  \end{itemize}
 \end{frame}
 
 \section{Current Status}
@@ -107,11 +107,11 @@
   \frametitle{Milestone: Sensing}
   \framesubtitle{Read and process MEMS data}
   \textbf{Status:}
-	\begin{itemize}
-		\item Reading data via I2C works
-		\item Computing plate position from data works
-		\item Additional filtering might be required
-	\end{itemize}
+  \begin{itemize}
+    \item Reading data via I2C works
+    \item Computing plate position from data works
+    \item Additional filtering might be required
+  \end{itemize}
 \end{frame}
 
 \subsection{Actuation}
@@ -119,11 +119,11 @@
   \frametitle{Milestone: Actuation}
   \framesubtitle{Control stepper motors}
   \textbf{Status:}
-	\begin{itemize}
-		\item Communication with stepper drivers via SPI works
-		\item Control of stepper motors works
-		\item Additional work on control daemon necessary
-	\end{itemize}
+  \begin{itemize}
+    \item Communication with stepper drivers via SPI works
+    \item Control of stepper motors works
+    \item Additional work on control daemon necessary
+  \end{itemize}
 \end{frame}
 
 \subsection{Mechanics}
@@ -131,11 +131,11 @@
   \frametitle{Milestone: Mechanics}
   \framesubtitle{Construct movable plate}
   \textbf{Status:}
-	\begin{itemize}
-		\item First version of plate construction printed
-		\item Works for now
-		\item Design on second, refined version in progress
-	\end{itemize}
+  \begin{itemize}
+    \item First version of plate construction printed
+    \item Works for now
+    \item Design on second, refined version in progress
+  \end{itemize}
 \end{frame}
 
 \subsection{Communication}
@@ -143,12 +143,12 @@
   \frametitle{Milestone: Communication}
   \framesubtitle{Implement industrial bus}
   \textbf{Status:}
-	\begin{itemize}
-		\item A lot of research was done
-		\item EtherCAT selected as most interesting
-		\item CAN selected as fallback
-		\item Work in progress
-	\end{itemize}
+  \begin{itemize}
+    \item A lot of research was done
+    \item EtherCAT selected as most interesting
+    \item CAN selected as fallback
+    \item Work in progress
+  \end{itemize}
 \end{frame}
 
 \subsection{Controller}
@@ -156,43 +156,43 @@
   \frametitle{Milestone: Controller}
   \framesubtitle{Bus master, main computational unit}
   \textbf{Status:}
-	\begin{itemize}
-		\item Modular design to fit CAN and EtherCAT
-		\item High-level controller class receives periodic sensor input events
-		\item ... and computes angle corrections for all drives
-		\item CAN or EtherCAT wrapped into classes to provide the events and send corrections
-		\item Built on a BeagleBone Black
-	\end{itemize}
+  \begin{itemize}
+    \item Modular design to fit CAN and EtherCAT
+    \item High-level controller class receives periodic sensor input events
+    \item ... and computes angle corrections for all drives
+    \item CAN or EtherCAT wrapped into classes to provide the events and send corrections
+    \item Built on a BeagleBone Black
+  \end{itemize}
 \end{frame}
 
 
 \section{System Specifications}
 \subsection{Timing}
 \begin{frame}
-	\frametitle{Timing}
-	\textbf{Timing goal:} Move plate to desired position within 1 second
-	
-	\vfill
-	
-	\textbf{Fixed timings:}
-	\begin{itemize}
-		\item Sensors
-			\begin{itemize}
-				\item Sample every 10 ms
-				\item Report mean value every 100 ms
-			\end{itemize}
-		\item Actuation takes up to 500 ms
-	\end{itemize}
-	
-	\vfill
-	
-	\textbf{Delay constraint:} 500 ms to compute \& communicate
+  \frametitle{Timing}
+  \textbf{Timing goal:} Move plate to desired position within 1 second
+
+  \vfill
+
+  \textbf{Fixed timings:}
+  \begin{itemize}
+    \item Sensors
+      \begin{itemize}
+        \item Sample every 10 ms
+        \item Report mean value every 100 ms
+      \end{itemize}
+    \item Actuation takes up to 500 ms
+  \end{itemize}
+
+  \vfill
+
+  \textbf{Delay constraint:} 500 ms to compute \& communicate
 \end{frame}
 
 \subsection{Nodes}
 \begin{frame}
   \frametitle{Node Description}
-	\begin{table}
+  \begin{table}
 \begin{tabular}{l | c | c }
 Node Name & ID / Priority & Master / Slave \\
 \hline \hline
@@ -208,7 +208,7 @@ Stepper Driver & 4 & Slave
 \subsection{Messages}
 \begin{frame}
   \frametitle{Message Description}
-	\begin{table}
+  \begin{table}
 \begin{tabular}{l | c | c }
 Description & Data Request & Length \\
 \hline \hline
@@ -223,18 +223,18 @@ Rotation Command & Not Allowed & 3 Bytes
 \subsection{Todo}
 \begin{frame}
   \frametitle{Future work}
-  	\begin{itemize}
-		\item Implement bus communication
-		\item Finish master controller
-		\item Tune motor timings
-		\item Refine plate construction
-	\end{itemize}
+    \begin{itemize}
+    \item Implement bus communication
+    \item Finish master controller
+    \item Tune motor timings
+    \item Refine plate construction
+  \end{itemize}
 \end{frame}
 
 \section{Discussion}
 \begin{frame}
-	\frametitle{Thanks for your attention!}
-	\huge{Questions? Ideas? Suggestions?}
+  \frametitle{Thanks for your attention!}
+  \huge{Questions? Ideas? Suggestions?}
 \end{frame}
 
 \end{document}
