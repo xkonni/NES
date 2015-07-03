@@ -1,5 +1,6 @@
 #include <LSM303.h>
 #include <iostream>
+#include <Wire.h>
 
 int main(int argc, char** argv)
 {
@@ -9,6 +10,7 @@ int main(int argc, char** argv)
   lsm.init();
   lsm.enableDefault();
   //lsm.read();
+  Wire.beginTransmission(0x19);
   std::cout << "heading: " << lsm.heading() << std::endl;
 
   std::cout << "done." << std::endl;
