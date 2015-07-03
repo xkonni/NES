@@ -208,9 +208,36 @@ Stepper Driver & 4 & Slave
 \end{table}
 \end{frame}
 
+\subsection{EtherCAT Design}
+\begin{frame}
+  \frametitle{EtherCAT}
+  \framesubtitle{Bus Option 1}
+  \begin{itemize}
+    \item Required cycle time: 100\,ms
+    \item Slave: TI AM3359 ICE board with TI EtherCAT Slave stack
+    \item Master: BeagleBone Black with IgH EtherCAT master runtime
+    \item Master app.: Update Controller on each cycle
+    \item Achievable cycle time using the generic NIC driver still unclear
+  \end{itemize}
+\end{frame}
+
+\subsection{CAN Design}
+\begin{frame}
+  \frametitle{CAN}
+  \framesubtitle{Bus Option 2}
+  \begin{itemize}
+    \item Required cycle time: 100\,ms
+    \item All nodes are BeagleBone Blacks
+    \item CAN controller: ???
+    \item Sensor values are periodically fed to the Controller from a buffer
+    \item Possibly with a communication scheme like TTCAN
+  \end{itemize}
+\end{frame}
+
 \subsection{Messages}
 \begin{frame}
   \frametitle{Message Description}
+  \framesubtitle{Bus Option 2}
   \begin{table}
 \begin{tabular}{l | c | c }
 Description & Data Request & Length \\
