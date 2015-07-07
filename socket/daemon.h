@@ -18,10 +18,10 @@
 
 #define PORT					2020
 #define BUFFERSIZE		256
-#define MIN_POS				-70
-#define MAX_POS				70
-#define GPIO_HOLD			100
-#define GPIO_TIMEOUT	900
+#define MIN_POS				-3600
+#define MAX_POS				3600
+#define GPIO_HOLD			10
+#define GPIO_TIMEOUT	240
 
 typedef struct {
   int header;
@@ -30,12 +30,15 @@ typedef struct {
 	int pos;
 } motor; 
 
+int ramp[] = {100, 75, 50, 40, 35, 30, 26, 25, 24, 23, 22, 21, 19, 18, 16, 15, 13, 10, 7, 1};
+int rampN = 20;
+
 motor motor1 = { 8, 11, 12, 0 };
 motor motor2 = { 8, 13, 14, 0 };
 
 void error(const char *reply);
-void motor_step(motor *m);
+void motor_step(motor *m, int timeout);
 void motor_dir(motor *m, int dir);
-void motor_loop (motor *m, int steps);
+void motor_loop (motor *m, int steps, int acc);
 void socket_write (int sockfd, char *msg);
 int socket_read (int sockfd);

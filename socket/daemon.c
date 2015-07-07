@@ -19,11 +19,11 @@ void error(const char *reply) {
 /*
  * do a single step
  */
-void motor_step(motor *m) {
+void motor_step(motor *m, int timeout) {
 	pin_high(m->header, m->step);
 	usleep(GPIO_HOLD);
 	pin_low(m->header, m->step);
-	usleep(GPIO_TIMEOUT);
+	usleep(timeout);
 }
 
 /*
@@ -42,8 +42,22 @@ void motor_dir(motor *m, int dir) {
 
 /*
  * do n steps
+ *
+ * motor *m   motor to use
+ * int steps  number of steps
+ * int acc    acceleration
+ *            [1 (slow) .. 10 (fast) ]
  */
-void motor_loop (motor *m, int steps) {
+void motor_loop (motor *m, int steps, int acc) {
+  if (acc < 1) {
+    printf("acc to low, setting from %d to 1\n", acc);
+    acc = 1;
+  }
+  else if (acc > 1) {
+    printf("acc to high, setting from %d to 10\n", acc);
+    acc = 10;
+  }
+
   if (steps > 0) {
     steps = m->pos + steps <= MAX_POS ? steps : MAX_POS - m->pos;
     motor_dir(m, 0);
@@ -54,8 +68,19 @@ void motor_loop (motor *m, int steps) {
   }
 
 	int n;
+  float delay;
 	for (n = 0; n < abs(steps); n++) {
-		motor_step(m);
+    if ( n < rampN ) {
+      delay = (10*ramp[n])/acc;
+      // printf("delay[%d]: %f\n", n, delay);
+    }
+    else if ( abs(steps) - n < rampN) {
+      delay = (10*ramp[abs(steps)-n])/acc;
+      // printf("delay[%d]: %f\n", abs(steps) - n, delay);
+    }
+    else delay = 1;
+    printf("delay: %f\n", GPIO_TIMEOUT * delay);
+		motor_step(m, GPIO_TIMEOUT * delay);
   }
   m->pos += steps;
 }
@@ -75,6 +100,7 @@ int socket_read (int sockfd) {
   int n;
 	int m;
   int steps;
+  int acc;
 	int client_sockfd;
   struct sockaddr_in cli_addr;
   char *substr;
@@ -119,18 +145,20 @@ int socket_read (int sockfd) {
       m = atoi(substr);
       substr = strtok (NULL, " ");
       steps = atoi(substr);
+      substr = strtok (NULL, " ");
+      acc = atoi(substr);
+
+      sprintf(msg, "LOOP motor: %d steps: %d acc: %d", m, steps, acc);
+      printf("%s\n", msg);
+      socket_write(client_sockfd, msg);
 
 			// select motor
 			if (m == 1) {
-				motor_loop(&motor1, steps);
+				motor_loop(&motor1, steps, acc);
 			}
 			else if (m == 2) {
-				motor_loop(&motor2, steps);
+				motor_loop(&motor2, steps, acc);
 			}
-
-      sprintf(msg, "LOOP motor: %d steps: %d", m, steps);
-      printf("%s\n", msg);
-      socket_write(client_sockfd, msg);
 
       return(1);
     }
