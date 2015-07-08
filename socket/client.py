@@ -22,13 +22,15 @@ def sendrcv(msg):
   s.connect((host, port))
   s.send(msg)
   print (s.recv(1024))
+  # shutdown and disallow RD and WR access
+  s.shutdown(socket.SHUT_RDWR)
   s.close()
   time.sleep(0.2)
   
 def main():
   sendrcv('reset 0')
   while (True):
-    steps = 2000
+    steps = 100
     acc = 10;
     sendrcv('loop 1 %d %d' % (steps, acc))
     sendrcv('status')

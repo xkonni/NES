@@ -20,10 +20,10 @@ void error(const char *reply) {
  * do a single step
  */
 void motor_step(motor *m, int timeout) {
-	pin_high(m->header, m->step);
-	usleep(GPIO_HOLD);
-	pin_low(m->header, m->step);
-	usleep(timeout);
+  pin_high(m->header, m->step);
+  usleep(GPIO_HOLD);
+  pin_low(m->header, m->step);
+  usleep(timeout);
 }
 
 /*
@@ -31,12 +31,12 @@ void motor_step(motor *m, int timeout) {
  */
 void motor_dir(motor *m, int dir) {
   if (dir == 0) {
-		if (is_high(m->header, m->dir))
-			pin_low(m->header, m->dir);
+    if (is_high(m->header, m->dir))
+      pin_low(m->header, m->dir);
   }
   else {
-		if (is_low(m->header, m->dir))
-			pin_high(m->header, m->dir);
+    if (is_low(m->header, m->dir))
+      pin_high(m->header, m->dir);
   }
 }
 
@@ -67,9 +67,9 @@ void motor_loop (motor *m, int steps, int acc) {
     motor_dir(m, 1);
   }
 
-	int n;
+  int n;
   float delay;
-	for (n = 0; n < abs(steps); n++) {
+  for (n = 0; n < abs(steps); n++) {
     if ( n < rampN ) {
       delay = (10*ramp[n])/acc;
       // printf("delay[%d]: %f\n", n, delay);
@@ -80,7 +80,7 @@ void motor_loop (motor *m, int steps, int acc) {
     }
     else delay = 1;
     printf("delay: %f\n", GPIO_TIMEOUT * delay);
-		motor_step(m, GPIO_TIMEOUT * delay);
+    motor_step(m, GPIO_TIMEOUT * delay);
   }
   m->pos += steps;
 }
@@ -96,12 +96,15 @@ void socket_write (int client_sockfd, char *msg) {
   }
 }
 
+/* 
+ * read from socket
+ */
 int socket_read (int sockfd) {
   int n;
-	int m;
+  int m;
   int steps;
   int acc;
-	int client_sockfd;
+  int client_sockfd;
   struct sockaddr_in cli_addr;
   char *substr;
   char buffer[BUFFERSIZE];
@@ -125,8 +128,8 @@ int socket_read (int sockfd) {
   }
 
   /*
-	 * received a command
-	 */
+   * received a command
+   */
   if (n > 0) {
     /*
      * quit
@@ -152,13 +155,13 @@ int socket_read (int sockfd) {
       printf("%s\n", msg);
       socket_write(client_sockfd, msg);
 
-			// select motor
-			if (m == 1) {
-				motor_loop(&motor1, steps, acc);
-			}
-			else if (m == 2) {
-				motor_loop(&motor2, steps, acc);
-			}
+      // select motor
+      if (m == 1) {
+        motor_loop(&motor1, steps, acc);
+      }
+      else if (m == 2) {
+        motor_loop(&motor2, steps, acc);
+      }
 
       return(1);
     }
@@ -168,25 +171,25 @@ int socket_read (int sockfd) {
       substr = strtok (NULL, " ");
       m = atoi(substr);
 
-			// select motor
-			if (m == 0) {
-				motor1.pos = 0;
-				motor2.pos = 0;
-				sprintf(msg, "RESET motor1 and motor2");
-			}
-			else if (m == 1) {
-				motor1.pos = 0;
-				sprintf(msg, "RESET motor1");
-			}
-			else if (m == 2) {
-				motor2.pos = 0;
-				sprintf(msg, "RESET motor2");
-			}
+      // select motor
+      if (m == 0) {
+        motor1.pos = 0;
+        motor2.pos = 0;
+        sprintf(msg, "RESET motor1 and motor2");
+      }
+      else if (m == 1) {
+        motor1.pos = 0;
+        sprintf(msg, "RESET motor1");
+      }
+      else if (m == 2) {
+        motor2.pos = 0;
+        sprintf(msg, "RESET motor2");
+      }
 
       printf("%s\n", msg);
       socket_write(client_sockfd, msg);
       return(1);
-		}
+    }
 
     /*
      * status
@@ -208,8 +211,8 @@ int socket_read (int sockfd) {
       return(1);
   }
 
-	shutdown(client_sockfd, 0);
-	close(client_sockfd);
+  shutdown(client_sockfd, 0);
+  close(client_sockfd);
   return(1);
 }
 
@@ -246,7 +249,7 @@ int main(int argc, char *argv[])
   // main loop
   while (socket_read(sockfd));
 
-	printf("shutting down\n");
+  printf("shutting down\n");
   shutdown(sockfd, 0);
   close(sockfd);
   return 0;
