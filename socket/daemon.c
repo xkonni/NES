@@ -50,11 +50,11 @@ void motor_dir(motor *m, int dir) {
  */
 void motor_loop (motor *m, int steps, int acc) {
   if (acc < 1) {
-    printf("acc to low, setting from %d to 1\n", acc);
+    printf("acc too low, setting from %d to 1\n", acc);
     acc = 1;
   }
-  else if (acc > 1) {
-    printf("acc to high, setting from %d to 10\n", acc);
+  else if (acc > 10) {
+    printf("acc too high, setting from %d to 10\n", acc);
     acc = 10;
   }
 
