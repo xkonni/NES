@@ -31,11 +31,20 @@ def main():
   sendrcv('reset 0')
   while (True):
     steps = 100
-    acc = 10;
+    acc = 10
+
     sendrcv('loop 1 %d %d' % (steps, acc))
     sendrcv('status')
     sendrcv('loop 1 %d %d' % (-steps, acc))
     sendrcv('status')
+    # for i in range(0,45):
+    #   print('step+ %d' % i)
+    #   sendrcv('loop 1 %d %d' % (steps, acc))
+    #   sendrcv('status')
+    # for i in range(0,45):
+    #   print('step- %d' % i)
+    #   sendrcv('loop 1 %d %d' % (-steps, acc))
+    #   sendrcv('status')
 
 if __name__ == "__main__":
   main()

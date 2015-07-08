@@ -70,16 +70,18 @@ void motor_loop (motor *m, int steps, int acc) {
   int n;
   float delay;
   for (n = 0; n < abs(steps); n++) {
+    // acceleration
     if ( n < rampN ) {
       delay = (10*ramp[n])/acc;
-      // printf("delay[%d]: %f\n", n, delay);
+      // printf("delay+: %f\n", GPIO_TIMEOUT * delay);
     }
+    // deceleration
     else if ( abs(steps) - n < rampN) {
       delay = (10*ramp[abs(steps)-n])/acc;
-      // printf("delay[%d]: %f\n", abs(steps) - n, delay);
+      // printf("delay-: %f\n", GPIO_TIMEOUT * delay);
     }
+    // run
     else delay = 1;
-    printf("delay: %f\n", GPIO_TIMEOUT * delay);
     motor_step(m, GPIO_TIMEOUT * delay);
   }
   m->pos += steps;
@@ -140,7 +142,7 @@ int socket_read (int sockfd) {
     }
 
     /*
-     * turn MOTOR STEPS
+     * turn MOTOR STEPS ACCELERATION
      */
     else if (!strncmp (buffer, "loop", 4)) {
       substr = strtok(buffer, " ");
