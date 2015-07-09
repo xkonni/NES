@@ -18,8 +18,8 @@
 
 #define PORT          2020
 #define BUFFERSIZE    256
-#define MIN_POS       -3600
-#define MAX_POS       3600
+#define MIN_POS       -400
+#define MAX_POS       400
 #define GPIO_HOLD     20
 #define GPIO_TIMEOUT  480
 
