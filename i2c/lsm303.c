@@ -5,14 +5,14 @@ int main(void) {
 
   accHandle = i2c_open(I2CBUS);
   magHandle = i2c_open(I2CBUS);
-  i2c_connect(accHandle, LSM303DLH_ACC);
-  i2c_connect(magHandle, LSM303DLH_MAG);
-  lsm303_initMag(magHandle);
+  i2c_connect(accHandle, LSM303DLHC_ACC);
+  i2c_connect(magHandle, LSM303DLHC_MAG);
   lsm303_initAcc(accHandle);
+  lsm303_initMag(magHandle);
 
   while (1) {
     lsm303_readMag(magHandle);
-    usleep(500);
+    usleep(1000000);
   }
 }
 
@@ -22,32 +22,48 @@ int lsm303_getDevice (int handle, unsigned char *dev) {
   i2c_read(handle, dev, 1);
 }
 int lsm303_initAcc(int handle) {
-  // 0x08 = 0b00001000
-  // FS = 00 (+/- 2 g full scale); HR = 1 (high resolution enable)
-  i2c_write_byte(handle, CTRL_REG4_A);
-  i2c_write_byte(handle, 0x08);
-
   // 0x47 = 0b01000111
   // ODR = 0100 (50 Hz ODR); LPen = 0 (normal mode); Zen = Yen = Xen = 1 (all axes enabled)
   i2c_write_byte(handle, CTRL_REG1_A);
   i2c_write_byte(handle, 0x47);
+
+  // 0x08 = 0b00001000
+  // FS = 00 (+/- 2 g full scale); HR = 1 (high resolution enable)
+  i2c_write_byte(handle, CTRL_REG4_A);
+  i2c_write_byte(handle, 0x28);
 }
 
 int lsm303_initMag(int handle) {
+  unsigned char buf;
+  char *tmp;
+
   // 0x0C = 0b00001100
   // DO = 011 (7.5 Hz ODR)
   i2c_write_byte(handle, CRA_REG_M);
   i2c_write_byte(handle, 0x0C);
+
+  i2c_write_byte(handle, CRA_REG_M);
+  i2c_read_byte(handle, &buf);
+  printf("CRA_REG_M %d\n", buf);
 
   // 0x20 = 0b00100000
   // GN = 001 (+/- 1.3 gauss full scale)
   i2c_write_byte(handle, CRB_REG_M);
   i2c_write_byte(handle, 0x20);
 
+  i2c_write_byte(handle, CRB_REG_M);
+  i2c_read_byte(handle, &buf);
+  printf("CRB_REG_M %d\n", buf);
+
   // 0x00 = 0b00000000
   // MD = 00 (continuous-conversion mode)
   i2c_write_byte(handle, MR_REG_M);
-  i2c_write_byte(handle, 0x00);
+  // i2c_write_byte(handle, 0x00);
+  i2c_write_byte(handle, 0x01);
+
+  i2c_write_byte(handle, MR_REG_M);
+  i2c_read_byte(handle, &buf);
+  printf("MR_REG_M %d\n", buf);
 }
 
 int lsm303_readMag(int handle) {

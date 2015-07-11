@@ -1,9 +1,10 @@
 #include "i2cfunc.h"
 
 #define I2CBUS            "/dev/i2c-1"
-#define LSM303DLH_ID      0x32
-#define LSM303DLH_MAG     0x1E
-#define LSM303DLH_ACC     0x19
+#define LSM303DLHC_ID     0x32
+#define LSM303DLHC_MAG    0x1E
+#define LSM303DLHC_ACC    0x19
+
 enum lsm303_regAddr {
   DEVICE_ID = 0x0f,
 
