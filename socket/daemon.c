@@ -8,6 +8,8 @@
  */
 #include "daemon.h"
 
+motor motor1, motor2;
+
 /*
  * print error and exit
  */
@@ -59,11 +61,11 @@ void motor_loop (motor *m, int steps, int acc) {
   }
 
   if (steps > 0) {
-    steps = m->pos + steps <= MAX_POS ? steps : MAX_POS - m->pos;
+    steps = m->pos + steps <= m->maxpos ? steps : m->maxpos - m->pos;
     motor_dir(m, 0);
   }
   else {
-    steps = m->pos + steps >= MIN_POS ? steps : MIN_POS - m->pos;
+    steps = m->pos + steps >= m->minpos ? steps : m->minpos - m->pos;
     motor_dir(m, 1);
   }
 
@@ -223,6 +225,10 @@ int main(int argc, char *argv[])
   // define variables
   int sockfd;
   struct sockaddr_in serv_addr;
+
+  // initialize motors
+  motor1 = (motor) { 8, 11, 12, 0, -400, 400 };
+  motor2 = (motor) { 8, 13, 14, 0, -200, 200 };
 
   // initialize GPIOs
   iolib_init();

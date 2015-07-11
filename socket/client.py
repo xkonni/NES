@@ -26,10 +26,19 @@ def sendrcv(msg):
   s.shutdown(socket.SHUT_RDWR)
   s.close()
   time.sleep(0.2)
-  
+
 def main():
   sendrcv('reset 0')
   while (True):
+    # steps = 800
+    # acc = 10
+    # sendrcv('loop 1 %d %d' % (steps, acc))
+    # sendrcv('loop 2 %d %d' % (steps, acc))
+    # sendrcv('status')
+    # sendrcv('loop 1 %d %d' % (-steps, acc))
+    # sendrcv('loop 2 %d %d' % (-steps, acc))
+    # sendrcv('status')
+
     # steps = 1000
     # acc = 10
     # sendrcv('loop 1 %d %d' % (steps, acc))

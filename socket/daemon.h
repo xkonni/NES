@@ -18,8 +18,6 @@
 
 #define PORT          2020
 #define BUFFERSIZE    256
-#define MIN_POS       -400
-#define MAX_POS       400
 #define GPIO_HOLD     20
 #define GPIO_TIMEOUT  480
 
@@ -28,7 +26,9 @@ typedef struct {
   int step;
   int dir;
   int pos;
-} motor; 
+  int minpos; // an entire turn
+  int maxpos; // counts 800 microsteps
+} motor;
 
 int ramp[] = {
   100,  71,  53,  42,  33,  27,  23,  19,  16,  14,
@@ -37,9 +37,6 @@ int ramp[] = {
     2,   2,   2,   2,   2,   2,   2,   2,   2,   2
 };
 int rampN = 40;
-
-motor motor1 = { 8, 11, 12, 0 };
-motor motor2 = { 8, 13, 14, 0 };
 
 void error(const char *reply);
 void motor_step(motor *m, int timeout);
