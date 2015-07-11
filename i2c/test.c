@@ -16,7 +16,6 @@ int main(void) {
     // Write register address
     i2c_write(i2cbus, &reg[r], 1);
     // read register
-    i2c_read(i2cbus, &buf, 1);
-
+    i2c_read(i2cbus, buf, 1);
   }
 }

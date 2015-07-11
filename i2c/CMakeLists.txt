@@ -15,3 +15,7 @@ include_directories(${CMAKE_SOURCE_DIR}/lib)
 set(test_src test.c)
 add_executable(test ${test_src})
 target_link_libraries(test i2cfunc)
+
+set(lsm303_src lsm303.c)
+add_executable(lsm303 ${lsm303_src})
+target_link_libraries(lsm303 i2cfunc)
