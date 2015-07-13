@@ -15,6 +15,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "BBBiolib.h"
+#include "messages.pb.h"
 
 #define PORT          2020
 #define BUFFERSIZE    256

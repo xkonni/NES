@@ -223,3 +223,6 @@ test
 lsm303
 motor-daemon
 sensor-daemon
+messages_pb2.py
+messages.pb.h
+messages.pb.cc
