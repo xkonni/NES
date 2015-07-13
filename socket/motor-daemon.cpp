@@ -1,12 +1,12 @@
 /*
- * daemon.c
+ * motor-daemon.cpp
  *
  * daemon to control the stepper motor controller
  * via a socket
  *
  * Konstantin Koslowski <konstantin.koslowski@mailbox.org>
  */
-#include "daemon.h"
+#include "motor-daemon.h"
 
 motor motor1, motor2;
 

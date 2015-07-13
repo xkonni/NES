@@ -221,3 +221,4 @@ Makefile
 cmake_install.cmake
 test
 lsm303
+motor-daemon
