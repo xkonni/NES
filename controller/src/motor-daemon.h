@@ -14,6 +14,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netdb.h>
+#include <iostream>
 #include "BBBiolib.h"
 #include "messages.pb.h"
 
@@ -43,5 +45,5 @@ void error(const char *reply);
 void motor_step(motor *m, int timeout);
 void motor_dir(motor *m, int dir);
 void motor_loop (motor *m, int steps, int acc);
-void socket_write (int sockfd, char *msg);
+void socket_write (int sockfd, messages::motorstatus *response);
 int socket_read (int sockfd);

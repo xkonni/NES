@@ -92,31 +92,29 @@ void motor_loop (motor *m, int steps, int acc) {
 /*
  * write reply to socket
  */
-void socket_write (int client_sockfd, char *msg) {
-  int n;
-  n = write(client_sockfd, msg, BUFFERSIZE);
-  if (n < 0) {
+void socket_write (int client_sockfd, messages::motorstatus *response) {
+  // int n;
+  // n = write(client_sockfd, msg, BUFFERSIZE);
+  if (! response->SerializeToFileDescriptor(client_sockfd) ) {
     error("ERROR writing to socket");
   }
+  printf("written\n");
 }
 
 /*
  * read from socket
  */
 int socket_read (int sockfd) {
-  int n;
+  // int n;
   int m;
   int steps;
   int acc;
+  char msg[BUFFERSIZE];
+  bzero(msg, BUFFERSIZE);
+
   int client_sockfd;
   struct sockaddr_in cli_addr;
-  char *substr;
-  char buffer[BUFFERSIZE];
-  char msg[BUFFERSIZE];
   socklen_t clilen;
-
-  bzero(buffer, BUFFERSIZE);
-  bzero(msg, BUFFERSIZE);
 
   clilen = sizeof(cli_addr);
   client_sockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
@@ -125,110 +123,73 @@ int socket_read (int sockfd) {
     exit(1);
   }
 
-  messages::msg *message = new messages::msg();
-  message->ParseFromFileDescriptor(client_sockfd);
+  // read motorcommand
+  messages::motorcommand *message = new messages::motorcommand();
+  message->ParsePartialFromFileDescriptor(client_sockfd);
+  // printf("motorcommand %d\n", message->type());
 
-  if (message->type() == messages::msg_messageType_COMMAND) {
-    printf("COMMAND %d\n", message->type());
+  if (message->type() == messages::motorcommand::LOOP) {
+    m = message->motor();
+    steps = message->steps();
+    acc = message->acc();
+    sprintf(msg, "LOOP motor: %d steps: %d acc: %d", m, steps, acc);
+
+    // select motor
+    if (m == 1) {
+      motor_loop(&motor1, steps, acc);
+    }
+    else if (m == 2) {
+      motor_loop(&motor2, steps, acc);
+    }
+    printf("%s\n", msg);
+    return(1);
   }
-  else if (message->type() == messages::msg_messageType_SENSORDATA) {
-    printf("SENSORDATA %d\n", message->type());
+  else if (message->type() == messages::motorcommand::RESET) {
+    m = message->motor();
+    if ( m == 1 ) {
+      motor1.pos = 0;
+      sprintf(msg, "RESET motor1");
+    }
+    else if ( m == 2 ) {
+      motor2.pos = 0;
+      sprintf(msg, "RESET motor2");
+    }
+    else {
+      motor1.pos = 0;
+      motor2.pos = 0;
+      sprintf(msg, "RESET motor1 and motor2");
+    }
+    printf("%s\n", msg);
+    return(1);
   }
-  else if (message->type() == messages::msg_messageType_MOTORSTATUS) {
-    printf("MOTORSTATUS %d\n", message->type());
+
+  else if (message->type() == messages::motorcommand::STATUS) {
+    m = message->motor();
+    if ( m == 1 ) {
+      sprintf(msg, "motor1 pos: %d", motor1.pos);
+    }
+    else if ( m == 2 ) {
+      sprintf(msg, "motor2 pos: %d", motor2.pos);
+    }
+    else {
+      sprintf(msg, "motor1 pos: %d, motor2 pos: %d", motor1.pos, motor2.pos);
+    }
+    printf("%s\n", msg);
+    return(1);
   }
 
-
-
-  // n = read(client_sockfd, buffer, BUFFERSIZE);
-  // if (n < 0) {
-  //   error("ERROR reading from socket");
-  //   exit(1);
-  // }
-  //
-  // /*
-  //  * received a command
-  //  */
-  // if (n > 0) {
-  //   /*
-  //    * quit
-  //    */
-  //   if (!strncmp (buffer, "quit", 4)) {
-  //     printf("quit\n");
-  //     return(0);
-  //   }
-  //
-  //   /*
-  //    * turn MOTOR STEPS ACCELERATION
-  //    */
-  //   else if (!strncmp (buffer, "loop", 4)) {
-  //     substr = strtok(buffer, " ");
-  //     substr = strtok (NULL, " ");
-  //     m = atoi(substr);
-  //     substr = strtok (NULL, " ");
-  //     steps = atoi(substr);
-  //     substr = strtok (NULL, " ");
-  //     acc = atoi(substr);
-  //
-  //     sprintf(msg, "LOOP motor: %d steps: %d acc: %d", m, steps, acc);
-  //     printf("%s\n", msg);
-  //     socket_write(client_sockfd, msg);
-  //
-  //     // select motor
-  //     if (m == 1) {
-  //       motor_loop(&motor1, steps, acc);
-  //     }
-  //     else if (m == 2) {
-  //       motor_loop(&motor2, steps, acc);
-  //     }
-  //
-  //     return(1);
-  //   }
-  //
-  //   else if (!strncmp (buffer, "reset", 5)) {
-  //     substr = strtok(buffer, " ");
-  //     substr = strtok (NULL, " ");
-  //     m = atoi(substr);
-  //
-  //     // select motor
-  //     if (m == 0) {
-  //       motor1.pos = 0;
-  //       motor2.pos = 0;
-  //       sprintf(msg, "RESET motor1 and motor2");
-  //     }
-  //     else if (m == 1) {
-  //       motor1.pos = 0;
-  //       sprintf(msg, "RESET motor1");
-  //     }
-  //     else if (m == 2) {
-  //       motor2.pos = 0;
-  //       sprintf(msg, "RESET motor2");
-  //     }
-  //
-  //     printf("%s\n", msg);
-  //     socket_write(client_sockfd, msg);
-  //     return(1);
-  //   }
-  //
-  //   /*
-  //    * status
-  //    */
-  //   else if (!strncmp (buffer, "status", 6)) {
-  //     sprintf(msg, "STATUS position: %d/%d", motor1.pos, motor2.pos);
-  //     socket_write(client_sockfd, msg);
-  //     printf("%s\n", msg);
-  //     return(1);
-  //   }
-  //
-  //   /*
-  //    * all else
-  //    */
-  //   else
-  //     sprintf(msg, "received unknown command: %s\n", buffer);
-  //     socket_write(client_sockfd, msg);
-  //     printf("%s\n", msg);
-  //     return(1);
-  // }
+  // write motorstatus
+  // messages::motorstatus *response = new messages::motorstatus();
+  // messages::motorstatus::motorStatusMsg *motor;
+  // motor = response->add_motor();
+  // motor->set_id(1);
+  // motor->set_pos(motor1.pos);
+  // motor = response->add_motor();
+  // motor->set_id(1);
+  // motor->set_pos(motor2.pos);
+  // printf("writing response...\n");
+  // socket_write(sockfd, response);
+  // printf("... done\n");
 
   shutdown(client_sockfd, 0);
   close(client_sockfd);

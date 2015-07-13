@@ -226,3 +226,4 @@ sensor-daemon
 messages_pb2.py
 messages.pb.h
 messages.pb.cc
+controller-daemon

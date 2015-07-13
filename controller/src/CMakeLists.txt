@@ -4,6 +4,13 @@ add_subdirectory(lib)
 
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS messages.proto)
 
+set(controller-daemon_src controller-daemon.cpp messages.pb.cc)
+add_executable(controller-daemon ${controller-daemon_src})
+target_link_libraries(controller-daemon
+  protobuf
+  pthread
+)
+
 set(motor-daemon_src motor-daemon.cpp messages.pb.cc)
 add_executable(motor-daemon ${motor-daemon_src})
 target_link_libraries(motor-daemon
@@ -17,4 +24,6 @@ add_executable(sensor-daemon ${sensor-daemon_src})
 target_link_libraries(sensor-daemon
   lsm303
   i2cbus
+  protobuf
+  pthread
 )
