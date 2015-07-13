@@ -1,54 +1,79 @@
+/*
+ * messages.proto
+ *
+ * message definitions
+ * ===================
+ *
+ * HOSTS
+ * -----
+ * * controller[PORT A, PORT B]
+ * * motor-daemon
+ * * sensor-daemon
+ *
+ * MESSAGES
+ * --------
+ * I   MOTORCOMMAND
+ * * controller[PORT A.out] -> motor-daemon
+ *
+ * II  MOTORSTATUS
+ * * motor-daemon -> controller[PORT A.in]
+ *
+ * III SENSORCOMMAND
+ * * controller[PORT B.out] -> sensor-daemon
+ *
+ * IV SENSORDATA
+ * * sensor-daemon -> controller[PORT B.in]
+ *
+ * Author: Konstantin Koslowski <konstantin.koslowski@mailbox.org>
+ */
+
 package messages;
 
-message msg {
-  enum messageType {
-    COMMAND     = 0;
-    SENSORDATA  = 1;
-    MOTORSTATUS = 2;
-    TEXT        = 3;
-    UNKNOWN     = 4;
+// I MOTORCOMMAND
+message motorcommand {
+  enum commandType {
+    LOOP    = 0;
+    RESET   = 1;
+    STATUS  = 2;
+    UNKNOWN = 3;
   }
-  required messageType type = 1 [default = UNKNOWN];
-
-  message commandMsg {
-    enum commandType {
-      LOOP    = 0;
-      RESET   = 1;
-      STATUS  = 2;
-      UNKNOWN = 3;
-    }
-
-    required commandType type = 1 [default = UNKNOWN];
-    optional int32 motor      = 2;
-    optional int32 steps      = 3;
-    optional int32 acc        = 4;
-  }
-  optional commandMsg command = 2;
-
-  message sensorDataMsg {
-    required int32 x = 1;
-    required int32 y = 2;
-    required int32 z = 3;
-
-    enum sensorType {
-      MAG = 0;
-      ACC = 1;
-    }
-    optional sensorType type = 4 [default = MAG];
-  }
-  optional sensorDataMsg sensorData = 3;
-
-  message statusMsg {
-    message motorStatusMsg {
-      required int32 id = 1;
-      required int32 pos = 2;
-    }
-    repeated motorStatusMsg motor = 1;
-  }
-  optional statusMsg status = 4;
-
-  message textMsg {
-    required string msg = 1;
-  }
-  optional textMsg text = 5;
+  required commandType type = 1 [default = UNKNOWN];
+  optional int32 motor      = 2;
+  optional int32 steps      = 3;
+  optional int32 acc        = 4;
 }
+
+// II MOTORSTATUS
+message motorstatus {
+  message motorStatusMsg {
+    required int32 id = 1;
+    required int32 pos = 2;
+  }
+  repeated motorStatusMsg motor = 1;
+}
+
+// III SENSORCOMMAND
+message sensorcommand {
+  enum commandType {
+    GET       = 0;
+    CALIBRATE = 1;
+    STATUS    = 2;
+    UNKNOWN   = 3;
+  }
+  required commandType type = 1 [default = UNKNOWN];
+  optional int32 sensor     = 2;
+}
+
+// IV SENSORDATA
+message sensordata {
+  required int32 x = 1;
+  required int32 y = 2;
+  required int32 z = 3;
+
+  enum sensorType {
+    MAGNETOMETER  = 1;
+    ACCELEROMETER = 2;
+  }
+  optional sensorType type = 4 [default = MAGNETOMETER];
+}
+
