@@ -18,7 +18,7 @@
 #include <iostream>
 #include "messages.pb.h"
 
-#ifdef BBB
+#ifdef HOST_BBB
 #include "BBBiolib.h"
 #endif
 

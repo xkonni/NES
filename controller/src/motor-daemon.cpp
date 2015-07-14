@@ -22,7 +22,7 @@ void error(const char *reply) {
  * do a single step
  */
 void motor_step(motor *m, int timeout) {
-#ifdef BBB
+#ifdef HOST_BBB
   pin_high(m->header, m->step);
   usleep(GPIO_HOLD);
   pin_low(m->header, m->step);
@@ -34,7 +34,7 @@ void motor_step(motor *m, int timeout) {
  * change direction
  */
 void motor_dir(motor *m, int dir) {
-#ifdef BBB
+#ifdef HOST_BBB
   if (dir == 0) {
     if (is_high(m->header, m->dir))
       pin_low(m->header, m->dir);
@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
   motor2 = (motor) { 8, 13, 14, 0, -200, 200 };
 
   // initialize GPIOs
-#ifdef BBB
+#ifdef HOST_BBB
   iolib_init();
   iolib_setdir(motor1.header, motor1.step, BBBIO_DIR_OUT);
   iolib_setdir(motor1.header, motor1.dir, BBBIO_DIR_OUT);

@@ -1,4 +1,4 @@
-#ifdef BBB
+#ifdef HOST_BBB
 #include "LSM303.h"
 #include "I2CBus.h"
 #endif
@@ -9,12 +9,12 @@
 
 int main(void) {
   printf("foo\n");
-#ifdef BBB
+#ifdef HOST_BBB
   LSM303 mag ("/dev/i2c-1");
   mag.enable();
 #endif
   while (1) {
-#ifdef BBB
+#ifdef HOST_BBB
     mag.readMag();
     printf("mag.x: %d, mag.y: %d, mag.z: %d\n", mag.m[0], mag.m[1], mag.m[2]);
 #endif
