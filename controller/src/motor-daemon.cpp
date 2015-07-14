@@ -125,7 +125,8 @@ int socket_read (int sockfd) {
 
   // read motorcommand
   messages::motorcommand *message = new messages::motorcommand();
-  message->ParsePartialFromFileDescriptor(client_sockfd);
+  message->ParseFromFileDescriptor(client_sockfd);
+  n = read (client_sockfd, buffer, 1024);
   // printf("motorcommand %d\n", message->type());
 
   if (message->type() == messages::motorcommand::LOOP) {
@@ -140,6 +141,9 @@ int socket_read (int sockfd) {
     }
     else if (m == 2) {
       motor_loop(&motor2, steps, acc);
+    }
+    else {
+      printf("magic!\n");
     }
     printf("%s\n", msg);
     return(1);

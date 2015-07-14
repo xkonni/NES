@@ -86,7 +86,7 @@ void socket_write_command (int port, const char *host, messages::motorcommand *c
   if (! command->SerializeToFileDescriptor(client_sockfd) ) {
     error("ERROR writing to socket");
   }
-  shutdown(client_sockfd, 0);
+  shutdown(client_sockfd, SHUT_RDWR);
   close(client_sockfd);
 }
 
@@ -99,27 +99,46 @@ int main(int argc, char *argv[])
   command->set_motor(0);
   socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
   while (1) {
-    command = new messages::motorcommand();
-    command->set_type(messages::motorcommand::LOOP);
-    command->set_motor(1);
-    command->set_steps(800);
-    command->set_acc(10);
-    socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
+    int i;
+    for(i = 1; i < 10; i++) {
+      command = new messages::motorcommand();
+      command->set_type(messages::motorcommand::LOOP);
+      command->set_motor(1);
+      command->set_steps(80);
+      command->set_acc(10);
+      socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
 
-    command = new messages::motorcommand();
-    command->set_type(messages::motorcommand::STATUS);
-    socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
+      command = new messages::motorcommand();
+      command->set_type(messages::motorcommand::LOOP);
+      command->set_motor(2);
+      command->set_steps(80);
+      command->set_acc(10);
+      socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
 
-    command = new messages::motorcommand();
-    command->set_type(messages::motorcommand::LOOP);
-    command->set_motor(1);
-    command->set_steps(-800);
-    command->set_acc(10);
-    socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
+      command = new messages::motorcommand();
+      command->set_type(messages::motorcommand::STATUS);
+      socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
+    }
 
-    command = new messages::motorcommand();
-    command->set_type(messages::motorcommand::STATUS);
-    socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
+    for(i = 1; i < 10; i++) {
+      command = new messages::motorcommand();
+      command->set_type(messages::motorcommand::LOOP);
+      command->set_motor(1);
+      command->set_steps(-80);
+      command->set_acc(10);
+      socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
+
+      command = new messages::motorcommand();
+      command->set_type(messages::motorcommand::LOOP);
+      command->set_motor(2);
+      command->set_steps(-80);
+      command->set_acc(10);
+      socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
+
+      command = new messages::motorcommand();
+      command->set_type(messages::motorcommand::STATUS);
+      socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
+    }
   }
 
 
