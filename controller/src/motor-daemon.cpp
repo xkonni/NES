@@ -22,16 +22,19 @@ void error(const char *reply) {
  * do a single step
  */
 void motor_step(motor *m, int timeout) {
+#ifdef BBB
   pin_high(m->header, m->step);
   usleep(GPIO_HOLD);
   pin_low(m->header, m->step);
   usleep(timeout);
+#endif
 }
 
 /*
  * change direction
  */
 void motor_dir(motor *m, int dir) {
+#ifdef BBB
   if (dir == 0) {
     if (is_high(m->header, m->dir))
       pin_low(m->header, m->dir);
@@ -40,6 +43,7 @@ void motor_dir(motor *m, int dir) {
     if (is_low(m->header, m->dir))
       pin_high(m->header, m->dir);
   }
+#endif
 }
 
 /*
@@ -126,7 +130,6 @@ int socket_read (int sockfd) {
   // read motorcommand
   messages::motorcommand *message = new messages::motorcommand();
   message->ParseFromFileDescriptor(client_sockfd);
-  n = read (client_sockfd, buffer, 1024);
   // printf("motorcommand %d\n", message->type());
 
   if (message->type() == messages::motorcommand::LOOP) {
@@ -211,11 +214,13 @@ int main(int argc, char *argv[])
   motor2 = (motor) { 8, 13, 14, 0, -200, 200 };
 
   // initialize GPIOs
+#ifdef BBB
   iolib_init();
   iolib_setdir(motor1.header, motor1.step, BBBIO_DIR_OUT);
   iolib_setdir(motor1.header, motor1.dir, BBBIO_DIR_OUT);
   iolib_setdir(motor2.header, motor2.step, BBBIO_DIR_OUT);
   iolib_setdir(motor2.header, motor2.dir, BBBIO_DIR_OUT);
+#endif
 
   // initialize socket
   sockfd = socket(AF_INET, SOCK_STREAM, 0);

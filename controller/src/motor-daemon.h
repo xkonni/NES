@@ -16,8 +16,11 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <iostream>
-#include "BBBiolib.h"
 #include "messages.pb.h"
+
+#ifdef BBB
+#include "BBBiolib.h"
+#endif
 
 #define PORT          2020
 #define BUFFERSIZE    256

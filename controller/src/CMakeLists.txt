@@ -13,17 +13,31 @@ target_link_libraries(controller-daemon
 
 set(motor-daemon_src motor-daemon.cpp messages.pb.cc)
 add_executable(motor-daemon ${motor-daemon_src})
-target_link_libraries(motor-daemon
-  ${CMAKE_SOURCE_DIR}/../../BBBIOlib/libBBBio.a
-  protobuf
-  pthread
-)
+if(${HOST} STREQUAL "beaglebone")
+  target_link_libraries(motor-daemon
+    ${CMAKE_SOURCE_DIR}/../../BBBIOlib/libBBBio.a
+    protobuf
+    pthread
+  )
+else()
+  target_link_libraries(motor-daemon
+    protobuf
+    pthread
+  )
+endif()
 
 set(sensor-daemon_src sensor-daemon.cpp)
 add_executable(sensor-daemon ${sensor-daemon_src})
-target_link_libraries(sensor-daemon
-  lsm303
-  i2cbus
-  protobuf
-  pthread
-)
+if(${HOST} STREQUAL "beaglebone")
+  target_link_libraries(sensor-daemon
+    lsm303
+    i2cbus
+    protobuf
+    pthread
+  )
+else()
+  target_link_libraries(sensor-daemon
+    protobuf
+    pthread
+  )
+endif()
