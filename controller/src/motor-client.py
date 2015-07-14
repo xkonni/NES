@@ -40,17 +40,24 @@ def send(message):
   time.sleep(.5)
 
 def main():
-  ## MOTORSTATUS
-  # message = messages_pb2.motorstatus()
-  # message.motor.add(id = 1, pos = 2);
-  # message.motor.add(id = 3, pos = 4);
+  message = messages_pb2.motorcommand()
+  message.type = message.RESET
+  message.motor = 1
+  send(message)
 
   while(1):
     message = messages_pb2.motorcommand()
     message.type = message.LOOP
     message.motor = 1
-    message.steps = 2
-    message.acc = 3
+    message.steps = 800
+    message.acc = 10
+    send(message)
+
+    message = messages_pb2.motorcommand()
+    message.type = message.LOOP
+    message.motor = 1
+    message.steps = -800
+    message.acc = 10
     send(message)
 
     message = messages_pb2.motorcommand()
