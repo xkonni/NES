@@ -12,11 +12,8 @@ import socket
 import time
 import messages_pb2
 
-#def __init__(self):
-# host = socket.gethostname()
-# port = 2020
 host = socket.gethostname()
-port = 2020
+port = 2022
 
 # def rcv():
 #   print("receiving")
@@ -27,12 +24,20 @@ port = 2020
 def send(message):
   s = socket.socket()
   s.connect((host, port))
-  s.send(message.SerializeToString())
+  message_str = message.SerializeToString()
+  print('message:\n%s' % message)
+  s.send(message_str)
+
+  response_str = s.recv(1024)
+  response = messages_pb2.motorstatus()
+  # response = messages_pb2.motorcommand()
+  response.ParseFromString(response_str)
+  print('response:\n%s' % response)
 
   # shutdown and disallow RD and WR access
   s.shutdown(socket.SHUT_RDWR)
   s.close()
-  time.sleep(0.01)
+  time.sleep(.5)
 
 def main():
   ## MOTORSTATUS
@@ -41,36 +46,48 @@ def main():
   # message.motor.add(id = 3, pos = 4);
 
   while(1):
-    ## MOTORCOMMAND
-    for i in range(1, 10):
-      message = messages_pb2.motorcommand()
-      message.type = message.LOOP
-      message.motor = 1
-      message.steps = 80
-      message.acc = 10
-      send(message)
+    message = messages_pb2.motorcommand()
+    message.type = message.LOOP
+    message.motor = 1
+    message.steps = 2
+    message.acc = 3
+    send(message)
 
-      message = messages_pb2.motorcommand()
-      message.type = message.LOOP
-      message.motor = 2
-      message.steps = 80
-      message.acc = 10
-      send(message)
+    message = messages_pb2.motorcommand()
+    message.type = message.STATUS
+    message.motor = 1
+    send(message)
 
-    for i in range(1, 10):
-      message = messages_pb2.motorcommand()
-      message.type = message.LOOP
-      message.motor = 1
-      message.steps = -80
-      message.acc = 10
-      send(message)
-
-      message = messages_pb2.motorcommand()
-      message.type = message.LOOP
-      message.motor = 2
-      message.steps = -80
-      message.acc = 10
-      send(message)
+    # ## MOTORCOMMAND
+    # for i in range(1, 10):
+    #   message = messages_pb2.motorcommand()
+    #   message.type = message.LOOP
+    #   message.motor = 1
+    #   message.steps = 80
+    #   message.acc = 10
+    #   send(message)
+    #
+    #   message = messages_pb2.motorcommand()
+    #   message.type = message.LOOP
+    #   message.motor = 2
+    #   message.steps = 80
+    #   message.acc = 10
+    #   send(message)
+    #
+    # for i in range(1, 10):
+    #   message = messages_pb2.motorcommand()
+    #   message.type = message.LOOP
+    #   message.motor = 1
+    #   message.steps = -80
+    #   message.acc = 10
+    #   send(message)
+    #
+    #   message = messages_pb2.motorcommand()
+    #   message.type = message.LOOP
+    #   message.motor = 2
+    #   message.steps = -80
+    #   message.acc = 10
+    #   send(message)
 
 
 if __name__ == "__main__":

@@ -32,10 +32,10 @@ package messages;
 // I MOTORCOMMAND
 message motorcommand {
   enum commandType {
-    LOOP    = 0;
-    RESET   = 1;
-    STATUS  = 2;
-    UNKNOWN = 3;
+    LOOP    = 1;
+    RESET   = 2;
+    STATUS  = 3;
+    UNKNOWN = 4;
   }
   required commandType type = 1 [default = UNKNOWN];
   optional int32 motor      = 2;
@@ -55,10 +55,10 @@ message motorstatus {
 // III SENSORCOMMAND
 message sensorcommand {
   enum commandType {
-    GET       = 0;
-    CALIBRATE = 1;
-    STATUS    = 2;
-    UNKNOWN   = 3;
+    GET       = 1;
+    CALIBRATE = 2;
+    STATUS    = 3;
+    UNKNOWN   = 4;
   }
   required commandType type = 1 [default = UNKNOWN];
   optional int32 sensor     = 2;

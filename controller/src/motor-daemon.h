@@ -24,10 +24,12 @@
 #include "BBBiolib.h"
 #endif
 
-#define PORT          "2022"
-#define BUFFERSIZE    256
-#define GPIO_HOLD     20
-#define GPIO_TIMEOUT  480
+#define CONTROLLER_PORT   2020
+#define SENSOR_PORT       2021
+#define MOTOR_PORT        2022
+#define BUFFERSIZE        256
+#define GPIO_HOLD         20
+#define GPIO_TIMEOUT      480
 
 typedef struct {
   int header;
@@ -37,6 +39,7 @@ typedef struct {
   int minpos; // an entire turn
   int maxpos; // counts 800 microsteps
 } motor;
+motor motor1, motor2;
 
 int ramp[] = {
   100,  71,  53,  42,  33,  27,  23,  19,  16,  14,
@@ -46,9 +49,14 @@ int ramp[] = {
 };
 int rampN = 40;
 
-void error(const char *reply);
-void motor_step(motor *m, int timeout);
-void motor_dir(motor *m, int dir);
+void print_error (const char *reply);
+void print_motorcommand (messages::motorcommand *command);
+void print_motorstatus (messages::motorstatus *status);
+messages::motorstatus* handle_motorcommand (messages::motorcommand *command);
+void motor_step (motor *m, int timeout);
+void motor_dir (motor *m, int dir);
 void motor_loop (motor *m, int steps, int acc);
+int socket_open();
+void socket_read (int sockfd);
+void socket_setnonblock(int sockfd);
 void socket_write (int sockfd, messages::motorstatus *response);
-int socket_read (int sockfd);
