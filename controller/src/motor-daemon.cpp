@@ -203,11 +203,130 @@ int socket_read (int sockfd) {
   return(1);
 }
 
+void socket_setnonblock(int socket) {
+    int flags;
+    flags = fcntl(socket,F_GETFL,0);
+    assert(flags != -1);
+    fcntl(socket, F_SETFL, flags | O_NONBLOCK);
+}
+
+int socket_open() {
+  // define variables
+  int sockfd, new_sockfd;
+  int max_fd;
+  int n;
+  int status;
+  std::vector<int> connected;
+  char buffer[256];
+  struct addrinfo hints;
+  struct addrinfo *servinfo;
+  // store the connecting address and size
+  struct sockaddr_storage their_addr;
+  socklen_t their_addr_size;
+
+  // fds to monitor
+  fd_set read_fds,write_fds;      // the flag sets to be used
+  struct timeval waitd = {10, 0};     // the max wait time for an event
+  int sel;                            // holds return value for select();
+
+
+  // socket info
+  memset(&hints, 0, sizeof hints);    // make sure the struct is empty
+  hints.ai_family = AF_INET;
+  hints.ai_socktype = SOCK_STREAM;    // tcp
+  hints.ai_flags = AI_PASSIVE;        // use local-host address
+
+  // get server info, put into servinfo
+  if ((status = getaddrinfo("localhost", PORT, &hints, &servinfo)) != 0) {
+      fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
+      exit(1);
+  }
+
+  // initialize socket
+  sockfd = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
+  if (sockfd < 0) {
+      error("server socket failure");
+  }
+
+  // avoid "this address is already in use"
+  int yes = 1;
+  if (setsockopt(sockfd,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof(int)) == -1) {
+      error("setsockopt");
+  }
+
+  //unlink and bind
+  unlink("localhost");
+  if(bind (sockfd, servinfo->ai_addr, servinfo->ai_addrlen) < 0) {
+      error("bind error");
+  }
+
+  // gc
+  freeaddrinfo(servinfo);
+
+  if(listen(sockfd, 5) < 0) {
+      error("Listen error");
+  }
+
+  while (1) {
+    FD_ZERO(&read_fds);
+    FD_ZERO(&write_fds);
+    // add sockfd
+    FD_SET(sockfd, &read_fds);
+    FD_SET(sockfd, &write_fds);
+    max_fd = sockfd;
+    // add connected clients
+    for (std::vector<int>::iterator it = connected.begin(); it != connected.end(); it++) {
+      FD_SET(*it, &read_fds);
+      max_fd = std::max(max_fd, *it);
+    }
+
+    // check for data
+    sel = select(max_fd+1, &read_fds, &write_fds, (fd_set*)0, &waitd);
+
+    // continue on error
+    if (sel < 0) {
+      error("select error");
+      continue;
+    }
+
+    // data received
+    if (sel > 0) {
+      if(FD_ISSET(sockfd, &read_fds)) {
+        printf("data on sockfd\n");
+        their_addr_size = sizeof(their_addr);
+        new_sockfd = accept(sockfd, (struct sockaddr*)&their_addr, &their_addr_size);
+        if( new_sockfd < 0) {
+            error("accept error");
+        }
+        socket_setnonblock(new_sockfd);
+        connected.push_back(new_sockfd);
+      }
+      for (std::vector<int>::iterator it = connected.begin(); it != connected.end(); it++) {
+        if (FD_ISSET(*it, &read_fds)) {
+          bzero(buffer, BUFFERSIZE);
+          n = read(*it, buffer, sizeof(buffer));
+          if (n > 0) {
+            printf("data on sock[%d] %d bytes: %s", *it, n, buffer);
+          }
+          if (n == 0) {
+            printf("closing socket: %d\n", *it);
+            // shutdown, close socket
+            shutdown(*it, SHUT_RDWR);
+            close(*it);
+            // erase from list
+            connected.erase(it);
+            // iterator invalid, end for-loop
+            break;
+          }
+        }
+      } // for
+    } // if (sel > 0)
+  } // while (1)
+}
+
 int main(int argc, char *argv[])
 {
-  // define variables
-  int sockfd;
-  struct sockaddr_in serv_addr;
+  int sockfd = socket_open();
 
   // initialize motors
   motor1 = (motor) { 8, 11, 12, 0, -400, 400 };
@@ -222,26 +341,9 @@ int main(int argc, char *argv[])
   iolib_setdir(motor2.header, motor2.dir, BBBIO_DIR_OUT);
 #endif
 
-  // initialize socket
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  // avoid "this address is already in use"
-  int so_reuseaddr = 1;
-  setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &so_reuseaddr, sizeof(so_reuseaddr));
-
-  if (sockfd < 0)
-    error("ERROR opening socket");
-  bzero((char *) &serv_addr, sizeof(serv_addr));
-  serv_addr.sin_family = AF_INET;
-  serv_addr.sin_addr.s_addr = INADDR_ANY;
-  serv_addr.sin_port = htons(PORT);
-
-  if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
-    error("ERROR on binding");
-  listen(sockfd,5);
-
   // main loop
-  while (socket_read(sockfd));
-
+  // while (socket_read(sockfd));
+  // socket_read(sockfd);
   printf("shutting down\n");
   shutdown(sockfd, 0);
   close(sockfd);

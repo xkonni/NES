@@ -7,6 +7,8 @@
  * Konstantin Koslowski <konstantin.koslowski@mailbox.org>
  */
 
+#include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,7 +24,7 @@
 #include "BBBiolib.h"
 #endif
 
-#define PORT          2020
+#define PORT          "2022"
 #define BUFFERSIZE    256
 #define GPIO_HOLD     20
 #define GPIO_TIMEOUT  480
