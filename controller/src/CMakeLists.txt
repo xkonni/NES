@@ -16,7 +16,7 @@ set(motor-daemon_src motor-daemon.cpp messages.pb.cc)
 add_executable(motor-daemon ${motor-daemon_src})
 if(${HOST} STREQUAL "beaglebone")
   target_link_libraries(motor-daemon
-    ${CMAKE_SOURCE_DIR}/../../BBBIOlib/libBBBio.a
+    ${CMAKE_SOURCE_DIR}/src/lib/BBBIOlib/libBBBio.a
     protobuf
     pthread
   )

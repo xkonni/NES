@@ -15,8 +15,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
 if(${HOST} STREQUAL "beaglebone")
   include_directories(
-    ${CMAKE_SOURCE_DIR}/../../BBBIOlib
-    ${CMAKE_SOURCE_DIR}/../../BBBIOlib/BBBio_lib
+    ${CMAKE_SOURCE_DIR}/src/lib/BBBIOlib
+    ${CMAKE_SOURCE_DIR}/src/lib/BBBIOlib/BBBio_lib
     ${CMAKE_SOURCE_DIR}/src/lib
   )
 else()
