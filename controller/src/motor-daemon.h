@@ -21,6 +21,7 @@
 #include "messages.pb.h"
 
 #ifdef HOST_BBB
+#undef HZ
 #include "BBBiolib.h"
 #endif
 
