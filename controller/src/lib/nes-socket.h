@@ -20,5 +20,6 @@
 #include "messages.pb.h"
 #include "nes.h"
 
+int socket_connect(int port, const char *hostname);
 int socket_open(int port);
 void socket_setnonblock(int sockfd);

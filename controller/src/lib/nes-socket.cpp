@@ -6,6 +6,39 @@
  * Konstantin Koslowski <konstantin.koslowski@mailbox.org>
  */
 #include "nes-socket.h"
+
+/*
+ * connect to socket
+ */
+int socket_connect(int port, const char *hostname) {
+  int sockfd;
+  struct sockaddr_in serv_addr;
+  struct hostent *server;
+
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (sockfd < 0)
+      print_error("ERROR opening socket");
+
+  server = gethostbyname(hostname);
+  if (server == NULL) {
+      print_error("ERROR, no such host");
+  }
+  bzero((char *) &serv_addr, sizeof(serv_addr));
+  serv_addr.sin_family = AF_INET;
+  bcopy((char *)server->h_addr,
+       (char *)&serv_addr.sin_addr.s_addr,
+       server->h_length);
+  serv_addr.sin_port = htons(port);
+  if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0)
+      print_error("ERROR connecting");
+
+  return sockfd;
+}
+
+
+/*
+ * open listening socket
+ */
 int socket_open(int port) {
   int sockfd;
 

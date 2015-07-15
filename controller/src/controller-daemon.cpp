@@ -17,87 +17,52 @@ void error(const char *reply) {
 }
 
 /*
- * connect to socket
+ * write motorcommand to socket
  */
-int socket_connect(int port, const char *hostname) {
-  int sockfd;
-  struct sockaddr_in serv_addr;
-  struct hostent *server;
-
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (sockfd < 0)
-      error("ERROR opening socket");
-
-  server = gethostbyname(hostname);
-  if (server == NULL) {
-      fprintf(stderr,"ERROR, no such host\n");
-      exit(0);
-  }
-  bzero((char *) &serv_addr, sizeof(serv_addr));
-  serv_addr.sin_family = AF_INET;
-  bcopy((char *)server->h_addr,
-       (char *)&serv_addr.sin_addr.s_addr,
-       server->h_length);
-  serv_addr.sin_port = htons(port);
-  if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0)
-      error("ERROR connecting");
-
-  return sockfd;
-}
-
-/*
- * read from socket
- */
-int socket_read (int sockfd) {
-  int client_sockfd;
-  struct sockaddr_in cli_addr;
-  socklen_t clilen;
-
-  clilen = sizeof(cli_addr);
-  client_sockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
-  if (client_sockfd < 0) {
-    error("ERROR on accept");
-    exit(1);
-  }
-
-  messages::motorstatus *message = new messages::motorstatus();
-  if (! message->ParseFromFileDescriptor(client_sockfd)) {
-    error("ERROR reading from socket");
-    exit(1);
-  }
-
-  int m = 0;
-  for (m = 0; m < message->motor_size(); m++) {
-    messages::motorstatus::motorStatusMsg motor;
-    motor = message->motor(m);
-    printf("motor id: %d, pos: %d\n", motor.id(), motor.pos());
-  }
-
-  shutdown(client_sockfd, 0);
-  close(client_sockfd);
-  return(1);
-}
-
-/*
- * write command to socket
- */
-void socket_write_command (int port, const char *host, messages::motorcommand *command) {
-  int n;
+void socket_write_motorcommand (messages::motorcommand *command) {
   char buffer[BUFFERSIZE];
   bzero(buffer, BUFFERSIZE);
   int client_sockfd;
 
-  client_sockfd = socket_connect(port, host);
+  client_sockfd = socket_connect(MOTOR_PORT, MOTOR_HOST);
   if (! command->SerializeToFileDescriptor(client_sockfd) ) {
     error("ERROR writing to socket");
   }
-  n = read(client_sockfd, buffer, BUFFERSIZE);
-  printf("%d bytes read\n", n);
+  read(client_sockfd, buffer, BUFFERSIZE);
+  // int n = read(client_sockfd, buffer, BUFFERSIZE);
+  // printf("%d bytes read\n", n);
 
   messages::motorstatus *status = new messages::motorstatus();
   status->ParseFromString(buffer);
 
-  print_motorstatus(status);
+  print_motorcommand(NET_OUT, command);
+  print_motorstatus(NET_IN, status);
+
+  shutdown(client_sockfd, SHUT_RDWR);
+  close(client_sockfd);
+}
+
+/*
+ * write sensorcommand to socket
+ */
+void socket_write_sensorcommand (messages::sensorcommand *command) {
+  char buffer[BUFFERSIZE];
+  bzero(buffer, BUFFERSIZE);
+  int client_sockfd;
+
+  client_sockfd = socket_connect(SENSOR_PORT, SENSOR_HOST);
+  if (! command->SerializeToFileDescriptor(client_sockfd) ) {
+    error("ERROR writing to socket");
+  }
+  read(client_sockfd, buffer, BUFFERSIZE);
+  // int n = read(client_sockfd, buffer, BUFFERSIZE);
+  // printf("%d bytes read\n", n);
+
+  messages::sensordata *data = new messages::sensordata();
+  data->ParseFromString(buffer);
+
+  print_sensorcommand(NET_OUT, command);
+  print_sensordata(NET_IN, data);
 
   shutdown(client_sockfd, SHUT_RDWR);
   close(client_sockfd);
@@ -105,78 +70,76 @@ void socket_write_command (int port, const char *host, messages::motorcommand *c
 
 int main(int argc, char *argv[])
 {
-  messages::motorcommand *command;
+  messages::motorcommand *mcommand;
+  messages::sensorcommand *scommand;
 
-  command = new messages::motorcommand();
-  command->set_type(messages::motorcommand::RESET);
-  command->set_motor(1);
-  socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
+  // reset motor1
+  mcommand = new messages::motorcommand();
+  mcommand->set_type(messages::motorcommand::RESET);
+  mcommand->set_motor(1);
+  socket_write_motorcommand(mcommand);
 
-  command = new messages::motorcommand();
-  command->set_type(messages::motorcommand::STATUS);
-  socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
+  // reset motor2
+  mcommand = new messages::motorcommand();
+  mcommand->set_type(messages::motorcommand::RESET);
+  mcommand->set_motor(2);
+  socket_write_motorcommand(mcommand);
 
-  // command = new messages::motorcommand();
-  // command->set_type(messages::motorcommand::LOOP);
-  // command->set_motor(1);
-  // command->set_steps(80);
-  // command->set_acc(10);
-  // socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
-  //
-  // command = new messages::motorcommand();
-  // command->set_type(messages::motorcommand::STATUS);
-  // socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
-  //
-  // command = new messages::motorcommand();
-  // command->set_type(messages::motorcommand::LOOP);
-  // command->set_motor(2);
-  // command->set_steps(80);
-  // command->set_acc(10);
-  // socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
+  // calibrate sensor1
+  scommand = new messages::sensorcommand();
+  scommand->set_type(messages::sensorcommand::CALIBRATE);
+  scommand->set_sensor(1);
+  socket_write_sensorcommand(scommand);
 
-  // while (1) {
-  //   int i;
-  //   for(i = 1; i < 10; i++) {
-  //     command = new messages::motorcommand();
-  //     command->set_type(messages::motorcommand::LOOP);
-  //     command->set_motor(1);
-  //     command->set_steps(80);
-  //     command->set_acc(10);
-  //     socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
-  //
-  //     command = new messages::motorcommand();
-  //     command->set_type(messages::motorcommand::LOOP);
-  //     command->set_motor(2);
-  //     command->set_steps(80);
-  //     command->set_acc(10);
-  //     socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
-  //
-  //     command = new messages::motorcommand();
-  //     command->set_type(messages::motorcommand::STATUS);
-  //     socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
-  //   }
-  //
-  //   for(i = 1; i < 10; i++) {
-  //     command = new messages::motorcommand();
-  //     command->set_type(messages::motorcommand::LOOP);
-  //     command->set_motor(1);
-  //     command->set_steps(-80);
-  //     command->set_acc(10);
-  //     socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
-  //
-  //     command = new messages::motorcommand();
-  //     command->set_type(messages::motorcommand::LOOP);
-  //     command->set_motor(2);
-  //     command->set_steps(-80);
-  //     command->set_acc(10);
-  //     socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
-  //
-  //     command = new messages::motorcommand();
-  //     command->set_type(messages::motorcommand::STATUS);
-  //     socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
-  //   }
-  // }
+  // calibrate sensor2
+  scommand = new messages::sensorcommand();
+  scommand->set_type(messages::sensorcommand::CALIBRATE);
+  scommand->set_sensor(2);
+  socket_write_sensorcommand(scommand);
 
+  while (1) {
+    // read sensor values
+    scommand = new messages::sensorcommand();
+    scommand->set_type(messages::sensorcommand::GET);
+    scommand->set_sensor(1);
+    socket_write_sensorcommand(scommand);
+
+    scommand = new messages::sensorcommand();
+    scommand->set_type(messages::sensorcommand::GET);
+    scommand->set_sensor(2);
+    socket_write_sensorcommand(scommand);
+
+    // rotate motor
+    // ... forward
+    mcommand = new messages::motorcommand();
+    mcommand->set_type(messages::motorcommand::LOOP);
+    mcommand->set_motor(1);
+    mcommand->set_steps(100);
+    mcommand->set_acc(10);
+    socket_write_motorcommand(mcommand);
+
+    mcommand = new messages::motorcommand();
+    mcommand->set_type(messages::motorcommand::LOOP);
+    mcommand->set_motor(2);
+    mcommand->set_steps(100);
+    mcommand->set_acc(10);
+    socket_write_motorcommand(mcommand);
+
+    // ... and backward
+    mcommand = new messages::motorcommand();
+    mcommand->set_type(messages::motorcommand::LOOP);
+    mcommand->set_motor(1);
+    mcommand->set_steps(-100);
+    mcommand->set_acc(10);
+    socket_write_motorcommand(mcommand);
+
+    mcommand = new messages::motorcommand();
+    mcommand->set_type(messages::motorcommand::LOOP);
+    mcommand->set_motor(2);
+    mcommand->set_steps(-100);
+    mcommand->set_acc(10);
+    socket_write_motorcommand(mcommand);
+  }
 
   return 0;
 }

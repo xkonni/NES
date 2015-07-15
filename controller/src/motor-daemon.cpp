@@ -198,10 +198,10 @@ void socket_read_motorcommand(int sockfd) {
 
             // parse message
             message->ParseFromString(buffer);
-            print_motorcommand(message);
+            print_motorcommand(NET_IN, message);
             // generate response
             handle_motorcommand(message, response);
-            print_motorstatus(response);
+            print_motorstatus(NET_OUT, response);
             socket_write_motorstatus(*it, response);
           }
           // client disconnected

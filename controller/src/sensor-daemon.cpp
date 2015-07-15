@@ -83,7 +83,7 @@ void socket_read_sensorcommand (int sockfd) {
     gettimeofday(&tv_now, NULL);
     t_diff = (tv_now.tv_usec - tv_last.tv_usec) + (tv_now.tv_sec - tv_last.tv_sec) * 1000000;
     if (t_diff > t_timeout) {
-      printf("updating sensors\n");
+      // printf("updating sensors\n");
       sensor1.x++;
       sensor1.y++;
       sensor1.z++;
@@ -142,10 +142,10 @@ void socket_read_sensorcommand (int sockfd) {
 
             // parse message
             message->ParseFromString(buffer);
-            print_sensorcommand(message);
+            print_sensorcommand(NET_IN, message);
             // generate response
             handle_sensorcommand(message, response);
-            print_sensordata(response);
+            print_sensordata(NET_OUT, response);
             socket_write_sensordata(*it, response);
           }
           // client disconnected

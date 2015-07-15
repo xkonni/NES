@@ -12,8 +12,11 @@
 #define MOTOR_PORT        2022
 #define MOTOR_HOST        "localhost"
 
+#define NET_IN            '<'
+#define NET_OUT           '>'
+
 void print_error(const char *reply);
-void print_motorcommand(messages::motorcommand *command);
-void print_motorstatus(messages::motorstatus *status);
-void print_sensorcommand (messages::sensorcommand *command);
-void print_sensordata(messages::sensordata *data);
+void print_motorcommand(char inout, messages::motorcommand *command);
+void print_motorstatus(char inout, messages::motorstatus *status);
+void print_sensorcommand (char inout, messages::sensorcommand *command);
+void print_sensordata(char inout, messages::sensordata *data);

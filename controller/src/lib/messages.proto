@@ -38,7 +38,7 @@ message motorcommand {
     UNKNOWN = 4;
   }
   required commandType type = 1 [default = UNKNOWN];
-  optional int32 motor      = 2;
+  required int32 motor      = 2;
   optional int32 steps      = 3;
   optional int32 acc        = 4;
 }
