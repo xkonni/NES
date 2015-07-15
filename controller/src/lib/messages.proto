@@ -57,23 +57,18 @@ message sensorcommand {
   enum commandType {
     GET       = 1;
     CALIBRATE = 2;
-    STATUS    = 3;
-    UNKNOWN   = 4;
+    UNKNOWN   = 3;
   }
   required commandType type = 1 [default = UNKNOWN];
-  optional int32 sensor     = 2;
+  required int32 sensor = 2;
 }
 
 // IV SENSORDATA
 message sensordata {
-  required int32 x = 1;
-  required int32 y = 2;
-  required int32 z = 3;
+  required int32 sensor = 1;
+  required int32 x = 2;
+  required int32 y = 3;
+  required int32 z = 4;
 
-  enum sensorType {
-    MAGNETOMETER  = 1;
-    ACCELEROMETER = 2;
-  }
-  optional sensorType type = 4 [default = MAGNETOMETER];
 }
 

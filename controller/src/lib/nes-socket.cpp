@@ -6,7 +6,7 @@
  * Konstantin Koslowski <konstantin.koslowski@mailbox.org>
  */
 #include "nes-socket.h"
-int socket_open() {
+int socket_open(int port) {
   int sockfd;
 
   // initialize socket
@@ -22,7 +22,7 @@ int socket_open() {
   bzero((char *) &serv_addr, sizeof(serv_addr));
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_addr.s_addr = INADDR_ANY;
-  serv_addr.sin_port = htons(MOTOR_PORT);
+  serv_addr.sin_port = htons(port);
 
   if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
     print_error("ERROR on binding");
@@ -47,15 +47,3 @@ void socket_setnonblock(int sockfd) {
     assert(flags != -1);
     fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
 }
-
-/*
- * write reply to socket
- */
-void socket_write (int sockfd, messages::motorstatus *response) {
-  char buffer[BUFFERSIZE];
-  bzero(buffer, BUFFERSIZE);
-  response->SerializeToArray(buffer, response->ByteSize());
-  // send response
-  write(sockfd, buffer, response->ByteSize());
-}
-

@@ -6,41 +6,8 @@
  *
  * Konstantin Koslowski <konstantin.koslowski@mailbox.org>
  */
+
 #include "motor-daemon.h"
-
-/*
- * print motorcommand
- */
-void print_motorcommand(messages::motorcommand *command) {
-  char *msg = (char *) malloc(BUFFERSIZE*sizeof(char));
-
-  sprintf(msg, "[COMMAND: %7s]",
-      messages::motorcommand::commandType_Name(command->type()).c_str());
-  if(command->has_motor())
-    sprintf(msg, "%s motor: %d", msg, command->motor());
-  if(command->has_steps())
-    sprintf(msg, "%s steps: %d", msg, command->steps());
-  if(command->has_acc())
-    sprintf(msg, "%s acc: %d", msg, command->acc());
-  sprintf(msg, "%s\n", msg);
-  printf(msg);
-}
-
-/*
- * print motorstatus
- */
-void print_motorstatus(messages::motorstatus *status) {
-  char *msg = (char *) malloc(BUFFERSIZE*sizeof(char));
-  bzero(msg, BUFFERSIZE);
-
-  int i;
-  for (i = 0; i < status->motor_size(); i++) {
-    messages::motorstatus::motorStatusMsg *motor;
-    motor = status->mutable_motor(i);
-    sprintf(msg, "%s[STATUS: motor: %d] pos: %d\n", msg, motor->id(), motor->pos());
-  }
-  printf(msg);
-}
 
 /*
  * handle motorcommand
@@ -79,13 +46,7 @@ void handle_motorcommand (messages::motorcommand *command, messages::motorstatus
   }
 
   else if (command->type() == messages::motorcommand::STATUS) {
-    m = command->motor();
-    if ( m == 1 ) {
-    }
-    else if ( m == 2 ) {
-    }
-    else {
-    }
+    // sending a status anyway
   }
 
   // create respnse
@@ -241,7 +202,7 @@ void socket_read_motorcommand(int sockfd) {
             // generate response
             handle_motorcommand(message, response);
             print_motorstatus(response);
-            socket_write(*it, response);
+            socket_write_motorstatus(*it, response);
           }
           // client disconnected
           else if (n == 0) {
@@ -260,8 +221,22 @@ void socket_read_motorcommand(int sockfd) {
   } // while (1)
 }
 
+/*
+ * write reply to socket
+ */
+void socket_write_motorstatus (int sockfd, messages::motorstatus *status) {
+  char buffer[BUFFERSIZE];
+  bzero(buffer, BUFFERSIZE);
+  status->SerializeToArray(buffer, status->ByteSize());
+  // send status
+  write(sockfd, buffer, status->ByteSize());
+}
+
+
 int main(int argc, char *argv[])
 {
+  int sockfd;
+
   // initialize motors
   motor1 = (motor) { 8, 11, 12, 0, -400, 400 };
   motor2 = (motor) { 8, 13, 14, 0, -200, 200 };
@@ -275,7 +250,8 @@ int main(int argc, char *argv[])
   iolib_setdir(motor2.header, motor2.dir, BBBIO_DIR_OUT);
 #endif
 
-  int sockfd = socket_open();
+  // initialize socket
+  sockfd = socket_open(MOTOR_PORT);
   // main loop
   socket_read_motorcommand(sockfd);
 

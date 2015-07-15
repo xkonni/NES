@@ -82,10 +82,23 @@ int socket_read (int sockfd) {
  * write command to socket
  */
 void socket_write_command (int port, const char *host, messages::motorcommand *command) {
-  int client_sockfd = socket_connect(port, host);
+  int n;
+  char buffer[BUFFERSIZE];
+  bzero(buffer, BUFFERSIZE);
+  int client_sockfd;
+
+  client_sockfd = socket_connect(port, host);
   if (! command->SerializeToFileDescriptor(client_sockfd) ) {
     error("ERROR writing to socket");
   }
+  n = read(client_sockfd, buffer, BUFFERSIZE);
+  printf("%d bytes read\n", n);
+
+  messages::motorstatus *status = new messages::motorstatus();
+  status->ParseFromString(buffer);
+
+  print_motorstatus(status);
+
   shutdown(client_sockfd, SHUT_RDWR);
   close(client_sockfd);
 }
@@ -96,50 +109,73 @@ int main(int argc, char *argv[])
 
   command = new messages::motorcommand();
   command->set_type(messages::motorcommand::RESET);
-  command->set_motor(0);
+  command->set_motor(1);
   socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
-  while (1) {
-    int i;
-    for(i = 1; i < 10; i++) {
-      command = new messages::motorcommand();
-      command->set_type(messages::motorcommand::LOOP);
-      command->set_motor(1);
-      command->set_steps(80);
-      command->set_acc(10);
-      socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
 
-      command = new messages::motorcommand();
-      command->set_type(messages::motorcommand::LOOP);
-      command->set_motor(2);
-      command->set_steps(80);
-      command->set_acc(10);
-      socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
+  command = new messages::motorcommand();
+  command->set_type(messages::motorcommand::STATUS);
+  socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
 
-      command = new messages::motorcommand();
-      command->set_type(messages::motorcommand::STATUS);
-      socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
-    }
+  // command = new messages::motorcommand();
+  // command->set_type(messages::motorcommand::LOOP);
+  // command->set_motor(1);
+  // command->set_steps(80);
+  // command->set_acc(10);
+  // socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
+  //
+  // command = new messages::motorcommand();
+  // command->set_type(messages::motorcommand::STATUS);
+  // socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
+  //
+  // command = new messages::motorcommand();
+  // command->set_type(messages::motorcommand::LOOP);
+  // command->set_motor(2);
+  // command->set_steps(80);
+  // command->set_acc(10);
+  // socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
 
-    for(i = 1; i < 10; i++) {
-      command = new messages::motorcommand();
-      command->set_type(messages::motorcommand::LOOP);
-      command->set_motor(1);
-      command->set_steps(-80);
-      command->set_acc(10);
-      socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
-
-      command = new messages::motorcommand();
-      command->set_type(messages::motorcommand::LOOP);
-      command->set_motor(2);
-      command->set_steps(-80);
-      command->set_acc(10);
-      socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
-
-      command = new messages::motorcommand();
-      command->set_type(messages::motorcommand::STATUS);
-      socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
-    }
-  }
+  // while (1) {
+  //   int i;
+  //   for(i = 1; i < 10; i++) {
+  //     command = new messages::motorcommand();
+  //     command->set_type(messages::motorcommand::LOOP);
+  //     command->set_motor(1);
+  //     command->set_steps(80);
+  //     command->set_acc(10);
+  //     socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
+  //
+  //     command = new messages::motorcommand();
+  //     command->set_type(messages::motorcommand::LOOP);
+  //     command->set_motor(2);
+  //     command->set_steps(80);
+  //     command->set_acc(10);
+  //     socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
+  //
+  //     command = new messages::motorcommand();
+  //     command->set_type(messages::motorcommand::STATUS);
+  //     socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
+  //   }
+  //
+  //   for(i = 1; i < 10; i++) {
+  //     command = new messages::motorcommand();
+  //     command->set_type(messages::motorcommand::LOOP);
+  //     command->set_motor(1);
+  //     command->set_steps(-80);
+  //     command->set_acc(10);
+  //     socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
+  //
+  //     command = new messages::motorcommand();
+  //     command->set_type(messages::motorcommand::LOOP);
+  //     command->set_motor(2);
+  //     command->set_steps(-80);
+  //     command->set_acc(10);
+  //     socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
+  //
+  //     command = new messages::motorcommand();
+  //     command->set_type(messages::motorcommand::STATUS);
+  //     socket_write_command(MOTOR_PORT, MOTOR_HOST, command);
+  //   }
+  // }
 
 
   return 0;

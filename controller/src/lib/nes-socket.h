@@ -20,6 +20,5 @@
 #include "messages.pb.h"
 #include "nes.h"
 
-int socket_open();
+int socket_open(int port);
 void socket_setnonblock(int sockfd);
-void socket_write (int sockfd, messages::motorstatus *response);

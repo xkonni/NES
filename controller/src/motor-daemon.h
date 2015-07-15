@@ -20,7 +20,7 @@
 #include <iostream>
 #include "messages.pb.h"
 #include "nes.h"
-#include "lib/nes-socket.h"
+#include "nes-socket.h"
 
 #ifdef HOST_BBB
 #undef HZ
@@ -49,10 +49,9 @@ int ramp[] = {
 int rampN = 40;
 
 void print_error (const char *reply);
-void print_motorcommand (messages::motorcommand *command);
-void print_motorstatus (messages::motorstatus *status);
 void handle_motorcommand (messages::motorcommand *command, messages::motorstatus *status);
 void motor_step (motor *m, int timeout);
 void motor_dir (motor *m, int dir);
 void motor_loop (motor *m, int steps, int acc);
 void socket_read_motorcommand (int sockfd);
+void socket_write_motorstatus (int sockfd, messages::motorstatus *status);
