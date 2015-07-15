@@ -1,8 +1,8 @@
 /*
- * daemon.h
+ * motor-daemon.h
  *
  * daemon to control the stepper motor controller
- * via a socket
+ * via a socket, using protobuf messages
  *
  * Konstantin Koslowski <konstantin.koslowski@mailbox.org>
  */
@@ -19,16 +19,14 @@
 #include <netdb.h>
 #include <iostream>
 #include "messages.pb.h"
+#include "nes.h"
+#include "lib/nes-socket.h"
 
 #ifdef HOST_BBB
 #undef HZ
 #include "BBBiolib.h"
 #endif
 
-#define CONTROLLER_PORT   2020
-#define SENSOR_PORT       2021
-#define MOTOR_PORT        2022
-#define BUFFERSIZE        256
 #define GPIO_HOLD         20
 #define GPIO_TIMEOUT      480
 
@@ -53,11 +51,8 @@ int rampN = 40;
 void print_error (const char *reply);
 void print_motorcommand (messages::motorcommand *command);
 void print_motorstatus (messages::motorstatus *status);
-messages::motorstatus* handle_motorcommand (messages::motorcommand *command);
+void handle_motorcommand (messages::motorcommand *command, messages::motorstatus *status);
 void motor_step (motor *m, int timeout);
 void motor_dir (motor *m, int dir);
 void motor_loop (motor *m, int steps, int acc);
-int socket_open();
-void socket_read (int sockfd);
-void socket_setnonblock(int sockfd);
-void socket_write (int sockfd, messages::motorstatus *response);
+void socket_read_motorcommand (int sockfd);

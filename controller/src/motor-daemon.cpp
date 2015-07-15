@@ -2,20 +2,11 @@
  * motor-daemon.cpp
  *
  * daemon to control the stepper motor controller
- * via a socket
+ * via a socket, using protobuf messages
  *
  * Konstantin Koslowski <konstantin.koslowski@mailbox.org>
  */
 #include "motor-daemon.h"
-
-
-/*
- * print error and exit
- */
-void print_error(const char *reply) {
-  perror(reply);
-  exit(1);
-}
 
 /*
  * print motorcommand
@@ -55,7 +46,7 @@ void print_motorstatus(messages::motorstatus *status) {
  * handle motorcommand
  * return motorstatus
  */
-messages::motorstatus* handle_motorcommand (messages::motorcommand *command) {
+void handle_motorcommand (messages::motorcommand *command, messages::motorstatus *status) {
   int m;
   int steps;
   int acc;
@@ -98,7 +89,6 @@ messages::motorstatus* handle_motorcommand (messages::motorcommand *command) {
   }
 
   // create respnse
-  messages::motorstatus *status = new messages::motorstatus();
   messages::motorstatus::motorStatusMsg *motor;
   motor = status->add_motor();
   motor->set_id(1);
@@ -106,8 +96,6 @@ messages::motorstatus* handle_motorcommand (messages::motorcommand *command) {
   motor = status->add_motor();
   motor->set_id(2);
   motor->set_pos(motor2.pos);
-
-  return status;
 }
 
 /*
@@ -185,39 +173,7 @@ void motor_loop (motor *m, int steps, int acc) {
   m->pos += steps;
 }
 
-int socket_open() {
-  int sockfd;
-
-  // initialize socket
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  // avoid "this address is already in use"
-  int so_reuseaddr = 1;
-  setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &so_reuseaddr, sizeof(so_reuseaddr));
-
-  if (sockfd < 0)
-    print_error("ERROR opening socket");
-
-  struct sockaddr_in serv_addr;
-  bzero((char *) &serv_addr, sizeof(serv_addr));
-  serv_addr.sin_family = AF_INET;
-  serv_addr.sin_addr.s_addr = INADDR_ANY;
-  serv_addr.sin_port = htons(MOTOR_PORT);
-
-  if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
-    print_error("ERROR on binding");
-
-  // avoid "this address is already in use"
-  int yes = 1;
-  if (setsockopt(sockfd,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof(int)) == -1)
-    print_error("setsockopt");
-
-  if(listen(sockfd, 5) < 0)
-    print_error("Listen error");
-
-  return(sockfd);
-}
-
-void socket_read(int sockfd) {
+void socket_read_motorcommand(int sockfd) {
   int new_sockfd;
   // fds to monitor
   fd_set read_fds,write_fds;
@@ -277,13 +233,13 @@ void socket_read(int sockfd) {
           if (n > 0) {
             // message, response
             messages::motorcommand *message = new messages::motorcommand();
-            messages::motorstatus *response;
+            messages::motorstatus *response = new messages::motorstatus();
 
             // parse message
             message->ParseFromString(buffer);
             print_motorcommand(message);
             // generate response
-            response = handle_motorcommand(message);
+            handle_motorcommand(message, response);
             print_motorstatus(response);
             socket_write(*it, response);
           }
@@ -304,28 +260,6 @@ void socket_read(int sockfd) {
   } // while (1)
 }
 
-/*
- * set socket to non-blocking
- */
-void socket_setnonblock(int sockfd) {
-    int flags;
-    flags = fcntl(sockfd,F_GETFL,0);
-    assert(flags != -1);
-    fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
-}
-
-/*
- * write reply to socket
- */
-void socket_write (int sockfd, messages::motorstatus *response) {
-  char buffer[BUFFERSIZE];
-  bzero(buffer, BUFFERSIZE);
-  response->SerializeToArray(buffer, response->ByteSize());
-  // send response
-  write(sockfd, buffer, response->ByteSize());
-}
-
-
 int main(int argc, char *argv[])
 {
   // initialize motors
@@ -343,7 +277,7 @@ int main(int argc, char *argv[])
 
   int sockfd = socket_open();
   // main loop
-  socket_read(sockfd);
+  socket_read_motorcommand(sockfd);
 
   // exit
   printf("shutting down\n");
