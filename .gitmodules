@@ -1,0 +1,3 @@
+[submodule "controller/src/lib/BBBIOlib"]
+	path = controller/src/lib/BBBIOlib
+	url = https://github.com/VegetableAvenger/BBBIOlib.git
