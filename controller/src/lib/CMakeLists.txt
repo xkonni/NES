@@ -9,7 +9,7 @@ add_library(lsm303 SHARED ${lsm303_src})
 target_link_libraries(lsm303 i2cbus)
 install(TARGETS lsm303 DESTINATION lib)
 
-set(nes_src nes.cpp)
+set(nes_src nes.cpp messages.pb.cc)
 add_library(nes SHARED ${nes_src})
 target_link_libraries(nes protobuf pthread)
 install(TARGETS nes DESTINATION lib)

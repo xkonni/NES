@@ -31,12 +31,12 @@ if(${HOST} STREQUAL "beaglebone")
   target_link_libraries(sensor-daemon
     lsm303
     i2cbus
-    protobuf
-    pthread
+    nes
+    nes-socket
   )
 else()
   target_link_libraries(sensor-daemon
-    protobuf
-    pthread
+    nes
+    nes-socket
   )
 endif()
