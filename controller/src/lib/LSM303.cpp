@@ -29,7 +29,6 @@ LSM303::LSM303(const char * i2cDeviceName) :
   i2c_mag(i2cDeviceName), i2c_acc(i2cDeviceName)
 {
     I2CBus i2c(i2cDeviceName);
-    printf("%s\n", i2cDeviceName);
     bool sa0;
 
     if (i2c.tryReadByte(D_SA0_HIGH_ADDRESS, LSM303_WHO_AM_I) == D_WHO_ID)
