@@ -1,3 +1,5 @@
+#ifndef __NES_H
+#define __NES_H
 #include <error.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -19,9 +21,16 @@
 #define NET_IN            '<'
 #define NET_OUT           '>'
 
+typedef struct {
+  double theta;
+  double phi;
+} coordinates;
+
 void print_error(const char *reply);
 void print_motorcommand(char inout, messages::motorcommand *command);
 void print_motorstatus(char inout, messages::motorstatus *status);
 void print_sensorcommand (char inout, messages::sensorcommand *command);
 void print_sensordata(char inout, messages::sensordata *data);
-void convert_sensordata(messages::sensordata *data, std::vector<double> *scoord);
+void convert_coordinates(int x, int y, int z, double *theta, double *phi);
+
+#endif

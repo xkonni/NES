@@ -63,29 +63,19 @@ void print_sensordata(char inout, messages::sensordata *data) {
   char *msg = (char *) malloc(BUFFERSIZE*sizeof(char));
   bzero(msg, BUFFERSIZE);
 
-  sprintf(msg, "[%c][SENSOR | DATA    | ID %d] x: %d, y: %d, z: %d\n",
-      inout, data->sensor(), data->x(), data->y(), data->z());
+  sprintf(msg, "[%c][SENSOR | DATA    | ID %d] theta: %f, phi: %f\n",
+      inout, data->sensor(), data->theta(), data->phi());
   printf(msg);
 }
 
-void convert_sensordata(messages::sensordata *data, std::vector<double> *sph_coord) {
-  double r, theta, phi;
+void convert_coordinates(int x, int y, int z, double *theta, double *phi) {
+  double r;
 
   // radius
-  r = sqrt(pow(data->x(), 2) + pow(data->y(), 2) + pow(data->z(), 2));
+  r = sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
   // angle theta [0; pi]
-  if (r != 0) theta = acos(data->z()/r);
-  else theta = 0;
+  if (r != 0) *theta = acos(z/r)/M_PI*180;
+  else *theta = 0;
   // angle phi [0; 2pi]
-  phi = atan2(data->y(), data->x());
-
-  sph_coord->push_back(r);
-  sph_coord->push_back(theta);
-  sph_coord->push_back(phi);
-
-  printf("spherical coordilates");
-  printf(" r: %.2f", r);
-  printf(" theta: %.2f", theta);
-  printf(" phi: %.2f\n", phi);
-  printf("\n");
+  *phi = atan2(y, x)/M_PI*180;
 }

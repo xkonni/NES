@@ -9,34 +9,27 @@
 #include "controller-daemon.h"
 
 /*
- * print error and exit
- */
-void error(const char *reply) {
-  perror(reply);
-  exit(1);
-}
-
-/*
  * write motorcommand to socket
  */
 void socket_write_motorcommand (messages::motorcommand *command) {
   char buffer[BUFFERSIZE];
   bzero(buffer, BUFFERSIZE);
   int client_sockfd;
+  int n;
 
   client_sockfd = socket_connect(MOTOR_PORT, MOTOR_HOST);
   if (! command->SerializeToFileDescriptor(client_sockfd) ) {
-    error("ERROR writing to socket");
+    print_error("ERROR writing to socket");
   }
-  read(client_sockfd, buffer, BUFFERSIZE);
-  // int n = read(client_sockfd, buffer, BUFFERSIZE);
-  // printf("%d bytes read\n", n);
-
-  messages::motorstatus *status = new messages::motorstatus();
-  status->ParseFromString(buffer);
-
   print_motorcommand(NET_OUT, command);
-  print_motorstatus(NET_IN, status);
+
+  n = read(client_sockfd, buffer, BUFFERSIZE);
+  if (n > 0) {
+    messages::motorstatus *status = new messages::motorstatus();
+    status->ParseFromArray(buffer, n);
+
+    print_motorstatus(NET_IN, status);
+  }
 
   shutdown(client_sockfd, SHUT_RDWR);
   close(client_sockfd);
@@ -49,22 +42,21 @@ void socket_write_sensorcommand (messages::sensorcommand *command) {
   char buffer[BUFFERSIZE];
   bzero(buffer, BUFFERSIZE);
   int client_sockfd;
+  int n;
 
   client_sockfd = socket_connect(SENSOR_PORT, SENSOR_HOST);
   if (! command->SerializeToFileDescriptor(client_sockfd) ) {
-    error("ERROR writing to socket");
+    print_error("ERROR writing to socket");
   }
-  read(client_sockfd, buffer, BUFFERSIZE);
-  // int n = read(client_sockfd, buffer, BUFFERSIZE);
-  // printf("%d bytes read\n", n);
-
-  messages::sensordata *data = new messages::sensordata();
-  data->ParseFromString(buffer);
-
   print_sensorcommand(NET_OUT, command);
-  print_sensordata(NET_IN, data);
-  std::vector<double> *sph_coord = new std::vector<double>();
-  convert_sensordata(data, sph_coord);
+
+  n = read(client_sockfd, buffer, BUFFERSIZE);
+  if (n > 0) {
+    messages::sensordata *data = new messages::sensordata();
+    data->ParseFromArray(buffer, n);
+
+    print_sensordata(NET_IN, data);
+  }
 
   shutdown(client_sockfd, SHUT_RDWR);
   close(client_sockfd);

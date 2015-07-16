@@ -26,12 +26,10 @@
 #endif
 
 typedef struct {
-  int x;
-  int y;
-  int z;
-  int x_offset;
-  int y_offset;
-  int z_offset;
+  double theta;
+  double phi;
+  double theta_offset;
+  double phi_offset;
 } sensor;
 sensor sensor1, sensor2;
 

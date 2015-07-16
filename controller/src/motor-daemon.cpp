@@ -197,7 +197,7 @@ void socket_read_motorcommand(int sockfd) {
             messages::motorstatus *response = new messages::motorstatus();
 
             // parse message
-            message->ParseFromString(buffer);
+            message->ParseFromArray(buffer, n);
             print_motorcommand(NET_IN, message);
             // generate response
             handle_motorcommand(message, response);

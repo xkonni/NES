@@ -31,35 +31,35 @@ void handle_sensorcommand (messages::sensorcommand *command, messages::sensordat
     // sending values anyway
   }
 
-  // TODO
   else if (command->type() == messages::sensorcommand::CALIBRATE) {
 
     // select sensor
     if (s == 1) {
       // read current values
       mag.readMag();
-      sensor1.x_offset = mag.m[0];
-      sensor1.y_offset = mag.m[1];
-      sensor1.z_offset = mag.m[2];
+      convert_coordinates(mag.m[0], mag.m[1], mag.m[2],
+          &sensor1.theta_offset, &sensor1.phi_offset);
     }
     else if (s == 2) {
       printf("TODO\n");
-      sensor2.x = 0;
-      sensor2.y = 0;
-      sensor2.z = 0;
+      // sensor2.x = 0;
+      // sensor2.y = 0;
+      // sensor2.z = 0;
     }
   }
 
   // create response
   if (s == 1) {
-    data->set_x(sensor1.x - sensor1.x_offset);
-    data->set_y(sensor1.y - sensor1.y_offset);
-    data->set_z(sensor1.z - sensor1.z_offset);
+    // printf("response: theta %.2f - %.2f = %.2f, phi: %.2f - %.2f = %.2f\n",
+    //     sensor1.theta, sensor1.theta_offset, sensor1.theta - sensor1.theta_offset,
+    //     sensor1.phi, sensor1.phi_offset, sensor1.phi - sensor1.phi_offset);
+    data->set_theta(sensor1.theta - sensor1.theta_offset);
+    data->set_phi(sensor1.phi - sensor1.phi_offset);
   }
   else if (s == 2) {
-    data->set_x(sensor2.x - sensor2.x_offset);
-    data->set_y(sensor2.y - sensor2.y_offset);
-    data->set_z(sensor2.z - sensor2.z_offset);
+    printf("TODO\n");
+    data->set_theta(sensor2.theta - sensor2.theta_offset);
+    data->set_phi(sensor2.phi - sensor2.phi_offset);
   }
 
 }
@@ -92,21 +92,8 @@ void socket_read_sensorcommand (int sockfd) {
     if (t_diff > t_timeout) {
 #ifdef HOST_BBB
       mag.readMag();
-      sensor1.x = mag.m[0];
-      sensor1.y = mag.m[1];
-      sensor1.z = mag.m[2];
-      // printf("mag.x: %d, mag.y: %d, mag.z: %d\n", mag.m[0], mag.m[1], mag.m[2]);
-      // TODO
-      sensor2.x++;
-      sensor2.y++;
-      sensor2.z++;
-#else
-      sensor1.x++;
-      sensor1.y++;
-      sensor1.z++;
-      sensor2.x++;
-      sensor2.y++;
-      sensor2.z++;
+      convert_coordinates(mag.m[0], mag.m[1], mag.m[2], &sensor1.theta, &sensor1.phi);
+      // TODO sensor2
 #endif
       gettimeofday(&tv_last, NULL);
     }
@@ -159,7 +146,7 @@ void socket_read_sensorcommand (int sockfd) {
             messages::sensordata *response = new messages::sensordata();
 
             // parse message
-            message->ParseFromString(buffer);
+            message->ParseFromArray(buffer, n);
             print_sensorcommand(NET_IN, message);
             // generate response
             handle_sensorcommand(message, response);
@@ -191,15 +178,18 @@ void socket_write_sensordata (int sockfd, messages::sensordata *data) {
   bzero(buffer, BUFFERSIZE);
 
   // serialize data
-  data->SerializeToArray(buffer, data->ByteSize());
+  int err = data->SerializeToArray(buffer, data->ByteSize());
+  if ( ! err ) {
+    printf("error: %d\n", err);
+  }
   // send data
   write(sockfd, buffer, data->ByteSize());
 }
 
 int main(void) {
   int sockfd;
-  sensor1 = (sensor) { 0, 0, 0, 0, 0, 0};
-  sensor2 = (sensor) { 0, 0, 0, 0, 0, 0};
+  sensor1 = (sensor) { 0, 0, 0, 0};
+  sensor2 = (sensor) { 0, 0, 0, 0};
 
 #ifdef HOST_BBB
   // initialize sensors
