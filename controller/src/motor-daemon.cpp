@@ -7,7 +7,15 @@
   */
 #include "motor-daemon.h"
 
-void handle_motorcommand (messages::motorcommand *command, messages::motorstatus *status) {
+Motor::Motor() {
+  motor1 = (motor) { 8, 11, 12, 0, -400, 400 };
+  motor2 = (motor) { 8, 13, 14, 0, -200, 200 };
+}
+
+Motor::~Motor() {
+}
+
+void Motor::handle_motorcommand (messages::motorcommand *command, messages::motorstatus *status) {
   int m;
   int steps;
   int acc;
@@ -53,7 +61,7 @@ void handle_motorcommand (messages::motorcommand *command, messages::motorstatus
   motor->set_pos(motor2.pos);
 }
 
-void motor_step(motor *m, int timeout) {
+void Motor::motor_step(motor *m, int timeout) {
 #ifdef HOST_BBB
   pin_high(m->header, m->step);
   usleep(GPIO_HOLD);
@@ -62,7 +70,7 @@ void motor_step(motor *m, int timeout) {
 #endif
 }
 
-void motor_dir(motor *m, int dir) {
+void Motor::motor_dir(motor *m, int dir) {
 #ifdef HOST_BBB
   if (dir == 0) {
     if (is_high(m->header, m->dir))
@@ -83,7 +91,7 @@ void motor_dir(motor *m, int dir) {
  * int acc    acceleration
  *            [1 (slow) .. 10 (fast) ]
  */
-void motor_loop (motor *m, int steps, int acc) {
+void Motor::motor_loop (motor *m, int steps, int acc) {
   if (acc < 1) {
     printf("acc too low, setting from %d to 1\n", acc);
     acc = 1;
@@ -122,7 +130,7 @@ void motor_loop (motor *m, int steps, int acc) {
   m->pos += steps;
 }
 
-void socket_read_motorcommand(int sockfd) {
+void Motor::socket_read_motorcommand(int sockfd) {
   int new_sockfd;
   // fds to monitor
   fd_set read_fds,write_fds;
@@ -209,7 +217,7 @@ void socket_read_motorcommand(int sockfd) {
   } // while (1)
 }
 
-void socket_write_motorstatus (int sockfd, messages::motorstatus *status) {
+void Motor::socket_write_motorstatus (int sockfd, messages::motorstatus *status) {
   char buffer[BUFFERSIZE];
   bzero(buffer, BUFFERSIZE);
   status->SerializeToArray(buffer, status->ByteSize());
@@ -220,9 +228,7 @@ void socket_write_motorstatus (int sockfd, messages::motorstatus *status) {
 int main(int argc, char *argv[]) {
   int sockfd;
 
-  // initialize motors
-  motor1 = (motor) { 8, 11, 12, 0, -400, 400 };
-  motor2 = (motor) { 8, 13, 14, 0, -200, 200 };
+  Motor mtr;
 
   // initialize GPIOs
 #ifdef HOST_BBB
@@ -235,8 +241,9 @@ int main(int argc, char *argv[]) {
 
   // initialize socket
   sockfd = socket_open(MOTOR_PORT);
+
   // main loop
-  socket_read_motorcommand(sockfd);
+  mtr.socket_read_motorcommand(sockfd);
 
   // exit
   printf("shutting down\n");
