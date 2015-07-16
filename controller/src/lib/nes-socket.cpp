@@ -1,15 +1,12 @@
-/*
- * nes-socket.cpp
- *
- * functions for sockets
- *
- * Konstantin Koslowski <konstantin.koslowski@mailbox.org>
- */
+/**
+  * @file nes-socket.cpp
+  * @brief handle sockets
+  *
+  * @author Konstantin Koslowski <konstantin.koslowski@mailbox.org>
+  */
+
 #include "nes-socket.h"
 
-/*
- * connect to socket
- */
 int socket_connect(int port, const char *hostname) {
   int sockfd;
   struct sockaddr_in serv_addr;
@@ -35,10 +32,6 @@ int socket_connect(int port, const char *hostname) {
   return sockfd;
 }
 
-
-/*
- * open listening socket
- */
 int socket_open(int port) {
   int sockfd;
 
@@ -71,9 +64,6 @@ int socket_open(int port) {
   return(sockfd);
 }
 
-/*
- * set socket to non-blocking
- */
 void socket_setnonblock(int sockfd) {
     int flags;
     flags = fcntl(sockfd,F_GETFL,0);
