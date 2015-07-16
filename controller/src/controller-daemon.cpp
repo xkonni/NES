@@ -1,16 +1,11 @@
-/*
- * controller.cpp
- *
- * control motors and sensors, each running as a separate process,
- * communicate via protobuf messages
- *
- * Konstantin Koslowski <konstantin.koslowski@mailbox.org>
- */
+/**
+  * @file controller-daemon.cpp
+  * @brief control motor- and sensor-daemon
+  *
+  * @author Konstantin Koslowski <konstantin.koslowski@mailbox.org>
+  */
 #include "controller-daemon.h"
 
-/*
- * write motorcommand to socket
- */
 void socket_write_motorcommand (messages::motorcommand *command) {
   char buffer[BUFFERSIZE];
   bzero(buffer, BUFFERSIZE);
@@ -35,9 +30,6 @@ void socket_write_motorcommand (messages::motorcommand *command) {
   close(client_sockfd);
 }
 
-/*
- * write sensorcommand to socket
- */
 void socket_write_sensorcommand (messages::sensorcommand *command) {
   char buffer[BUFFERSIZE];
   bzero(buffer, BUFFERSIZE);
