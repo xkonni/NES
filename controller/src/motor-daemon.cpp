@@ -1,18 +1,12 @@
-/*
- * motor-daemon.cpp
- *
- * daemon to control the stepper motor controller
- * via a socket, using protobuf messages
- *
- * Konstantin Koslowski <konstantin.koslowski@mailbox.org>
- */
-
+/**
+  * @file motor-daemon.cpp
+  * @brief receive protobuf messages containing motorcommands, use them to control 
+  *   two step motors
+  *
+  * @author Konstantin Koslowski <konstantin.koslowski@mailbox.org>
+  */
 #include "motor-daemon.h"
 
-/*
- * handle motorcommand
- * return motorstatus
- */
 void handle_motorcommand (messages::motorcommand *command, messages::motorstatus *status) {
   int m;
   int steps;
@@ -59,9 +53,6 @@ void handle_motorcommand (messages::motorcommand *command, messages::motorstatus
   motor->set_pos(motor2.pos);
 }
 
-/*
- * do a single step
- */
 void motor_step(motor *m, int timeout) {
 #ifdef HOST_BBB
   pin_high(m->header, m->step);
@@ -71,9 +62,6 @@ void motor_step(motor *m, int timeout) {
 #endif
 }
 
-/*
- * change direction
- */
 void motor_dir(motor *m, int dir) {
 #ifdef HOST_BBB
   if (dir == 0) {
@@ -221,9 +209,6 @@ void socket_read_motorcommand(int sockfd) {
   } // while (1)
 }
 
-/*
- * write reply to socket
- */
 void socket_write_motorstatus (int sockfd, messages::motorstatus *status) {
   char buffer[BUFFERSIZE];
   bzero(buffer, BUFFERSIZE);
@@ -232,9 +217,7 @@ void socket_write_motorstatus (int sockfd, messages::motorstatus *status) {
   write(sockfd, buffer, status->ByteSize());
 }
 
-
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   int sockfd;
 
   // initialize motors
