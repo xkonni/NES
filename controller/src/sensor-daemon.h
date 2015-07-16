@@ -7,6 +7,9 @@
  * Konstantin Koslowski <konstantin.koslowski@mailbox.org>
  */
 
+#ifndef __SENSOR_DAEMON_H
+#define __SENSOR_DAEMON_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,3 +38,5 @@ sensor sensor1, sensor2;
 
 void socket_read_sensorcommand (int sockfd);
 void socket_write_sensordata (int sockfd, messages::sensordata *data);
+
+#endif

@@ -1,5 +1,14 @@
+/*
+ * nes.h
+ *
+ * helper functions
+ *
+ * Konstantin Koslowski <konstantin.koslowski@mailbox.org>
+ */
+
 #ifndef __NES_H
 #define __NES_H
+
 #include <error.h>
 #include <unistd.h>
 #include <stdlib.h>

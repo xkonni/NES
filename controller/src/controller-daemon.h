@@ -7,6 +7,9 @@
  * Konstantin Koslowski <konstantin.koslowski@mailbox.org>
  */
 
+#ifndef __CONTROLLER_DAEMON_H
+#define __CONTROLLER_DAEMON_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,3 +21,5 @@
 #include "messages.pb.h"
 #include "nes.h"
 #include "nes-socket.h"
+
+#endif

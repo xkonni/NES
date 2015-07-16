@@ -7,6 +7,9 @@
  * Konstantin Koslowski <konstantin.koslowski@mailbox.org>
  */
 
+#ifndef __MOTOR_DAEMON_H
+#define __MOTOR_DAEMON_H
+
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -55,3 +58,5 @@ void motor_dir (motor *m, int dir);
 void motor_loop (motor *m, int steps, int acc);
 void socket_read_motorcommand (int sockfd);
 void socket_write_motorstatus (int sockfd, messages::motorstatus *status);
+
+#endif

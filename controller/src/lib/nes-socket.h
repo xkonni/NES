@@ -6,6 +6,9 @@
  * Konstantin Koslowski <konstantin.koslowski@mailbox.org>
  */
 
+#ifndef __NES_SOCKET_H
+#define __NES_SOCKET_H
+
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -23,3 +26,5 @@
 int socket_connect(int port, const char *hostname);
 int socket_open(int port);
 void socket_setnonblock(int sockfd);
+
+#endif
