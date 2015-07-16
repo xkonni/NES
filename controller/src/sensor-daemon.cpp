@@ -11,7 +11,15 @@
 LSM303 mag("/dev/i2c-1");
 #endif
 
-void handle_sensorcommand (messages::sensorcommand *command, messages::sensordata *data) {
+Sensor::Sensor() {
+  sensor1 = (sensor) { 0, 0, 0, 0};
+  sensor2 = (sensor) { 0, 0, 0, 0};
+}
+
+Sensor::~Sensor() {
+}
+
+void Sensor::handle_sensorcommand (messages::sensorcommand *command, messages::sensordata *data) {
   int s;
   // select sensor
   s = command->sensor();
@@ -59,7 +67,7 @@ void handle_sensorcommand (messages::sensorcommand *command, messages::sensordat
 
 }
 
-void socket_read_sensorcommand (int sockfd) {
+void Sensor::socket_read_sensorcommand (int sockfd) {
   int new_sockfd;
   // fds to monitor
   fd_set read_fds,write_fds;
@@ -165,7 +173,7 @@ void socket_read_sensorcommand (int sockfd) {
   } // while (1)
 }
 
-void socket_write_sensordata (int sockfd, messages::sensordata *data) {
+void Sensor::socket_write_sensordata (int sockfd, messages::sensordata *data) {
   char buffer[BUFFERSIZE];
   bzero(buffer, BUFFERSIZE);
 
@@ -180,8 +188,7 @@ void socket_write_sensordata (int sockfd, messages::sensordata *data) {
 
 int main(void) {
   int sockfd;
-  sensor1 = (sensor) { 0, 0, 0, 0};
-  sensor2 = (sensor) { 0, 0, 0, 0};
+  Sensor snsr;
 
 #ifdef HOST_BBB
   // initialize sensors
@@ -193,7 +200,7 @@ int main(void) {
 
   // main loop
   while (1) {
-    socket_read_sensorcommand(sockfd);
+    snsr.socket_read_sensorcommand(sockfd);
   }
 
   return(0);
