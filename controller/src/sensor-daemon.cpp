@@ -1,26 +1,16 @@
-/*
- * sensor-daemon.cpp
- *
- * daemon to read sensor values and send them
- * via protobuf messages
- *
- * Konstantin Koslowski <konstantin.koslowski@mailbox.org>
- */
+/**
+  * @file sensor-daemon.cpp
+  * @brief read sensor values, send them via protobuf messages
+  *
+  * @author Konstantin Koslowski <konstantin.koslowski@mailbox.org>
+  */
 
-// #include <stdio.h>
-// #include <iostream>
-// #include <unistd.h>
-// #include <vector>
 #include "sensor-daemon.h"
 
 #ifdef HOST_BBB
 LSM303 mag("/dev/i2c-1");
 #endif
 
-/*
- * handle sensorcommand
- * return sensorstatus
- */
 void handle_sensorcommand (messages::sensorcommand *command, messages::sensordata *data) {
   int s;
   // select sensor
@@ -36,9 +26,11 @@ void handle_sensorcommand (messages::sensorcommand *command, messages::sensordat
     // select sensor
     if (s == 1) {
       // read current values
+#ifdef HOST_BBB
       mag.readMag();
       convert_coordinates(mag.m[0], mag.m[1], mag.m[2],
           &sensor1.theta_offset, &sensor1.phi_offset);
+#endif
     }
     else if (s == 2) {
       printf("TODO\n");
@@ -50,9 +42,12 @@ void handle_sensorcommand (messages::sensorcommand *command, messages::sensordat
 
   // create response
   if (s == 1) {
+    // DEBUG
     // printf("response: theta %.2f - %.2f = %.2f, phi: %.2f - %.2f = %.2f\n",
     //     sensor1.theta, sensor1.theta_offset, sensor1.theta - sensor1.theta_offset,
     //     sensor1.phi, sensor1.phi_offset, sensor1.phi - sensor1.phi_offset);
+
+    // return the current sensor position minus the saved offset
     data->set_theta(sensor1.theta - sensor1.theta_offset);
     data->set_phi(sensor1.phi - sensor1.phi_offset);
   }
@@ -170,9 +165,6 @@ void socket_read_sensorcommand (int sockfd) {
   } // while (1)
 }
 
-/*
- * write reply to socket
- */
 void socket_write_sensordata (int sockfd, messages::sensordata *data) {
   char buffer[BUFFERSIZE];
   bzero(buffer, BUFFERSIZE);
