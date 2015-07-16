@@ -1,21 +1,20 @@
+/**
+  * @file nes.cpp
+  * @brief parameters and helper functions
+  *
+  * @author Konstantin Koslowski <konstantin.koslowski@mailbox.org>
+  */
 #include "nes.h"
-/*
- * print error and exit
- */
+
 void print_error(const char *reply) {
   perror(reply);
   exit(1);
 }
 
-/*
- * print motorcommand
- */
 void print_motorcommand (char inout, messages::motorcommand *command) {
   char *msg = (char *) malloc(BUFFERSIZE*sizeof(char));
   bzero(msg, BUFFERSIZE);
 
-  // TODO
-  // sprintf(msg, "  [SENSOR | COMMAND | ID %d] %s\n",
   sprintf(msg, "[%c][MOTOR  | COMMAND | ID %d] %s",
       inout, command->motor(),
       messages::motorcommand::commandType_Name(command->type()).c_str());
@@ -27,9 +26,6 @@ void print_motorcommand (char inout, messages::motorcommand *command) {
   printf(msg);
 }
 
-/*
- * print motorstatus
- */
 void print_motorstatus (char inout, messages::motorstatus *status) {
   char *msg = (char *) malloc(BUFFERSIZE*sizeof(char));
   bzero(msg, BUFFERSIZE);
@@ -44,9 +40,6 @@ void print_motorstatus (char inout, messages::motorstatus *status) {
   printf(msg);
 }
 
-/*
- * print sensorcommand
- */
 void print_sensorcommand (char inout, messages::sensorcommand *command) {
   char *msg = (char *) malloc(BUFFERSIZE*sizeof(char));
   bzero(msg, BUFFERSIZE);
@@ -56,9 +49,6 @@ void print_sensorcommand (char inout, messages::sensorcommand *command) {
   printf(msg);
 }
 
-/*
- * print sensordata
- */
 void print_sensordata(char inout, messages::sensordata *data) {
   char *msg = (char *) malloc(BUFFERSIZE*sizeof(char));
   bzero(msg, BUFFERSIZE);
