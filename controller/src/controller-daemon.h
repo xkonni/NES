@@ -25,18 +25,24 @@
 #include "nes.h"
 #include "nes-socket.h"
 
-/** @fn void socket_write_motorcommand (messages::motorcommand *command)
-  * @brief send motorcommand
-  *
-  * @param[in] command the command to send
-  */
-void socket_write_motorcommand (messages::motorcommand *command);
+class Controller {
+  public:
+    Controller();
+    ~Controller();
 
-/** @fn void socket_write_sensorcommand (messages::sensorcommand *command);
-  * @brief send sensorcommand
-  *
-  * @param[in] command the command to send
-  */
-void socket_write_sensorcommand (messages::sensorcommand *command);
+    /** @fn void socket_write_motorcommand (messages::motorcommand *command)
+      * @brief send motorcommand
+      *
+      * @param[in] command the command to send
+      */
+    void socket_write_motorcommand (messages::motorcommand *command);
+
+    /** @fn void socket_write_sensorcommand (messages::sensorcommand *command);
+      * @brief send sensorcommand
+      *
+      * @param[in] command the command to send
+      */
+    void socket_write_sensorcommand (messages::sensorcommand *command);
+};
 
 #endif
