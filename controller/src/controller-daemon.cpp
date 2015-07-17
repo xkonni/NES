@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
   sdata1 = new messages::sensordata();
   scommand->set_type(messages::sensorcommand::CALIBRATE);
   scommand->set_sensor(1);
-  ctrl.socket_write_sensorcommand(scommand, sdata1);
+  ctrl.socket_write_sensorcommand(SENSOR1, scommand, sdata1);
 
   // calibrate sensor1
   scommand = new messages::sensorcommand();
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
   scommand->set_type(messages::sensorcommand::CALIBRATE);
     // TODO: select sensor2
   scommand->set_sensor(1);
-  ctrl.socket_write_sensorcommand(scommand, sdata2);
+  ctrl.socket_write_sensorcommand(SENSOR2, scommand, sdata2);
 
   while (1) {
     // read sensor1 values
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
     sdata1 = new messages::sensordata();
     scommand->set_type(messages::sensorcommand::GET);
     scommand->set_sensor(1);
-    ctrl.socket_write_sensorcommand(scommand, sdata1);
+    ctrl.socket_write_sensorcommand(SENSOR2, scommand, sdata1);
 
     // read sensor2 values
     scommand = new messages::sensorcommand();
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
     scommand->set_type(messages::sensorcommand::GET);
     // TODO: select sensor2
     scommand->set_sensor(1);
-    ctrl.socket_write_sensorcommand(scommand, sdata2);
+    ctrl.socket_write_sensorcommand(SENSOR2, scommand, sdata2);
 
     // sleep
     sleep(1);

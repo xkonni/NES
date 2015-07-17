@@ -31,6 +31,9 @@
 // #define SENSOR2_HOST       "localhost"
 #define SENSOR2_HOST        "192.168.7.2"
 
+#define SENSOR1             1
+#define SENSOR2             2
+
 #define NET_IN            '<'
 #define NET_OUT           '>'
 

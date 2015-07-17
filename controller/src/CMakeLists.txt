@@ -54,7 +54,7 @@ if(${HOST} STREQUAL "beaglebone")
     nes-socket
   )
 else()
-  target_link_libraries(sensor-daemon
+  target_link_libraries(sensor2-daemon
     nes
     nes-socket
   )
