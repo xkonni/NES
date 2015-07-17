@@ -40,6 +40,28 @@ class Controller {
       */
     ~Controller();
 
+    /** @struct sensors
+      * @brief sensors struct
+      * @details
+      *   holds angles of both sensors
+      */
+    struct sensors {
+      double theta1;          ///< sensor1 theta angle
+      double phi1;            ///< sensor1 phi angle
+      double theta2;          ///< sensor2 theta angle
+      double phi2;            ///< sensor2 phi angle
+      /**
+       * @fn sensor()
+       * @brief default constructor for the sensor struct
+       */
+      sensors() {
+        theta1        = 0;
+        phi1          = 0;
+        theta2        = 0;
+        phi2          = 0;
+      }
+    };
+
     /** @fn void calculate_movement (messages::sensordata *data1,
      *          messages::sensordata *data2);
      *  @brief calculate the necessary movement based on reading from two sensors
@@ -83,6 +105,9 @@ class Controller {
 
     /// @var sockfd listening socket
     int sockfd;
+
+    /// @var currentSensors latest readings
+    sensors currentSensors;
 };
 
 #endif

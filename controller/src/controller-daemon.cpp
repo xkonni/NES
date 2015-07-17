@@ -6,7 +6,9 @@
   */
 #include "controller-daemon.h"
 
-Controller::Controller() {
+Controller::Controller() :
+  currentSensors{}
+{
   sockfd = socket_open(CONTROLLER_PORT);
 }
 
@@ -24,25 +26,12 @@ void Controller::socket_write_motorcommand (
   int n;
 
   client_sockfd = socket_connect(MOTOR_PORT, MOTOR_HOST);
-  // TODO:
-  //
-  // char buffer[BUFFERSIZE];
-  // bzero(buffer, BUFFERSIZE);
-  //
-  // // serialize data
-  // int err = data->SerializeToArray(buffer, data->ByteSize());
-  // if ( ! err ) {
-  //   printf("error: %d\n", err);
-  // }
-  // // send data
-  // write(sockfd, buffer, data->ByteSize());
-  //
 
-  if (! command->SerializeToFileDescriptor(client_sockfd) ) {
-    print_error("ERROR writing to socket");
-  }
+  command->SerializeToArray(buffer, command->ByteSize());
+  write(client_sockfd, buffer, command->ByteSize());
   print_motorcommand(NET_OUT, command);
 
+  bzero(buffer, BUFFERSIZE);
   n = read(client_sockfd, buffer, BUFFERSIZE);
   if (n > 0) {
     status->ParseFromArray(buffer, n);
@@ -66,6 +55,7 @@ void Controller::calculate_movement (
 
   // motor1 -> theta
   theta_diff = data1->theta() - data2->theta();
+  command1->set_type(messages::motorcommand::LOOP);
   command1->set_motor(1);
   command1->set_steps(deg2steps(theta_diff));
   command1->set_acc(10);
@@ -73,6 +63,7 @@ void Controller::calculate_movement (
 
   // motor2 -> phi
   phi_diff = data1->phi() - data2->phi();
+  command2->set_type(messages::motorcommand::LOOP);
   command2->set_motor(2);
   command2->set_steps(deg2steps(phi_diff));
   command2->set_acc(10);
@@ -90,11 +81,12 @@ void Controller::socket_write_sensorcommand (int sensor,
   } else {
     client_sockfd = socket_connect(SENSOR2_PORT, SENSOR2_HOST);
   }
-  if (! command->SerializeToFileDescriptor(client_sockfd) ) {
-    print_error("ERROR writing to socket");
-  }
+  command->SerializeToArray(buffer, command->ByteSize());
+  write(client_sockfd, buffer, command->ByteSize());
+
   print_sensorcommand(NET_OUT, command);
 
+  bzero(buffer, BUFFERSIZE);
   n = read(client_sockfd, buffer, BUFFERSIZE);
   if (n > 0) {
     data->ParseFromArray(buffer, n);
@@ -108,12 +100,24 @@ void Controller::socket_write_sensorcommand (int sensor,
 int main(int argc, char *argv[])
 {
   Controller ctrl;
-  messages::motorcommand *mcommand;
-  messages::motorstatus *mstatus;
-  // messages::sensorcommand *scommand;
-  // messages::sensordata *sdata1;
-  // messages::sensordata *sdata2;
+  messages::motorcommand *mcommand1 = new messages::motorcommand();
+  messages::motorcommand *mcommand2 = new messages::motorcommand();
+  messages::motorstatus *mstatus1 = new messages::motorstatus();
+  messages::motorstatus *mstatus2 = new messages::motorstatus();
+  messages::sensorcommand *scommand1 = new messages::sensorcommand();
+  messages::sensorcommand *scommand2 = new messages::sensorcommand();
+  messages::sensordata *sdata1 = new messages::sensordata();
+  messages::sensordata *sdata2 = new messages::sensordata();
 
+  // calibrate sensor1
+  scommand1->set_type(messages::sensorcommand::CALIBRATE);
+  scommand1->set_sensor(1);
+  ctrl.socket_write_sensorcommand(SENSOR1, scommand1, sdata1);
+
+  // calibrate sensor2
+  scommand2->set_type(messages::sensorcommand::CALIBRATE);
+  scommand2->set_sensor(2);
+  ctrl.socket_write_sensorcommand(SENSOR2, scommand2, sdata2);
 
   int new_sockfd;
   // fds to monitor
@@ -184,16 +188,18 @@ int main(int argc, char *argv[])
           n = read(*it, buffer, sizeof(buffer));
           // data available
           if (n > 0) {
-            // message, response
+            // message
             messages::sensordata *message = new messages::sensordata();
-
             // parse message
             message->ParseFromArray(buffer, n);
             print_sensordata(NET_IN, message);
-            // generate response
-            // handle_motorcommand(message, response);
-            // print_motorstatus(NET_OUT, response);
-            // socket_write_motorstatus(*it, response);
+            if (message->sensor() == SENSOR1) {
+              sdata1->CopyFrom(*message);
+              printf("message->theta: %f, sdata1->theta(): %f\n", message->theta(), sdata1->theta());
+            } else {
+              sdata2->CopyFrom(*message);
+              printf("message->theta: %f, sdata2->theta(): %f\n", message->theta(), sdata2->theta());
+            }
           }
           // client disconnected
           else if (n == 0) {
@@ -213,13 +219,12 @@ int main(int argc, char *argv[])
     // printf("doing other things...\n");
     gettimeofday(&tv_now, NULL);
     if (t_diff > update_timeout) {
-      // mcommand = new messages::motorcommand();
-      // mstatus = new messages::motorstatus();
-      // mcommand->set_type(messages::motorcommand::LOOP);
-      // mcommand->set_motor(1);
-      // mcommand->set_steps(10);
-      // mcommand->set_acc(10);
-      // ctrl.socket_write_motorcommand(mcommand, mstatus);
+      mcommand1 = new messages::motorcommand();
+      mcommand2 = new messages::motorcommand();
+
+      ctrl.calculate_movement(sdata1, sdata2, mcommand1, mcommand2);
+      ctrl.socket_write_motorcommand(mcommand1, mstatus1);
+      ctrl.socket_write_motorcommand(mcommand2, mstatus2);
       gettimeofday(&tv_last, NULL);
     }
 
