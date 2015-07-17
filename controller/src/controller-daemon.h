@@ -80,6 +80,9 @@ class Controller {
      */
     void socket_write_sensorcommand (int sensor,
         messages::sensorcommand *command, messages::sensordata *data);
+
+    /// @var sockfd listening socket
+    int sockfd;
 };
 
 #endif

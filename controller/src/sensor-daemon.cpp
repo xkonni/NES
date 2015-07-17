@@ -85,6 +85,7 @@ void Sensor::handle_sensorcommand (messages::sensorcommand *command, messages::s
 
 void Sensor::socket_read_sensorcommand () {
   int new_sockfd;
+  int client_sockfd;
   // fds to monitor
   fd_set read_fds,write_fds;
   // timeout {[sec], [usec]}
@@ -108,16 +109,32 @@ void Sensor::socket_read_sensorcommand () {
     // read sensor data
     gettimeofday(&tv_now, NULL);
     t_diff = (tv_now.tv_usec - tv_last.tv_usec) + (tv_now.tv_sec - tv_last.tv_sec) * 1000000;
+    // update values and send them to the controller
     if (t_diff > t_timeout) {
 #ifdef HOST_BBB
       mag.readMag();
       convert_coordinates(mag.m[0], mag.m[1], mag.m[2], &sensor1.theta, &sensor1.phi);
+
+
       // DEBUG
       // printf("update: theta %.2f - %.2f = %.2f, phi: %.2f - %.2f = %.2f\n",
       //     sensor1.theta, sensor1.theta_offset, sensor1.theta - sensor1.theta_offset,
       //     sensor1.phi, sensor1.phi_offset, sensor1.phi - sensor1.phi_offset);
-      // TODO sensor2
 #endif
+
+      // send updated values
+      messages::sensordata *data = new messages::sensordata();
+      // TODO create a function for this
+      data->set_sensor(1);
+      data->set_theta(sensor1.theta - sensor1.theta_offset);
+      data->set_phi(sensor1.phi - sensor1.phi_offset);
+      client_sockfd = socket_connect(CONTROLLER_PORT, CONTROLLER_HOST);
+      if( client_sockfd < 0) {
+          print_error("CONNECT error");
+      }
+      socket_write_sensordata(client_sockfd, data);
+      shutdown(client_sockfd, 0);
+      close(client_sockfd);
       gettimeofday(&tv_last, NULL);
     }
 

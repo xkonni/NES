@@ -7,9 +7,13 @@
 #include "controller-daemon.h"
 
 Controller::Controller() {
+  sockfd = socket_open(CONTROLLER_PORT);
 }
 
 Controller::~Controller() {
+  // shutdown
+  shutdown(sockfd, 0);
+  close(sockfd);
 }
 
 void Controller::socket_write_motorcommand (
@@ -20,6 +24,20 @@ void Controller::socket_write_motorcommand (
   int n;
 
   client_sockfd = socket_connect(MOTOR_PORT, MOTOR_HOST);
+  // TODO:
+  //
+  // char buffer[BUFFERSIZE];
+  // bzero(buffer, BUFFERSIZE);
+  //
+  // // serialize data
+  // int err = data->SerializeToArray(buffer, data->ByteSize());
+  // if ( ! err ) {
+  //   printf("error: %d\n", err);
+  // }
+  // // send data
+  // write(sockfd, buffer, data->ByteSize());
+  //
+
   if (! command->SerializeToFileDescriptor(client_sockfd) ) {
     print_error("ERROR writing to socket");
   }
@@ -92,51 +110,146 @@ int main(int argc, char *argv[])
   Controller ctrl;
   messages::motorcommand *mcommand;
   messages::motorstatus *mstatus;
-  messages::sensorcommand *scommand;
-  messages::sensordata *sdata1;
-  messages::sensordata *sdata2;
+  // messages::sensorcommand *scommand;
+  // messages::sensordata *sdata1;
+  // messages::sensordata *sdata2;
 
-  // reset motor1
-  mcommand = new messages::motorcommand();
-  mstatus = new messages::motorstatus();
-  mcommand->set_type(messages::motorcommand::RESET);
-  mcommand->set_motor(1);
-  ctrl.socket_write_motorcommand(mcommand, mstatus);
 
-  // calibrate sensor1
-  scommand = new messages::sensorcommand();
-  sdata1 = new messages::sensordata();
-  scommand->set_type(messages::sensorcommand::CALIBRATE);
-  scommand->set_sensor(1);
-  ctrl.socket_write_sensorcommand(SENSOR1, scommand, sdata1);
-
-  // calibrate sensor1
-  scommand = new messages::sensorcommand();
-  sdata2 = new messages::sensordata();
-  scommand->set_type(messages::sensorcommand::CALIBRATE);
-    // TODO: select sensor2
-  scommand->set_sensor(1);
-  ctrl.socket_write_sensorcommand(SENSOR2, scommand, sdata2);
-
+  int new_sockfd;
+  // fds to monitor
+  fd_set read_fds,write_fds;
+  struct timeval waitd = {10, 0};
+  int sel;
+  int max_fd;
+  int n;
+  std::vector<int> connected;
+  char buffer[BUFFERSIZE];
+  // store the connecting address and size
+  struct sockaddr_storage their_addr;
+  socklen_t their_addr_size;
   while (1) {
-    // read sensor1 values
-    scommand = new messages::sensorcommand();
-    sdata1 = new messages::sensordata();
-    scommand->set_type(messages::sensorcommand::GET);
-    scommand->set_sensor(1);
-    ctrl.socket_write_sensorcommand(SENSOR2, scommand, sdata1);
+    // listen to sensorstatus messages
+    // printf("listening...\n");
+    FD_ZERO(&read_fds);
+    FD_ZERO(&write_fds);
+    // add sockfd
+    FD_SET(ctrl.sockfd, &read_fds);
+    FD_SET(ctrl.sockfd, &write_fds);
+    max_fd = ctrl.sockfd;
 
-    // read sensor2 values
-    scommand = new messages::sensorcommand();
-    sdata2 = new messages::sensordata();
-    scommand->set_type(messages::sensorcommand::GET);
-    // TODO: select sensor2
-    scommand->set_sensor(1);
-    ctrl.socket_write_sensorcommand(SENSOR2, scommand, sdata2);
+    // add connected clients
+    for (std::vector<int>::iterator it = connected.begin(); it != connected.end(); it++) {
+      FD_SET(*it, &read_fds);
+      max_fd = std::max(max_fd, *it);
+    }
 
-    // sleep
-    sleep(1);
-  }
+    // check for data
+    sel = select(max_fd+1, &read_fds, &write_fds, (fd_set*)0, &waitd);
+
+    // continue on error
+    if (sel < 0) {
+      print_error("select error");
+      continue;
+    }
+
+    // data received
+    if (sel > 0) {
+      // client connected
+      if(FD_ISSET(ctrl.sockfd, &read_fds)) {
+        // printf("data on sockfd\n");
+        their_addr_size = sizeof(their_addr);
+        new_sockfd = accept(ctrl.sockfd, (struct sockaddr*)&their_addr, &their_addr_size);
+        if( new_sockfd < 0) {
+            print_error("accept error");
+        }
+        socket_setnonblock(new_sockfd);
+        printf("client connected\n");
+        connected.push_back(new_sockfd);
+      }
+      for (std::vector<int>::iterator it = connected.begin(); it != connected.end(); it++) {
+        if (FD_ISSET(*it, &read_fds)) {
+          // skip this fd
+          if (*it == ctrl.sockfd) continue;
+          bzero(buffer, BUFFERSIZE);
+          n = read(*it, buffer, sizeof(buffer));
+          // data available
+          if (n > 0) {
+            // message, response
+            printf("message received\n");
+            messages::sensordata *message = new messages::sensordata();
+
+            // parse message
+            message->ParseFromArray(buffer, n);
+            print_sensordata(NET_IN, message);
+            // generate response
+            // handle_motorcommand(message, response);
+            // print_motorstatus(NET_OUT, response);
+            // socket_write_motorstatus(*it, response);
+          }
+          // client disconnected
+          else if (n == 0) {
+            printf("client disconnected\n");
+            // printf("closing socket: %d\n", *it);
+            // shutdown, close socket
+            shutdown(*it, SHUT_RDWR);
+            close(*it);
+            // erase from list
+            connected.erase(it);
+            // iterator invalid, end for-loop
+            break;
+          }
+        }
+      } // for
+    } // if (sel > 0)
+
+    // do other things
+    // printf("doing other things...\n");
+    mcommand = new messages::motorcommand();
+    mstatus = new messages::motorstatus();
+    mcommand->set_type(messages::motorcommand::LOOP);
+    mcommand->set_motor(1);
+    mcommand->set_steps(10);
+    mcommand->set_acc(10);
+    ctrl.socket_write_motorcommand(mcommand, mstatus);
+
+  } // while (1)
 
   return 0;
 }
+  // leftovers
+  // // reset motor1
+  // mcommand = new messages::motorcommand();
+  // mstatus = new messages::motorstatus();
+  // mcommand->set_type(messages::motorcommand::RESET);
+  // mcommand->set_motor(1);
+  // ctrl.socket_write_motorcommand(mcommand, mstatus);
+  //
+  // // calibrate sensor1
+  // scommand = new messages::sensorcommand();
+  // sdata1 = new messages::sensordata();
+  // scommand->set_type(messages::sensorcommand::CALIBRATE);
+  // scommand->set_sensor(1);
+  // ctrl.socket_write_sensorcommand(SENSOR1, scommand, sdata1);
+  //
+  // // calibrate sensor1
+  // scommand = new messages::sensorcommand();
+  // sdata2 = new messages::sensordata();
+  // scommand->set_type(messages::sensorcommand::CALIBRATE);
+  //   // TODO: select sensor2
+  // scommand->set_sensor(1);
+  // ctrl.socket_write_sensorcommand(SENSOR2, scommand, sdata2);
+
+    // // request sensor1 values
+    // scommand = new messages::sensorcommand();
+    // sdata1 = new messages::sensordata();
+    // scommand->set_type(messages::sensorcommand::GET);
+    // scommand->set_sensor(1);
+    // ctrl.socket_write_sensorcommand(SENSOR1, scommand, sdata1);
+    //
+    // // request sensor2 values
+    // scommand = new messages::sensorcommand();
+    // sdata2 = new messages::sensordata();
+    // scommand->set_type(messages::sensorcommand::GET);
+    // // TODO: select sensor2
+    // scommand->set_sensor(1);
+    // ctrl.socket_write_sensorcommand(SENSOR2, scommand, sdata2);
