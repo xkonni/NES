@@ -7,10 +7,14 @@
   */
 #include "motor-daemon.h"
 
-Motor::Motor() {
-  // initialize motors
-  motor1 = motor( 8, 11, 12, 0, -400, 400 );
-  motor2 = motor( 8, 13, 14, 0, -200, 200 );
+Motor::Motor() :
+    ramp {100,  71,  53,  42,  33,  27,  23,  19,  16,  14,
+           12,  11,  10,   9,   8,   7,   6,   6,   5,   5,
+            5,   4,   4,   4,   3,   3,   3,   3,   3,   2,
+            2,   2,   2,   2,   2,   2,   2,   2,   2,   2 },
+    motor1 { 8, 11, 12, 0, -400, 400 },
+    motor2 { 8, 13, 14, 0, -200, 200 }
+{
   // initialize socket
   sockfd = socket_open(MOTOR_PORT);
 }
@@ -237,10 +241,10 @@ int main(int argc, char *argv[]) {
   // initialize GPIOs
 #ifdef HOST_BBB
   iolib_init();
-  iolib_setdir(motor1.header, motor1.step, BBBIO_DIR_OUT);
-  iolib_setdir(motor1.header, motor1.dir, BBBIO_DIR_OUT);
-  iolib_setdir(motor2.header, motor2.step, BBBIO_DIR_OUT);
-  iolib_setdir(motor2.header, motor2.dir, BBBIO_DIR_OUT);
+  iolib_setdir(mtr.motor1.header, mtr.motor1.step, BBBIO_DIR_OUT);
+  iolib_setdir(mtr.motor1.header, mtr.motor1.dir, BBBIO_DIR_OUT);
+  iolib_setdir(mtr.motor2.header, mtr.motor2.step, BBBIO_DIR_OUT);
+  iolib_setdir(mtr.motor2.header, mtr.motor2.dir, BBBIO_DIR_OUT);
 #endif
 
   // main loop

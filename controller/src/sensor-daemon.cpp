@@ -11,10 +11,10 @@
 LSM303 mag("/dev/i2c-1");
 #endif
 
-Sensor::Sensor() {
-  // initialize sensors
-  sensor1 = sensor();
-  sensor2 = sensor();
+Sensor::Sensor() :
+    sensor1 {},
+    sensor2 {}
+{
   // initialize socket
   sockfd = socket_open(SENSOR_PORT);
 }

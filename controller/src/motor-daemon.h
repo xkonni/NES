@@ -58,26 +58,12 @@ class Motor {
       *   800 steps
       */
     struct motor {
-      int header;   ///< the pin header
-      int step;     ///< pin for the step signal
-      int dir;      ///< pin for the direction signal
-      int pos;      ///< current position
-      int minpos;   ///< minimum position
-      int maxpos;   ///< maximum position
-
-      /**
-       * @fn motor()
-       *
-       * @brief default constructor for the motor struct
-       */
-      motor() {
-        header  = 0;
-        step    = 0;
-        dir     = 0;
-        pos     = 0;
-        minpos  = 0;
-        maxpos  = 0;
-      }
+      int header;    ///< the pin header
+      int step;      ///< pin for the step signal
+      int dir;       ///< pin for the direction signal
+      int pos;       ///< current position
+      int minpos;    ///< minimum position
+      int maxpos;    ///< maximum position
 
       /**
        * @fn motor(int header_in, int step_in, int dir_in, int pos_in,
@@ -98,23 +84,38 @@ class Motor {
         pos     = pos_in;
         minpos  = minpos_in;
         maxpos  = maxpos_in;
+      };
+
+      /**
+       * @fn motor()
+       *
+       * @brief default constructor for the motor struct
+       */
+      motor() {
+        header  = 0;
+        step    = 0;
+        dir     = 0;
+        pos     = 0;
+        minpos  = 0;
+        maxpos  = 0;
       }
     };
 
     /** @var ramp values used for acceleration and
       * deceleration of the motors
       */
-    int ramp[40] = {
-      100,  71,  53,  42,  33,  27,  23,  19,  16,  14,
-       12,  11,  10,   9,   8,   7,   6,   6,   5,   5,
-        5,   4,   4,   4,   3,   3,   3,   3,   3,   2,
-        2,   2,   2,   2,   2,   2,   2,   2,   2,   2
-    };
+    const int ramp[40];
+    // = {
+    //   100,  71,  53,  42,  33,  27,  23,  19,  16,  14,
+    //    12,  11,  10,   9,   8,   7,   6,   6,   5,   5,
+    //     5,   4,   4,   4,   3,   3,   3,   3,   3,   2,
+    //     2,   2,   2,   2,   2,   2,   2,   2,   2,   2
+    // };
 
     /**
      * @var rampN number of ramp elements
      */
-    int rampN = 40;
+    static const int rampN = 40;
 
     /** @fn         void handle_motorcommand (messages::motorcommand *command,
       *                 messages::motorstatus *status)
