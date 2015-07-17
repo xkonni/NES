@@ -26,8 +26,10 @@ int socket_connect(int port, const char *hostname) {
        (char *)&serv_addr.sin_addr.s_addr,
        server->h_length);
   serv_addr.sin_port = htons(port);
-  if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0)
-      print_error("ERROR connecting");
+  if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) {
+      perror("ERROR connecting\n");
+      return -1;
+  }
 
   return sockfd;
 }
