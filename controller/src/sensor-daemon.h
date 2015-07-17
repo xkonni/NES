@@ -94,8 +94,6 @@ class Sensor {
 
     /// @var sensor1 first LSM303DLHC sensor
     sensor sensor1;
-    /// @var sensor2 second LSM303DLHC sensor
-    sensor sensor2;
     /// @var sockfd listening socket
     int sockfd;
 };

@@ -8,25 +8,25 @@
 #include "sensor-daemon.h"
 
 #ifdef HOST_BBB
-// pin 19,20
-LSM303 mag("/dev/i2c-1");
-// pin 17,18
-// LSM303 mag("/dev/i2c-2");
+#ifndef BBB_SENSOR2
+LSM303 mag("/dev/i2c-1"); // pin 19,20
+#else
+LSM303 mag("/dev/i2c-2"); // pin 17,18
+#endif
 #endif
 
 Sensor::Sensor() :
     sensor1 {}
 {
-  // initialize socket
 #ifndef BBB_SENSOR2
-  printf("built for SENSOR1\n");
+  printf("built for SENSOR1, using \"/dev/i2c-1\"\n");
+  sensor1.id = 1;
   sockfd = socket_open(SENSOR1_PORT);
 #else
+  printf("built for SENSOR2, using \"/dev/i2c-2\"\n");
   sensor1.id = 2;
-  printf("built for SENSOR2\n");
   sockfd = socket_open(SENSOR2_PORT);
 #endif
-
 }
 
 Sensor::~Sensor() {
@@ -72,7 +72,7 @@ void Sensor::socket_read_sensorcommand () {
   struct timeval waitd = {0, 100};
   struct timeval tv_now, tv_last;
   // sensor update interval [usec]
-  int update_timeout = 100000;
+  int update_timeout = 1000000;
   long int t_diff;
   int sel;
   int max_fd;
