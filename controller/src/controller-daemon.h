@@ -27,7 +27,17 @@
 
 class Controller {
   public:
+
+    /**
+      * @fn Controller();
+      * @brief the constructor for a Controller object
+      */
     Controller();
+
+    /**
+      * @fn ~Controller();
+      * @brief the destructor for a Controller object
+      */
     ~Controller();
 
     /** @fn void socket_write_motorcommand (messages::motorcommand *command)
