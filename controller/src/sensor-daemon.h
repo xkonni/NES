@@ -24,7 +24,6 @@
 #include "messages.pb.h"
 #include "nes-socket.h"
 #include "nes.h"
-#include "sys/time.h"
 
 #ifdef HOST_BBB
 #include "LSM303.h"

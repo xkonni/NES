@@ -92,7 +92,7 @@ void Sensor::socket_read_sensorcommand () {
   struct timeval waitd = {0, 100};
   struct timeval tv_now, tv_last;
   // sensor update interval [usec]
-  int t_timeout = 100000;
+  int update_timeout = 100000;
   long int t_diff;
   int sel;
   int max_fd;
@@ -106,11 +106,11 @@ void Sensor::socket_read_sensorcommand () {
   // initialize time
   gettimeofday(&tv_last, NULL);
   while (1) {
-    // read sensor data
     gettimeofday(&tv_now, NULL);
     t_diff = (tv_now.tv_usec - tv_last.tv_usec) + (tv_now.tv_sec - tv_last.tv_sec) * 1000000;
+
     // update values and send them to the controller
-    if (t_diff > t_timeout) {
+    if (t_diff > update_timeout) {
 #ifdef HOST_BBB
       mag.readMag();
       convert_coordinates(mag.m[0], mag.m[1], mag.m[2], &sensor1.theta, &sensor1.phi);

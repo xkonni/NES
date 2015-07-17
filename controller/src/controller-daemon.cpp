@@ -118,7 +118,12 @@ int main(int argc, char *argv[])
   int new_sockfd;
   // fds to monitor
   fd_set read_fds,write_fds;
-  struct timeval waitd = {10, 0};
+  // timeout {[sec], [usec]}
+  struct timeval waitd = {0, 100};
+  struct timeval tv_now, tv_last;
+  // sensor update interval [usec]
+  int update_timeout = 100000;
+  long int t_diff;
   int sel;
   int max_fd;
   int n;
@@ -127,7 +132,13 @@ int main(int argc, char *argv[])
   // store the connecting address and size
   struct sockaddr_storage their_addr;
   socklen_t their_addr_size;
+
+  // initialize time
+  gettimeofday(&tv_last, NULL);
   while (1) {
+    gettimeofday(&tv_now, NULL);
+    t_diff = (tv_now.tv_usec - tv_last.tv_usec) + (tv_now.tv_sec - tv_last.tv_sec) * 1000000;
+
     // listen to sensorstatus messages
     // printf("listening...\n");
     FD_ZERO(&read_fds);
@@ -163,7 +174,6 @@ int main(int argc, char *argv[])
             print_error("accept error");
         }
         socket_setnonblock(new_sockfd);
-        printf("client connected\n");
         connected.push_back(new_sockfd);
       }
       for (std::vector<int>::iterator it = connected.begin(); it != connected.end(); it++) {
@@ -175,7 +185,6 @@ int main(int argc, char *argv[])
           // data available
           if (n > 0) {
             // message, response
-            printf("message received\n");
             messages::sensordata *message = new messages::sensordata();
 
             // parse message
@@ -188,8 +197,6 @@ int main(int argc, char *argv[])
           }
           // client disconnected
           else if (n == 0) {
-            printf("client disconnected\n");
-            // printf("closing socket: %d\n", *it);
             // shutdown, close socket
             shutdown(*it, SHUT_RDWR);
             close(*it);
@@ -204,13 +211,17 @@ int main(int argc, char *argv[])
 
     // do other things
     // printf("doing other things...\n");
-    mcommand = new messages::motorcommand();
-    mstatus = new messages::motorstatus();
-    mcommand->set_type(messages::motorcommand::LOOP);
-    mcommand->set_motor(1);
-    mcommand->set_steps(10);
-    mcommand->set_acc(10);
-    ctrl.socket_write_motorcommand(mcommand, mstatus);
+    gettimeofday(&tv_now, NULL);
+    if (t_diff > update_timeout) {
+      // mcommand = new messages::motorcommand();
+      // mstatus = new messages::motorstatus();
+      // mcommand->set_type(messages::motorcommand::LOOP);
+      // mcommand->set_motor(1);
+      // mcommand->set_steps(10);
+      // mcommand->set_acc(10);
+      // ctrl.socket_write_motorcommand(mcommand, mstatus);
+      gettimeofday(&tv_last, NULL);
+    }
 
   } // while (1)
 
