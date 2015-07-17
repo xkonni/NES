@@ -1,6 +1,6 @@
 /**
   * @file motor-daemon.h
-  * @brief receive protobuf messages containing motorcommands, use them to control 
+  * @brief receive protobuf messages containing motorcommands, use them to control
   *   two step motors
   *
   * @details
@@ -38,23 +38,68 @@
 
 class Motor {
   public:
+    /**
+      * @fn Motor();
+      * @brief the constructor for a Motor object
+      */
     Motor();
+    /**
+      * @fn ~Motor();
+      * @brief the destructor for a Motor object
+      */
     ~Motor();
 
-    /** @typedef motor
-      * describes the header and step/direction pins
-      * the motor is connected to as well as the current
-      * position and limits. a complete turn-around counts
-      * 800 steps
+    /** @struct motor
+      * @brief motor struct
+      * @details
+      *   describes the header and step/direction pins
+      *   the motor is connected to as well as the current
+      *   position and limits. a complete turn-around counts
+      *   800 steps
       */
-    typedef struct {
+    struct motor {
       int header;   ///< the pin header
       int step;     ///< pin for the step signal
       int dir;      ///< pin for the direction signal
       int pos;      ///< current position
       int minpos;   ///< minimum position
       int maxpos;   ///< maximum position
-    } motor;
+
+      /**
+       * @fn motor()
+       *
+       * @brief default constructor for the motor struct
+       */
+      motor() {
+        header  = 0;
+        step    = 0;
+        dir     = 0;
+        pos     = 0;
+        minpos  = 0;
+        maxpos  = 0;
+      }
+
+      /**
+       * @fn motor(int header_in, int step_in, int dir_in, int pos_in,
+                int minpos_in, int maxpos_in)
+       * @brief constructor for the motor struct
+       * @param[in] header    initial value for the pin header
+       * @param[in] step      initial value for pin for the step signal
+       * @param[in] dir       initial value for pin for the direction signal
+       * @param[in] pos       initial value for current position
+       * @param[in] minpos    initial value for minimum position
+       * @param[in] maxpos    initial value for maximum position
+       */
+      motor(int header_in, int step_in, int dir_in, int pos_in,
+          int minpos_in, int maxpos_in) {
+        header  = header_in;
+        step    = step_in;
+        dir     = dir_in;
+        pos     = pos_in;
+        minpos  = minpos_in;
+        maxpos  = maxpos_in;
+      }
+    };
 
     /** @var ramp values used for acceleration and
       * deceleration of the motors
@@ -66,7 +111,9 @@ class Motor {
         2,   2,   2,   2,   2,   2,   2,   2,   2,   2
     };
 
-    /// @var rampN number of ramp elements
+    /**
+     * @var rampN number of ramp elements
+     */
     int rampN = 40;
 
     /** @fn         void handle_motorcommand (messages::motorcommand *command,
@@ -105,10 +152,8 @@ class Motor {
 
     /** @fn         void socket_read_motorcommand (int sockfd);
       * @brief      read a motorcommand from the socket
-      *
-      * @param[in]  sockfd  the socket
       */
-    void socket_read_motorcommand (int sockfd);
+    void socket_read_motorcommand ();
 
     /** @fn         void socket_write_motorstatus (int sockfd, messages::motorstatus *status);
       * @brief write motorstatus to the socket
@@ -122,6 +167,8 @@ class Motor {
     motor motor1;
     /// @var motor2 second connected motor
     motor motor2;
+    /// @var sockfd listening socket
+    int sockfd;
 };
 
 #endif

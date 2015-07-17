@@ -8,11 +8,17 @@
 #include "motor-daemon.h"
 
 Motor::Motor() {
-  motor1 = (motor) { 8, 11, 12, 0, -400, 400 };
-  motor2 = (motor) { 8, 13, 14, 0, -200, 200 };
+  // initialize motors
+  motor1 = motor( 8, 11, 12, 0, -400, 400 );
+  motor2 = motor( 8, 13, 14, 0, -200, 200 );
+  // initialize socket
+  sockfd = socket_open(MOTOR_PORT);
 }
 
 Motor::~Motor() {
+  // shutdown
+  shutdown(sockfd, 0);
+  close(sockfd);
 }
 
 void Motor::handle_motorcommand (messages::motorcommand *command, messages::motorstatus *status) {
@@ -130,7 +136,7 @@ void Motor::motor_loop (motor *m, int steps, int acc) {
   m->pos += steps;
 }
 
-void Motor::socket_read_motorcommand(int sockfd) {
+void Motor::socket_read_motorcommand() {
   int new_sockfd;
   // fds to monitor
   fd_set read_fds,write_fds;
@@ -226,8 +232,6 @@ void Motor::socket_write_motorstatus (int sockfd, messages::motorstatus *status)
 }
 
 int main(int argc, char *argv[]) {
-  int sockfd;
-
   Motor mtr;
 
   // initialize GPIOs
@@ -239,15 +243,8 @@ int main(int argc, char *argv[]) {
   iolib_setdir(motor2.header, motor2.dir, BBBIO_DIR_OUT);
 #endif
 
-  // initialize socket
-  sockfd = socket_open(MOTOR_PORT);
-
   // main loop
-  mtr.socket_read_motorcommand(sockfd);
+  mtr.socket_read_motorcommand();
 
-  // exit
-  printf("shutting down\n");
-  shutdown(sockfd, 0);
-  close(sockfd);
   return 0;
 }
