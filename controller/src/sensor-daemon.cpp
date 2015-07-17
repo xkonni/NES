@@ -12,11 +12,17 @@ LSM303 mag("/dev/i2c-1");
 #endif
 
 Sensor::Sensor() {
-  sensor1 = (sensor) { 0, 0, 0, 0};
-  sensor2 = (sensor) { 0, 0, 0, 0};
+  // initialize sensors
+  sensor1 = sensor();
+  sensor2 = sensor();
+  // initialize socket
+  sockfd = socket_open(SENSOR_PORT);
 }
 
 Sensor::~Sensor() {
+  // shutdown
+  shutdown(sockfd, 0);
+  close(sockfd);
 }
 
 void Sensor::handle_sensorcommand (messages::sensorcommand *command, messages::sensordata *data) {
@@ -67,7 +73,7 @@ void Sensor::handle_sensorcommand (messages::sensorcommand *command, messages::s
 
 }
 
-void Sensor::socket_read_sensorcommand (int sockfd) {
+void Sensor::socket_read_sensorcommand () {
   int new_sockfd;
   // fds to monitor
   fd_set read_fds,write_fds;
@@ -187,7 +193,6 @@ void Sensor::socket_write_sensordata (int sockfd, messages::sensordata *data) {
 }
 
 int main(void) {
-  int sockfd;
   Sensor snsr;
 
 #ifdef HOST_BBB
@@ -195,12 +200,9 @@ int main(void) {
   mag.enable();
 #endif
 
-  // initialize socket
-  sockfd = socket_open(SENSOR_PORT);
-
   // main loop
   while (1) {
-    snsr.socket_read_sensorcommand(sockfd);
+    snsr.socket_read_sensorcommand();
   }
 
   return(0);

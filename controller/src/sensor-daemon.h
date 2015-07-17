@@ -33,20 +33,41 @@
 
 class Sensor {
   public:
+    /**
+      * @fn Sensor();
+      * @brief the constructor for a Sensor object
+      */
     Sensor();
+
+    /**
+      * @fn ~Sensor();
+      * @brief the destructor for a Sensor object
+      */
     ~Sensor();
 
-    /** @typedef sensor
-      * describes the angles theta and phi
-      * resulting from the x, y, z sensor values
-      * as well as offsets due to calibration
+    /** @struct sensor
+      * @brief sensor typedef
+      * @details
+      *   describes the angles theta and phi
+      *   resulting from the x, y, z sensor values
+      *   as well as offsets due to calibration
       */
-    typedef struct {
+    struct sensor {
       double theta;           ///< current theta angle
       double phi;             ///< current phi angle
       double theta_offset;    ///< calibrated theta offset
       double phi_offset;      ///< calibrated phi offset
-    } sensor;
+      /**
+       * @fn sensor()
+       * @brief default constructor for the sensor struct
+       */
+      sensor() {
+        theta         = 0;
+        phi           = 0;
+        theta_offset  = 0;
+        phi_offset    = 0;
+      }
+    };
 
     /** @fn         void handle_sensorcommand (messages::sensorcommand *command,
       *                 messages::sensordata *data);
@@ -59,10 +80,8 @@ class Sensor {
 
     /** @fn   void socket_read_sensorcommand (int sockfd);
       * @brief read a sensorcommand from the socket
-      *
-      * @param[in] sockfd the socket
       */
-    void socket_read_sensorcommand (int sockfd);
+    void socket_read_sensorcommand ();
 
     /** @fn         void socket_write_sensordata (int sockfd, messages::sensordata *data);
       * @brief      write sensordata to the socket
@@ -76,6 +95,8 @@ class Sensor {
     sensor sensor1;
     /// @var sensor2 second LSM303DLHC sensor
     sensor sensor2;
+    /// @var sockfd listening socket
+    int sockfd;
 };
 
 #endif
