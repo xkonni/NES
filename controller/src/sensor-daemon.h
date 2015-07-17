@@ -45,7 +45,7 @@ class Sensor {
     ~Sensor();
 
     /** @struct sensor
-      * @brief sensor typedef
+      * @brief sensor struct
       * @details
       *   describes the angles theta and phi
       *   resulting from the x, y, z sensor values
