@@ -52,6 +52,7 @@ class Sensor {
       *   as well as offsets due to calibration
       */
     struct sensor {
+      int id;                 ///< sensor id
       double theta;           ///< current theta angle
       double phi;             ///< current phi angle
       double theta_offset;    ///< calibrated theta offset
@@ -61,6 +62,7 @@ class Sensor {
        * @brief default constructor for the sensor struct
        */
       sensor() {
+        id            = 1;
         theta         = 0;
         phi           = 0;
         theta_offset  = 0;

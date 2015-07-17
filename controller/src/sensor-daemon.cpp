@@ -15,14 +15,14 @@ LSM303 mag("/dev/i2c-1");
 #endif
 
 Sensor::Sensor() :
-    sensor1 {},
-    sensor2 {}
+    sensor1 {}
 {
   // initialize socket
 #ifndef BBB_SENSOR2
   printf("built for SENSOR1\n");
   sockfd = socket_open(SENSOR1_PORT);
 #else
+  sensor1.id = 2;
   printf("built for SENSOR2\n");
   sockfd = socket_open(SENSOR2_PORT);
 #endif
@@ -36,10 +36,7 @@ Sensor::~Sensor() {
 }
 
 void Sensor::handle_sensorcommand (messages::sensorcommand *command, messages::sensordata *data) {
-  int s;
-  // select sensor
-  s = command->sensor();
-  data->set_sensor(s);
+  data->set_sensor(sensor1.id);
 
   if (command->type() == messages::sensorcommand::GET) {
     // sending values anyway
@@ -47,40 +44,23 @@ void Sensor::handle_sensorcommand (messages::sensorcommand *command, messages::s
 
   else if (command->type() == messages::sensorcommand::CALIBRATE) {
 
-    // select sensor
-    if (s == 1) {
-      // read current values
+    // read current values
 #ifdef HOST_BBB
-      mag.readMag();
-      convert_coordinates(mag.m[0], mag.m[1], mag.m[2],
-          &sensor1.theta_offset, &sensor1.phi_offset);
+    mag.readMag();
+    convert_coordinates(mag.m[0], mag.m[1], mag.m[2],
+        &sensor1.theta_offset, &sensor1.phi_offset);
 #endif
-    }
-    else if (s == 2) {
-      printf("TODO\n");
-      // sensor2.x = 0;
-      // sensor2.y = 0;
-      // sensor2.z = 0;
-    }
   }
 
   // create response
-  if (s == 1) {
-    // DEBUG
-    // printf("response: theta %.2f - %.2f = %.2f, phi: %.2f - %.2f = %.2f\n",
-    //     sensor1.theta, sensor1.theta_offset, sensor1.theta - sensor1.theta_offset,
-    //     sensor1.phi, sensor1.phi_offset, sensor1.phi - sensor1.phi_offset);
+  // DEBUG
+  // printf("response: theta %.2f - %.2f = %.2f, phi: %.2f - %.2f = %.2f\n",
+  //     sensor1.theta, sensor1.theta_offset, sensor1.theta - sensor1.theta_offset,
+  //     sensor1.phi, sensor1.phi_offset, sensor1.phi - sensor1.phi_offset);
 
-    // return the current sensor position minus the saved offset
-    data->set_theta(sensor1.theta - sensor1.theta_offset);
-    data->set_phi(sensor1.phi - sensor1.phi_offset);
-  }
-  else if (s == 2) {
-    printf("TODO\n");
-    data->set_theta(sensor2.theta - sensor2.theta_offset);
-    data->set_phi(sensor2.phi - sensor2.phi_offset);
-  }
-
+  // return the current sensor position minus the saved offset
+  data->set_theta(sensor1.theta - sensor1.theta_offset);
+  data->set_phi(sensor1.phi - sensor1.phi_offset);
 }
 
 void Sensor::socket_read_sensorcommand () {
@@ -106,6 +86,7 @@ void Sensor::socket_read_sensorcommand () {
   // initialize time
   gettimeofday(&tv_last, NULL);
   while (1) {
+    // read sensor data
     gettimeofday(&tv_now, NULL);
     t_diff = (tv_now.tv_usec - tv_last.tv_usec) + (tv_now.tv_sec - tv_last.tv_sec) * 1000000;
 
@@ -114,7 +95,6 @@ void Sensor::socket_read_sensorcommand () {
 #ifdef HOST_BBB
       mag.readMag();
       convert_coordinates(mag.m[0], mag.m[1], mag.m[2], &sensor1.theta, &sensor1.phi);
-
 
       // DEBUG
       // printf("update: theta %.2f - %.2f = %.2f, phi: %.2f - %.2f = %.2f\n",
@@ -125,7 +105,7 @@ void Sensor::socket_read_sensorcommand () {
       // send updated values
       messages::sensordata *data = new messages::sensordata();
       // TODO create a function for this
-      data->set_sensor(1);
+      data->set_sensor(sensor1.id);
       data->set_theta(sensor1.theta - sensor1.theta_offset);
       data->set_phi(sensor1.phi - sensor1.phi_offset);
       client_sockfd = socket_connect(CONTROLLER_PORT, CONTROLLER_HOST);
