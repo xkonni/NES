@@ -140,103 +140,14 @@ void Motor::motor_loop (motor *m, int steps, int acc) {
   m->pos += steps;
 }
 
-void Motor::socket_read_motorcommand() {
-  int new_sockfd;
-  // fds to monitor
-  fd_set read_fds,write_fds;
-  struct timeval waitd = {10, 0};
-  int sel;
-  int max_fd;
-  int n;
-  std::vector<int> connected;
-  char buffer[BUFFERSIZE];
-  // store the connecting address and size
-  struct sockaddr_storage their_addr;
-  socklen_t their_addr_size;
-
-  while (1) {
-    FD_ZERO(&read_fds);
-    FD_ZERO(&write_fds);
-    // add sockfd
-    FD_SET(sockfd, &read_fds);
-    FD_SET(sockfd, &write_fds);
-    max_fd = sockfd;
-
-    // add connected clients
-    for (std::vector<int>::iterator it = connected.begin(); it != connected.end(); it++) {
-      FD_SET(*it, &read_fds);
-      max_fd = std::max(max_fd, *it);
-    }
-
-    // check for data
-    sel = select(max_fd+1, &read_fds, &write_fds, (fd_set*)0, &waitd);
-
-    // continue on error
-    if (sel < 0) {
-      print_error("select error");
-      continue;
-    }
-
-    // data received
-    if (sel > 0) {
-      // client connected
-      if(FD_ISSET(sockfd, &read_fds)) {
-        // printf("data on sockfd\n");
-        their_addr_size = sizeof(their_addr);
-        new_sockfd = accept(sockfd, (struct sockaddr*)&their_addr, &their_addr_size);
-        if( new_sockfd < 0) {
-            print_error("accept error");
-        }
-        socket_setnonblock(new_sockfd);
-        connected.push_back(new_sockfd);
-      }
-      for (std::vector<int>::iterator it = connected.begin(); it != connected.end(); it++) {
-        if (FD_ISSET(*it, &read_fds)) {
-          // skip this fd
-          if (*it == sockfd) continue;
-          bzero(buffer, BUFFERSIZE);
-          n = read(*it, buffer, sizeof(buffer));
-          // data available
-          if (n > 0) {
-            // message, response
-            messages::motorcommand *message = new messages::motorcommand();
-            messages::motorstatus *response = new messages::motorstatus();
-
-            // parse message
-            message->ParseFromArray(buffer, n);
-            print_motorcommand(NET_IN, message);
-            // generate response
-            handle_motorcommand(message, response);
-            print_motorstatus(NET_OUT, response);
-            socket_write_motorstatus(*it, response);
-          }
-          // client disconnected
-          else if (n == 0) {
-            // printf("closing socket: %d\n", *it);
-            // shutdown, close socket
-            shutdown(*it, SHUT_RDWR);
-            close(*it);
-            // erase from list
-            connected.erase(it);
-            // iterator invalid, end for-loop
-            break;
-          }
-        }
-      } // for
-    } // if (sel > 0)
-  } // while (1)
-}
-
-void Motor::socket_write_motorstatus (int sockfd, messages::motorstatus *status) {
-  char buffer[BUFFERSIZE];
-  bzero(buffer, BUFFERSIZE);
-  status->SerializeToArray(buffer, status->ByteSize());
-  // send status
-  write(sockfd, buffer, status->ByteSize());
-}
-
 int main(int argc, char *argv[]) {
   Motor mtr;
+  int n;
+  char buffer[BUFFERSIZE];
+  // connected clients
+  std::vector<int> *connected = new std::vector<int>();
+  messages::motorcommand *message = new messages::motorcommand();
+  messages::motorstatus *response = new messages::motorstatus();
 
   // initialize GPIOs
 #ifdef HOST_BBB
@@ -248,7 +159,23 @@ int main(int argc, char *argv[]) {
 #endif
 
   // main loop
-  mtr.socket_read_motorcommand();
+  while (1) {
+    // listen on socket
+    n = socket_listen(mtr.sockfd, connected, buffer);
+    if (n > 0) {
+      // parse message
+      message->ParseFromArray(buffer, n);
+      print_motorcommand(NET_IN, message);
+      mtr.handle_motorcommand(message, response);
+    }
+    // TODO: fix
+    // command requested response
+    // if (response->motor_size() > 0) {
+    //   bzero(buffer, BUFFERSIZE);
+    //   response->SerializeToArray(buffer, response->ByteSize());
+    //   socket_write(CONTROLLER_PORT, CONTROLLER_HOST, buffer, response->ByteSize());
+    // }
+  }
 
   return 0;
 }

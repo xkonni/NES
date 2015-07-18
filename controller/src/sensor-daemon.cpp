@@ -63,157 +63,82 @@ void Sensor::handle_sensorcommand (messages::sensorcommand *command, messages::s
   data->set_phi(sensor1.phi - sensor1.phi_offset);
 }
 
-void Sensor::socket_read_sensorcommand () {
-  int new_sockfd;
-  int client_sockfd;
-  // fds to monitor
-  fd_set read_fds,write_fds;
-  // timeout {[sec], [usec]}
-  struct timeval waitd = {0, 100};
-  struct timeval tv_now, tv_last;
-  // sensor update interval [usec]
-  int update_timeout = 1000000;
-  long int t_diff;
-  int sel;
-  int max_fd;
-  int n;
-  std::vector<int> connected;
-  char buffer[BUFFERSIZE];
-  // store the connecting address and size
-  struct sockaddr_storage their_addr;
-  socklen_t their_addr_size;
-
-  // initialize time
-  gettimeofday(&tv_last, NULL);
-  while (1) {
-    // read sensor data
-    gettimeofday(&tv_now, NULL);
-    t_diff = (tv_now.tv_usec - tv_last.tv_usec) + (tv_now.tv_sec - tv_last.tv_sec) * 1000000;
-
-    // update values and send them to the controller
-    if (t_diff > update_timeout) {
-#ifdef HOST_BBB
-      mag.readMag();
-      convert_coordinates(mag.m[0], mag.m[1], mag.m[2], &sensor1.theta, &sensor1.phi);
-
-      // DEBUG
-      // printf("update: theta %.2f - %.2f = %.2f, phi: %.2f - %.2f = %.2f\n",
-      //     sensor1.theta, sensor1.theta_offset, sensor1.theta - sensor1.theta_offset,
-      //     sensor1.phi, sensor1.phi_offset, sensor1.phi - sensor1.phi_offset);
-#endif
-
-      // send updated values
-      messages::sensordata *data = new messages::sensordata();
-      // TODO create a function for this
-      data->set_sensor(sensor1.id);
-      data->set_theta(sensor1.theta - sensor1.theta_offset);
-      data->set_phi(sensor1.phi - sensor1.phi_offset);
-      client_sockfd = socket_connect(CONTROLLER_PORT, CONTROLLER_HOST);
-      if( client_sockfd < 0) {
-          print_error("CONNECT error");
-      }
-      socket_write_sensordata(client_sockfd, data);
-      shutdown(client_sockfd, 0);
-      close(client_sockfd);
-      gettimeofday(&tv_last, NULL);
-    }
-
-    FD_ZERO(&read_fds);
-    FD_ZERO(&write_fds);
-    // add sockfd
-    FD_SET(sockfd, &read_fds);
-    FD_SET(sockfd, &write_fds);
-    max_fd = sockfd;
-
-    // add connected clients
-    for (std::vector<int>::iterator it = connected.begin(); it != connected.end(); it++) {
-      FD_SET(*it, &read_fds);
-      max_fd = std::max(max_fd, *it);
-    }
-
-    // check for data
-    sel = select(max_fd+1, &read_fds, &write_fds, (fd_set*)0, &waitd);
-
-    // continue on error
-    if (sel < 0) {
-      print_error("select error");
-      continue;
-    }
-
-    // data received
-    if (sel > 0) {
-      // client connected
-      if(FD_ISSET(sockfd, &read_fds)) {
-        // printf("data on sockfd\n");
-        their_addr_size = sizeof(their_addr);
-        new_sockfd = accept(sockfd, (struct sockaddr*)&their_addr, &their_addr_size);
-        if( new_sockfd < 0) {
-            print_error("accept error");
-        }
-        socket_setnonblock(new_sockfd);
-        connected.push_back(new_sockfd);
-      }
-      for (std::vector<int>::iterator it = connected.begin(); it != connected.end(); it++) {
-        if (FD_ISSET(*it, &read_fds)) {
-          // skip this fd
-          if (*it == sockfd) continue;
-          bzero(buffer, BUFFERSIZE);
-          n = read(*it, buffer, sizeof(buffer));
-          // data available
-          if (n > 0) {
-            // message, response
-            messages::sensorcommand *message = new messages::sensorcommand();
-            messages::sensordata *response = new messages::sensordata();
-
-            // parse message
-            message->ParseFromArray(buffer, n);
-            print_sensorcommand(NET_IN, message);
-            // generate response
-            handle_sensorcommand(message, response);
-            print_sensordata(NET_OUT, response);
-            socket_write_sensordata(*it, response);
-          }
-          // client disconnected
-          else if (n == 0) {
-            // printf("closing socket: %d\n", *it);
-            // shutdown, close socket
-            shutdown(*it, SHUT_RDWR);
-            close(*it);
-            // erase from list
-            connected.erase(it);
-            // iterator invalid, end for-loop
-            break;
-          }
-        }
-      } // for
-    } // if (sel > 0)
-  } // while (1)
-}
-
-void Sensor::socket_write_sensordata (int sockfd, messages::sensordata *data) {
-  char buffer[BUFFERSIZE];
+int Sensor::get_sensordatabuffer (char *buffer) {
   bzero(buffer, BUFFERSIZE);
 
+  messages::sensordata *data = new messages::sensordata();
+  data->set_sensor(sensor1.id);
+  data->set_theta(sensor1.theta - sensor1.theta_offset);
+  data->set_phi(sensor1.phi - sensor1.phi_offset);
+  print_sensordata(NET_OUT, data);
   // serialize data
-  int err = data->SerializeToArray(buffer, data->ByteSize());
-  if ( ! err ) {
-    printf("error: %d\n", err);
-  }
-  // send data
-  write(sockfd, buffer, data->ByteSize());
+  data->SerializeToArray(buffer, data->ByteSize());
+  return data->ByteSize();
 }
 
 int main(void) {
   Sensor snsr;
+  struct timeval tv_now, tv_last;
+  // update timeout [usec]
+  int update_timeout = 1000000;
+  int n;
+  long int t_diff;
+  char buffer[BUFFERSIZE];
+  // connected clients
+  std::vector<int> *connected = new std::vector<int>();
+  messages::sensorcommand *message = new messages::sensorcommand();
+  messages::sensordata *response = new messages::sensordata();
 
 #ifdef HOST_BBB
   // initialize sensors
   mag.enable();
 #endif
 
+  // initialize time
+  gettimeofday(&tv_last, NULL);
   // main loop
   while (1) {
-    snsr.socket_read_sensorcommand();
+    // update time
+    gettimeofday(&tv_now, NULL);
+    t_diff = (tv_now.tv_usec - tv_last.tv_usec) + (tv_now.tv_sec - tv_last.tv_sec) * 1000000;
+    // listen on socket
+    n = socket_listen(snsr.sockfd, connected, buffer);
+    if (n > 0) {
+      // parse message
+      message->ParseFromArray(buffer, n);
+      print_sensorcommand(NET_IN, message);
+      snsr.handle_sensorcommand(message, response);
+    }
+
+    // command requested response
+    if (response->has_sensor()) {
+      bzero(buffer, BUFFERSIZE);
+      response->SerializeToArray(buffer, response->ByteSize());
+      print_sensordata(NET_OUT, response);
+      n = socket_write(CONTROLLER_PORT, CONTROLLER_HOST, buffer, response->ByteSize());
+      if (n > 0) {
+        print_sensordata(NET_OUT, response);
+      }
+    }
+
+    // timeout
+    // update values and send them to the controller
+    if (t_diff > update_timeout) {
+#ifdef HOST_BBB
+      mag.readMag();
+      convert_coordinates(mag.m[0], mag.m[1], mag.m[2],
+          &snsr.sensor1.theta, &snsr.sensor1.phi);
+#else
+      snsr.sensor1.theta++;
+      snsr.sensor1.phi++;
+#endif
+      // DEBUG
+      // printf("timeout: %f, %f\n", snsr.sensor1.theta, snsr.sensor1.phi);
+      // send updated values
+      n = snsr.get_sensordatabuffer(buffer);
+      socket_write(CONTROLLER_PORT, CONTROLLER_HOST, buffer, n);
+      gettimeofday(&tv_last, NULL);
+    }
   }
 
   return(0);

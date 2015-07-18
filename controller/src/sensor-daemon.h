@@ -79,18 +79,12 @@ class Sensor {
       */
     void handle_sensorcommand (messages::sensorcommand *command, messages::sensordata *data);
 
-    /** @fn   void socket_read_sensorcommand (int sockfd);
-      * @brief read a sensorcommand from the socket
-      */
-    void socket_read_sensorcommand ();
-
-    /** @fn         void socket_write_sensordata (int sockfd, messages::sensordata *data);
-      * @brief      write sensordata to the socket
-      *
-      * @param[in]  sockfd    the socket
-      * @param[in]  data      sensordata to be written
-      */
-    void socket_write_sensordata (int sockfd, messages::sensordata *data);
+    /** @fn         int get_sensordatabuffer (char *buffer);
+     * @brief       get buffer containing latest sensordata
+     *
+     * @param[out]  buffer    buffer to hold the data
+     */
+    int get_sensordatabuffer (char *buffer);
 
     /// @var sensor1 first LSM303DLHC sensor
     sensor sensor1;

@@ -25,13 +25,29 @@
 #include "messages.pb.h"
 #include "nes.h"
 
-/** @fn         int socket_connect(int port, const char *hostname);
-  * @brief      connect to a host:port
-  *
-  * @param[in]  port      the port to use
-  * @param[in]  hostname  the host to connect to
-  */
-int socket_connect(int port, const char *hostname);
+int socket_listen(int sockfd, std::vector<int> *connected, char *buffer);
+
+/** @fn         int socket_writeread(int port, const char *hostname,
+ *                  const char *buffer, int size);
+ * @brief       connect to a host:port and write a buffer
+ *
+ * @param[in]     port      port to use
+ * @param[in]     hostname  host to connect to
+ * @param[in/out] buffer    data to write
+ * @param[in]     size      size of the data
+ */
+int socket_writeread(int port, const char *hostname, char *buffer, int size);
+
+/** @fn         int socket_write(int port, const char *hostname,
+ *                  const char *buffer, int size);
+ * @brief       connect to a host:port and write a buffer
+ *
+ * @param[in]   port      port to use
+ * @param[in]   hostname  host to connect to
+ * @param[in]   buffer    data to write
+ * @param[in]   size      size of the data
+ */
+int socket_write(int port, const char *hostname, const char *buffer, int size);
 
 /** @fn         int socket_open(int port);
   * @brief      open a listening socket

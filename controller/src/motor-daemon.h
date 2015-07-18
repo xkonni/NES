@@ -151,19 +151,6 @@ class Motor {
       */
     void motor_loop (motor *m, int steps, int acc);
 
-    /** @fn         void socket_read_motorcommand (int sockfd);
-      * @brief      read a motorcommand from the socket
-      */
-    void socket_read_motorcommand ();
-
-    /** @fn         void socket_write_motorstatus (int sockfd, messages::motorstatus *status);
-      * @brief write motorstatus to the socket
-      *
-      * @param[in]  sockfd  the socket
-      * @param[in]  data    motorstatus to be written
-      */
-    void socket_write_motorstatus (int sockfd, messages::motorstatus *status);
-
     /// @var motor1 first connected motor
     motor motor1;
     /// @var motor2 second connected motor

@@ -24,8 +24,8 @@
 
 // controller
 #define CONTROLLER_PORT   2020
-#define CONTROLLER_HOST   "192.168.7.1"
-// #define CONTROLLER_HOST   "localhost"
+// #define CONTROLLER_HOST   "192.168.7.1"
+#define CONTROLLER_HOST   "localhost"
 
 // motor
 #define MOTOR_PORT        2021
@@ -35,12 +35,12 @@
 
 // sensor1
 #define SENSOR1_PORT       2022
-#define SENSOR1_HOST        "192.168.7.2"
+#define SENSOR1_HOST        "192.168.7.1"
 // #define SENSOR1_HOST       "localhost"
 
 // sensor2
 #define SENSOR2_PORT       2023
-#define SENSOR2_HOST        "192.168.7.2"
+#define SENSOR2_HOST        "192.168.7.1"
 // #define SENSOR2_HOST       "localhost"
 
 #define SENSOR1             1
