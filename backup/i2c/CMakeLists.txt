@@ -9,13 +9,12 @@ endif()
 project(BBB_I2C)
 # set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+
 add_subdirectory(lib)
 include_directories(${CMAKE_SOURCE_DIR}/lib)
 
-set(test_src test.c)
+set(test_src test.cpp)
 add_executable(test ${test_src})
-target_link_libraries(test i2cfunc)
+target_link_libraries(test i2cbus lsm303)
 
-set(lsm303_src lsm303.c)
-add_executable(lsm303 ${lsm303_src})
-target_link_libraries(lsm303 i2cfunc)
