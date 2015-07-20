@@ -33,9 +33,10 @@ package messages;
 message motorcommand {
   enum commandType {
     LOOP    = 1;
-    RESET   = 2;
-    STATUS  = 3;
-    UNKNOWN = 4;
+    ACC     = 2;
+    RESET   = 3;
+    STATUS  = 4;
+    UNKNOWN = 5;
   }
   required commandType type = 1 [default = UNKNOWN];
   required int32 motor      = 2;
@@ -45,11 +46,8 @@ message motorcommand {
 
 // II MOTORSTATUS
 message motorstatus {
-  message motorStatusMsg {
-    required int32 id = 1;
-    required int32 pos = 2;
-  }
-  repeated motorStatusMsg motor = 1;
+  required int32 motor = 1;
+  required int32 pos = 2;
 }
 
 // III SENSORCOMMAND
@@ -66,8 +64,6 @@ message sensorcommand {
 // IV SENSORDATA
 message sensordata {
   required int32 sensor = 1;
-  required double theta = 2;
-  required double phi = 3;
-
+  optional int32 theta = 2;
+  optional int32 phi = 3;
 }
-

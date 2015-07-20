@@ -38,12 +38,18 @@ Sensor::~Sensor() {
 void Sensor::handle_sensorcommand (messages::sensorcommand *command, messages::sensordata *data) {
   data->set_sensor(sensor1.id);
 
+  /*
+   * GET current values
+   */
   if (command->type() == messages::sensorcommand::GET) {
-    // sending values anyway
+    // return the current sensor position minus the saved offset
+    data->set_theta((sensor1.theta - sensor1.theta_offset + 360) % 360);
+    data->set_phi((sensor1.phi - sensor1.phi_offset + 360) % 360);
   }
-
+  /*
+   * CALIBRATE sensor
+   */
   else if (command->type() == messages::sensorcommand::CALIBRATE) {
-
     // read current values
 #ifdef HOST_BBB
     mag.readMag();
@@ -52,15 +58,10 @@ void Sensor::handle_sensorcommand (messages::sensorcommand *command, messages::s
 #endif
   }
 
-  // create response
   // DEBUG
-  // printf("response: theta %.2f - %.2f = %.2f, phi: %.2f - %.2f = %.2f\n",
+  // printf("calibrated: theta %d - %d = %d, phi: %d - %d = %d\n",
   //     sensor1.theta, sensor1.theta_offset, sensor1.theta - sensor1.theta_offset,
   //     sensor1.phi, sensor1.phi_offset, sensor1.phi - sensor1.phi_offset);
-
-  // return the current sensor position minus the saved offset
-  data->set_theta(sensor1.theta - sensor1.theta_offset);
-  data->set_phi(sensor1.phi - sensor1.phi_offset);
 }
 
 int Sensor::get_sensordatabuffer (char *buffer) {
@@ -68,8 +69,8 @@ int Sensor::get_sensordatabuffer (char *buffer) {
 
   messages::sensordata *data = new messages::sensordata();
   data->set_sensor(sensor1.id);
-  data->set_theta(sensor1.theta - sensor1.theta_offset);
-  data->set_phi(sensor1.phi - sensor1.phi_offset);
+  data->set_theta((sensor1.theta - sensor1.theta_offset + 360) % 360);
+  data->set_phi((sensor1.phi - sensor1.phi_offset + 360) % 360);
   print_sensordata(NET_OUT, data);
   // serialize data
   data->SerializeToArray(buffer, data->ByteSize());
@@ -94,36 +95,73 @@ int main(void) {
   mag.enable();
 #endif
 
+  // messages::sensordata *datafoo = new messages::sensordata();
+  // printf("initialize size: %d\n", datafoo->ByteSize());
+  // datafoo->set_sensor(1);
+  // printf("sensor size: %d\n", datafoo->ByteSize());
+  // datafoo->set_theta(0);
+  // printf("theta 0 %d size: %d\n", datafoo->theta(), datafoo->ByteSize());
+  // datafoo->set_theta(360);
+  // printf("theta 360 %d size: %d\n", datafoo->theta(), datafoo->ByteSize());
+  // datafoo->set_phi(0);
+  // printf("phi 0 %d size: %d\n", datafoo->phi(), datafoo->ByteSize());
+  // datafoo->set_phi(360);
+  // printf("phi 360 %d size: %d\n", datafoo->phi(), datafoo->ByteSize());
+
+  // messages::motorcommand *commandfoo = new messages::motorcommand();
+  // printf("initialize size: %d\n", commandfoo->ByteSize());
+  // commandfoo->set_type(messages::motorcommand::LOOP);
+  // commandfoo->set_motor(1);
+  // printf("type & motor size: %d\n", commandfoo->ByteSize());
+  // commandfoo->set_steps(0);
+  // printf("steps 0 %d size: %d\n", commandfoo->steps(), commandfoo->ByteSize());
+  // commandfoo->set_steps(1600);
+  // printf("steps 1600 %d size: %d\n", commandfoo->steps(), commandfoo->ByteSize());
+
+  // exit(0);
+
   // initialize time
   gettimeofday(&tv_last, NULL);
   // main loop
   while (1) {
-    // update time
-    gettimeofday(&tv_now, NULL);
-    t_diff = (tv_now.tv_usec - tv_last.tv_usec) + (tv_now.tv_sec - tv_last.tv_sec) * 1000000;
-    // listen on socket
+    /*
+     * I) listen on socket
+     */
     n = socket_listen(snsr.sockfd, connected, buffer);
     if (n > 0) {
+      // initialize message, response
+      message->Clear();
+      response->Clear();
+
       // parse message
       message->ParseFromArray(buffer, n);
       print_sensorcommand(NET_IN, message);
       snsr.handle_sensorcommand(message, response);
     }
 
-    // command requested response
+    /*
+     * II) command requested response
+     */
     if (response->has_sensor()) {
+      printf("sending response\n");
       bzero(buffer, BUFFERSIZE);
       response->SerializeToArray(buffer, response->ByteSize());
-      print_sensordata(NET_OUT, response);
       n = socket_write(CONTROLLER_PORT, CONTROLLER_HOST, buffer, response->ByteSize());
       if (n > 0) {
         print_sensordata(NET_OUT, response);
+        printf("bytesize: %d\n", response->ByteSize());
       }
+      response->Clear();
     }
 
+    // update time
+    gettimeofday(&tv_now, NULL);
+    t_diff = (tv_now.tv_usec - tv_last.tv_usec) + (tv_now.tv_sec - tv_last.tv_sec) * 1000000;
     // timeout
     // update values and send them to the controller
     if (t_diff > update_timeout) {
+      // update last
+      gettimeofday(&tv_last, NULL);
 #ifdef HOST_BBB
       mag.readMag();
       convert_coordinates(mag.m[0], mag.m[1], mag.m[2],
@@ -137,7 +175,6 @@ int main(void) {
       // send updated values
       n = snsr.get_sensordatabuffer(buffer);
       socket_write(CONTROLLER_PORT, CONTROLLER_HOST, buffer, n);
-      gettimeofday(&tv_last, NULL);
     }
   }
 

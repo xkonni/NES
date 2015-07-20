@@ -62,6 +62,7 @@ class Motor {
       int step;      ///< pin for the step signal
       int dir;       ///< pin for the direction signal
       int pos;       ///< current position
+      int acc;       ///< current acceleration
       int minpos;    ///< minimum position
       int maxpos;    ///< maximum position
 
@@ -72,15 +73,17 @@ class Motor {
        * @param[in] header    initial value for the pin header
        * @param[in] step      initial value for pin for the step signal
        * @param[in] dir       initial value for pin for the direction signal
+       * @param[in] acc       initial value for current acceleration
        * @param[in] pos       initial value for current position
        * @param[in] minpos    initial value for minimum position
        * @param[in] maxpos    initial value for maximum position
        */
-      motor(int header_in, int step_in, int dir_in, int pos_in,
+      motor(int header_in, int step_in, int dir_in, int acc_in, int pos_in,
           int minpos_in, int maxpos_in) {
         header  = header_in;
         step    = step_in;
         dir     = dir_in;
+        acc     = acc_in;
         pos     = pos_in;
         minpos  = minpos_in;
         maxpos  = maxpos_in;
@@ -142,14 +145,13 @@ class Motor {
       */
     void motor_dir (motor *m, int dir);
 
-    /** @fn         void motor_loop (motor *m, int steps, int acc);
+    /** @fn         void motor_loop (motor *m, int steps);
       * @brief      do some steps on the motor
       *
       * @param[in]  m the   motor
       * @param[in]  steps   number of steps
-      * @param[in]  acc     acceleration used [1..10]
       */
-    void motor_loop (motor *m, int steps, int acc);
+    void motor_loop (motor *m, int steps);
 
     /// @var motor1 first connected motor
     motor motor1;

@@ -24,24 +24,24 @@
 
 // controller
 #define CONTROLLER_PORT   2020
-// #define CONTROLLER_HOST   "192.168.7.1"
 #define CONTROLLER_HOST   "localhost"
+// #define CONTROLLER_HOST   "192.168.7.1"
 
 // motor
 #define MOTOR_PORT        2021
-#define MOTOR_HOST        "192.168.7.1"
-// #define MOTOR_HOST        "localhost"
+#define MOTOR_HOST        "localhost"
+// #define MOTOR_HOST        "192.168.7.1"
 // #define MOTOR_HOST        "192.168.21.37"
 
 // sensor1
 #define SENSOR1_PORT       2022
-#define SENSOR1_HOST        "192.168.7.1"
-// #define SENSOR1_HOST       "localhost"
+#define SENSOR1_HOST       "localhost"
+// #define SENSOR1_HOST        "192.168.7.1"
 
 // sensor2
 #define SENSOR2_PORT       2023
-#define SENSOR2_HOST        "192.168.7.1"
-// #define SENSOR2_HOST       "localhost"
+#define SENSOR2_HOST       "localhost"
+// #define SENSOR2_HOST        "192.168.7.1"
 
 #define SENSOR1             1
 #define SENSOR2             2
@@ -85,7 +85,7 @@ void print_sensorcommand (char inout, messages::sensorcommand *command);
   */
 void print_sensordata(char inout, messages::sensordata *data);
 
-/** @fn         void convert_coordinates(int x, int y, int z, double *theta, double *phi);
+/** @fn         void convert_coordinates(int x, int y, int z, int *theta, int *phi);
   * @brief      convert xyz coordinates into spherical coordinates
   *
   * @param[in]  x         the x-coordinate
@@ -94,6 +94,6 @@ void print_sensordata(char inout, messages::sensordata *data);
   * @param[out] theta     the theta angle [0; pi]
   * @param[out] phi       the phi angle [0; 2pi]
   */
-void convert_coordinates(int x, int y, int z, double *theta, double *phi);
+void convert_coordinates(int x, int y, int z, int *theta, int *phi);
 
 #endif

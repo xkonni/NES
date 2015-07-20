@@ -31,21 +31,72 @@ void Controller::calculate_movement (
   theta_diff = data1->theta() - data2->theta();
   command1->set_type(messages::motorcommand::LOOP);
   command1->set_motor(1);
-  command1->set_steps(deg2steps(theta_diff));
-  command1->set_acc(10);
+  // modify steps [-800; 800] -> [0; 1600]
+  command1->set_steps(deg2steps(theta_diff) + 800);
 
 
   // motor2 -> phi
   phi_diff = data1->phi() - data2->phi();
   command2->set_type(messages::motorcommand::LOOP);
   command2->set_motor(2);
-  command2->set_steps(deg2steps(phi_diff));
-  command2->set_acc(10);
+  // modify steps [-800; 800] -> [0; 1600]
+  command2->set_steps(deg2steps(phi_diff) + 800);
+}
+
+void Controller::move_motor(int motor, int steps, int acc) {
+  // set acceleration
+  messages::motorcommand *command = new messages::motorcommand();
+  command->set_type(messages::motorcommand::LOOP);
+  command->set_motor(motor);
+  command->set_acc(acc);
+  send_motorcommand(command);
+
+  // correct from [0; 1600] to [-800; 800]
+  steps = steps - 800;
+
+  // set steps
+  command->Clear();
+  command->set_type(messages::motorcommand::LOOP);
+  command->set_motor(motor);
+  command->set_steps(steps);
+  send_motorcommand(command);
+}
+
+int Controller::send_motorcommand(messages::motorcommand *command) {
+  char buffer[BUFFERSIZE];
+  int n;
+
+  command->SerializeToArray(buffer, command->ByteSize());
+  n = socket_write(MOTOR_PORT, MOTOR_HOST, buffer, command->ByteSize());
+  if (n > 0) {
+    print_motorcommand(NET_OUT, command);
+  }
+  return(n);
+}
+
+int Controller::send_sensorcommand(messages::sensorcommand *command) {
+  char buffer[BUFFERSIZE];
+  int n;
+
+  command->SerializeToArray(buffer, command->ByteSize());
+  if (command->sensor() == SENSOR1)
+    n = socket_write(SENSOR1_PORT, SENSOR1_HOST, buffer, command->ByteSize());
+  else
+    n = socket_write(SENSOR2_PORT, SENSOR2_HOST, buffer, command->ByteSize());
+  if (n > 0) {
+    print_sensorcommand(NET_OUT, command);
+  }
+  return(n);
 }
 
 int main(int argc, char *argv[])
 {
   Controller ctrl;
+
+  messages::sensordata *sdata1 = new messages::sensordata();
+  messages::sensordata *sdata2 = new messages::sensordata();
+  messages::motorcommand *mcommand1 = new messages::motorcommand();
+  messages::motorcommand *mcommand2 = new messages::motorcommand();
 
   struct timeval tv_now, tv_last;
   // update timeout [usec]
@@ -56,34 +107,13 @@ int main(int argc, char *argv[])
   std::vector<int> *connected = new std::vector<int>();
   char buffer[BUFFERSIZE];
 
-  messages::motorcommand *mcommand1 = new messages::motorcommand();
-  messages::motorcommand *mcommand2 = new messages::motorcommand();
-  messages::motorstatus *mstatus1 = new messages::motorstatus();
-  messages::motorstatus *mstatus2 = new messages::motorstatus();
-  messages::sensorcommand *scommand1 = new messages::sensorcommand();
-  messages::sensorcommand *scommand2 = new messages::sensorcommand();
-  messages::sensordata *sdata1 = new messages::sensordata();
-  messages::sensordata *sdata2 = new messages::sensordata();
-
-  // // calibrate sensor1
+  // calibrate sensor1
   // scommand1->set_type(messages::sensorcommand::CALIBRATE);
   // scommand1->set_sensor(SENSOR1);
-  // bzero(buffer, BUFFERSIZE);
-  // scommand1->SerializeToArray(buffer, scommand1->ByteSize());
-  // n = socket_writeread(SENSOR1_PORT, SENSOR1_HOST, buffer, scommand1->ByteSize());
-  // if (n > 0) {
-  //   sdata1->ParseFromArray(buffer, n);
-  // }
   //
-  // // calibrate sensor2
-  // scommand2->set_type(messages::sensorcommand::CALIBRATE);
-  // scommand2->set_sensor(SENSOR2);
-  // bzero(buffer, BUFFERSIZE);
-  // scommand2->SerializeToArray(buffer, scommand2->ByteSize());
-  // n = socket_writeread(SENSOR2_PORT, SENSOR2_HOST, buffer, scommand2->ByteSize());
-  // if (n > 0) {
-  //   sdata2->ParseFromArray(buffer, n);
-  // }
+  // mcommand1 = new messages::motorcommand();
+  // mcommand1->set_type(messages::motorcommand::RESET);
+  // mcommand1->set_motor(1);
 
   // initialize time
   gettimeofday(&tv_last, NULL);
@@ -113,32 +143,12 @@ int main(int argc, char *argv[])
     if (t_diff > update_timeout) {
       // DEBUG
       // printf("updating motors\n");
-      mcommand1 = new messages::motorcommand();
-      mcommand2 = new messages::motorcommand();
+      mcommand1->Clear();
+      mcommand2->Clear();
 
       ctrl.calculate_movement(sdata1, sdata2, mcommand1, mcommand2);
-      // handle first command
-      bzero(buffer, BUFFERSIZE);
-      mcommand1->SerializeToArray(buffer, mcommand1->ByteSize());
-      // TODO: fix
-      // n = socket_writeread(MOTOR_PORT, MOTOR_HOST, buffer, mcommand1->ByteSize());
-      n = socket_write(MOTOR_PORT, MOTOR_HOST, buffer, mcommand1->ByteSize());
-      // success
-      if (n > 0) {
-        print_motorcommand(NET_OUT, mcommand1);
-        mstatus1->ParseFromArray(buffer, n);
-      }
-      // handle second command
-      bzero(buffer, BUFFERSIZE);
-      mcommand2->SerializeToArray(buffer, mcommand2->ByteSize());
-      // TODO: fix
-      // n = socket_writeread(MOTOR_PORT, MOTOR_HOST, buffer, mcommand2->ByteSize());
-      n = socket_write(MOTOR_PORT, MOTOR_HOST, buffer, mcommand2->ByteSize());
-      // success
-      if (n > 0) {
-        print_motorcommand(NET_OUT, mcommand2);
-        mstatus2->ParseFromArray(buffer, n);
-      }
+      ctrl.send_motorcommand(mcommand1);
+      ctrl.send_motorcommand(mcommand2);
 
       // update time of last command
       gettimeofday(&tv_last, NULL);

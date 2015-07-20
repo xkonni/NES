@@ -12,8 +12,8 @@ Motor::Motor() :
            12,  11,  10,   9,   8,   7,   6,   6,   5,   5,
             5,   4,   4,   4,   3,   3,   3,   3,   3,   2,
             2,   2,   2,   2,   2,   2,   2,   2,   2,   2 },
-    motor1 { 8, 11, 12, 0, -400, 400 },
-    motor2 { 8, 13, 14, 0, -200, 200 }
+    motor1 { 9, 11, 12, 10, 0, -200, 200 },
+    motor2 { 9, 13, 14, 10, 0, -200, 200 }
 {
   // initialize socket
   sockfd = socket_open(MOTOR_PORT);
@@ -26,49 +26,66 @@ Motor::~Motor() {
 }
 
 void Motor::handle_motorcommand (messages::motorcommand *command, messages::motorstatus *status) {
-  int m;
-  int steps;
-  int acc;
+  int m = command->motor();
 
+  /*
+   * LOOP
+   */
   if (command->type() == messages::motorcommand::LOOP) {
-    m = command->motor();
-    steps = command->steps();
-    acc = command->acc();
-
-    // select motor
     if (m == 1) {
-      motor_loop(&motor1, steps, acc);
+      motor_loop(&motor1, command->steps());
     }
     else if (m == 2) {
-      motor_loop(&motor2, steps, acc);
+      motor_loop(&motor2, command->steps());
     }
   }
+
+  /*
+   * ACC
+   */
+  else if (command->type() == messages::motorcommand::ACC) {
+    int acc = command->acc();
+    if (acc < 1) {
+      printf("acc too low, setting from %d to 1\n", acc);
+      acc = 1;
+    }
+    else if (acc > 10) {
+      printf("acc too high, setting from %d to 10\n", acc);
+      acc = 10;
+    }
+
+    if ( m == 1 ) {
+      motor1.acc = acc;
+    }
+    else if ( m == 2 ) {
+      motor2.acc = acc;
+    }
+  }
+
+  /*
+   * RESET
+   */
   else if (command->type() == messages::motorcommand::RESET) {
-    m = command->motor();
     if ( m == 1 ) {
       motor1.pos = 0;
     }
     else if ( m == 2 ) {
       motor2.pos = 0;
     }
-    else {
-      motor1.pos = 0;
-      motor2.pos = 0;
+  }
+
+  /*
+   * STATUS
+   */
+  else if (command->type() == messages::motorcommand::STATUS) {
+    status->set_motor(m);
+    if ( m == 1 ) {
+      status->set_pos(motor1.pos);
+    }
+    else if ( m == 2 ) {
+      status->set_pos(motor2.pos);
     }
   }
-
-  else if (command->type() == messages::motorcommand::STATUS) {
-    // sending a status anyway
-  }
-
-  // create respnse
-  messages::motorstatus::motorStatusMsg *motor;
-  motor = status->add_motor();
-  motor->set_id(1);
-  motor->set_pos(motor1.pos);
-  motor = status->add_motor();
-  motor->set_id(2);
-  motor->set_pos(motor2.pos);
 }
 
 void Motor::motor_step(motor *m, int timeout) {
@@ -93,24 +110,7 @@ void Motor::motor_dir(motor *m, int dir) {
 #endif
 }
 
-/*
- * do n steps
- *
- * motor *m   motor to use
- * int steps  number of steps
- * int acc    acceleration
- *            [1 (slow) .. 10 (fast) ]
- */
-void Motor::motor_loop (motor *m, int steps, int acc) {
-  if (acc < 1) {
-    printf("acc too low, setting from %d to 1\n", acc);
-    acc = 1;
-  }
-  else if (acc > 10) {
-    printf("acc too high, setting from %d to 10\n", acc);
-    acc = 10;
-  }
-
+void Motor::motor_loop (motor *m, int steps) {
   if (steps > 0) {
     steps = m->pos + steps <= m->maxpos ? steps : m->maxpos - m->pos;
     motor_dir(m, 0);
@@ -125,12 +125,12 @@ void Motor::motor_loop (motor *m, int steps, int acc) {
   for (n = 0; n < abs(steps); n++) {
     // acceleration
     if ( n < rampN ) {
-      delay = (10*ramp[n])/acc;
+      delay = (10*ramp[n])/m->acc;
       // printf("delay+: %f\n", GPIO_TIMEOUT * delay);
     }
     // deceleration
     else if ( abs(steps) - n < rampN) {
-      delay = (10*ramp[abs(steps)-n])/acc;
+      delay = (10*ramp[abs(steps)-n])/m->acc;
       // printf("delay-: %f\n", GPIO_TIMEOUT * delay);
     }
     // run

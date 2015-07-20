@@ -53,10 +53,10 @@ class Sensor {
       */
     struct sensor {
       int id;                 ///< sensor id
-      double theta;           ///< current theta angle
-      double phi;             ///< current phi angle
-      double theta_offset;    ///< calibrated theta offset
-      double phi_offset;      ///< calibrated phi offset
+      int theta;              ///< current theta angle
+      int phi;                ///< current phi angle
+      int theta_offset;       ///< calibrated theta offset
+      int phi_offset;         ///< calibrated phi offset
       /**
        * @fn sensor()
        * @brief default constructor for the sensor struct

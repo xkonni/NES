@@ -105,8 +105,8 @@ int socket_write(int port, const char *hostname, const char *buffer, int size) {
   serv_addr.sin_port = htons(port);
 
   if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) {
-      perror("ERROR connecting\n");
-      usleep(500000);
+      // perror("ERROR connecting\n");
+      // usleep(500000);
       return(-1);
   }
 
