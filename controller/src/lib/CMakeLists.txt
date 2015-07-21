@@ -21,3 +21,7 @@ add_library(nes-socket SHARED ${nes-socket_src})
 target_link_libraries(nes-socket nes protobuf pthread)
 install(TARGETS nes-socket DESTINATION lib)
 
+set(nes-can_src nes-can.cpp messages.pb.cc)
+add_library(nes-can SHARED ${nes-can_src})
+target_link_libraries(nes-can nes)
+install(TARGETS nes-can DESTINATION lib)
