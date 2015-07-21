@@ -24,6 +24,7 @@
 #include "messages.pb.h"
 #include "nes.h"
 #include "nes-socket.h"
+#include "nes-can.h"
 
 class Controller {
   public:

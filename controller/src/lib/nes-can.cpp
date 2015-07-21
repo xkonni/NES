@@ -17,17 +17,15 @@ int can_listen(int sockfd, std::vector<int> *connected, char *buffer) {
 
 int can_write(int sockfd, const char *buffer, int size) {
   int n;
+
   // Send a message to the CAN bus
   struct can_frame frame;
   frame.can_id = 0x123;
-  // original
-  strcpy(frame.data, "foo");;
-  // compiles, not sure if it works
-  // strcpy((char *)frame.data, "foo");;
-  frame.can_dlc = strlen(&frame.data);
-  frame.can_dlc = sizeof(frame.data);
+  strcpy((char *)frame.data, buffer);;
+
+  frame.can_dlc = strlen((char *)frame.data);
   n = write(sockfd, &frame, sizeof(frame));
-  //
+
   // // Read a message back from the CAN bus
   // int bytes_read = read(sockfd, &frame, sizeof(frame));
   return(n);

@@ -93,6 +93,13 @@ int main(int argc, char *argv[])
 {
   Controller ctrl;
 
+  int cansock = can_open();
+  char buf[BUFFERSIZE];
+  sprintf(buf, "foobar");
+  int size=2;
+  can_write(cansock, buf, size);
+  return(0);
+
   messages::sensordata *sdata1 = new messages::sensordata();
   messages::sensordata *sdata2 = new messages::sensordata();
   messages::motorcommand *mcommand1 = new messages::motorcommand();

@@ -8,6 +8,7 @@ add_executable(controller-daemon ${controller-daemon_src})
 target_link_libraries(controller-daemon
   nes
   nes-socket
+  nes-can
 )
 
 set(motor-daemon_src motor-daemon.cpp)
