@@ -22,8 +22,12 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include "messages.pb.h"
-#include "nes-socket.h"
 #include "nes.h"
+#ifdef BBB_CAN
+  #include "nes-can.h"
+#else
+  #include "nes-socket.h"
+#endif
 
 #ifdef BBB_HOST
 #include "LSM303.h"

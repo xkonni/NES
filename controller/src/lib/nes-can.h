@@ -37,22 +37,25 @@
 #define AF_CAN PF_CAN
 #endif
 
-enum {
-  CAN_MOTOCOMMAND,
-  CAN_MOTORSTATUS,
-  CAN_SENSORCOMMAND,
-  CAN_SENSORDATA
-};
+#define CAN_MOTORCOMMAND    1
+#define CAN_MOTORSTATUS     2
+#define CAN_SENSORCOMMAND   4
+#define CAN_SENSORDATA      8
 
 /** @fn         int can_listen();
-  * @brief      listen on a can socket
-  */
-int can_listen(int sockfd, char *buffer);
+ * @brief       listen on a can socket
+ *
+ * @param[in]   sockfd    socket to write to
+ * @param[in]   canid     filter by can message id
+ *                        can be assembled as 'id1 OR id2 ...'
+ * @param[in]   buffer    buffer for the data
+ */
+int can_listen(int sockfd, int canid, char *buffer);
 
 /** @fn         int can_write
  * @brief       connect to the can bus and write a buffer
  *
- * @param[in]   sockdf    socket to write to
+ * @param[in]   sockfd    socket to write to
  * @param[in]   canid     can message id
  * @param[in]   buffer    data to write
  * @param[in]   size      size of the data

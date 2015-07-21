@@ -7,7 +7,11 @@
 #include "controller-daemon.h"
 
 Controller::Controller() {
+#ifdef BBB_CAN
+  sockfd = can_open();
+#else
   sockfd = socket_open(CONTROLLER_PORT);
+#endif
 }
 
 Controller::~Controller() {
@@ -67,7 +71,11 @@ int Controller::send_motorcommand(messages::motorcommand *command) {
   int n;
 
   command->SerializeToArray(buffer, command->ByteSize());
+#ifdef BBB_CAN
+  n = can_write(sockfd, CAN_MOTORCOMMAND, buffer, command->ByteSize());
+#else
   n = socket_write(MOTOR_PORT, MOTOR_HOST, buffer, command->ByteSize());
+#endif
   if (n > 0) {
     print_motorcommand(NET_OUT, command);
   }
@@ -79,10 +87,14 @@ int Controller::send_sensorcommand(messages::sensorcommand *command) {
   int n;
 
   command->SerializeToArray(buffer, command->ByteSize());
+#ifdef BBB_CAN
+    n = can_write(sockfd, CAN_SENSORCOMMAND, buffer, command->ByteSize());
+#else
   if (command->sensor() == SENSOR1)
     n = socket_write(SENSOR1_PORT, SENSOR1_HOST, buffer, command->ByteSize());
   else
     n = socket_write(SENSOR2_PORT, SENSOR2_HOST, buffer, command->ByteSize());
+#endif
   if (n > 0) {
     print_sensorcommand(NET_OUT, command);
   }
@@ -103,9 +115,11 @@ int main(int argc, char *argv[])
   int update_timeout = 1000000;
   long int t_diff;
   int n;
+  char buffer[BUFFERSIZE];
+#ifndef BBB_CAN
   // connected clients
   std::vector<int> *connected = new std::vector<int>();
-  char buffer[BUFFERSIZE];
+#endif
 
   // calibrate sensor1
   // scommand1->set_type(messages::sensorcommand::CALIBRATE);
@@ -115,43 +129,16 @@ int main(int argc, char *argv[])
   // mcommand1->set_type(messages::motorcommand::RESET);
   // mcommand1->set_motor(1);
 
-  /*
-   * CAN
-   */
-  int cansock = can_open();
-  int canid = CAN_SENSORDATA;
-  char buf[BUFFERSIZE];
-  bzero(buf, BUFFERSIZE);
-
-  sdata1->set_sensor(SENSOR1);
-  sdata1->set_theta(123);
-  sdata1->SerializeToArray(buf, sdata1->ByteSize());
-
-  can_write(cansock, canid, buf, sdata1->ByteSize());
-  print_sensordata(NET_OUT, sdata1);
-
-  while(1) {
-    n = can_listen(cansock, buf);
-    if (n > 0) {
-      sdata1->ParseFromArray(buf, n);
-      print_sensordata(NET_IN, sdata1);
-    }
-  }
-  return(0);
-  // CAN
-
   // initialize time
   gettimeofday(&tv_last, NULL);
   while (1) {
-    // update time
-    gettimeofday(&tv_now, NULL);
-    t_diff = (tv_now.tv_usec - tv_last.tv_usec) + (tv_now.tv_sec - tv_last.tv_sec) * 1000000;
-
     // listen on socket
+#ifdef BBB_CAN
+    n = can_listen(ctrl.sockfd, CAN_SENSORDATA, buffer);
+#else
     n = socket_listen(ctrl.sockfd, connected, buffer);
+#endif
     if (n > 0) {
-      // DEBUG
-      // printf("%d bytes of sensordata received!\n", n);
       // message
       messages::sensordata *message = new messages::sensordata();
       // parse message
@@ -163,6 +150,10 @@ int main(int argc, char *argv[])
         sdata2->CopyFrom(*message);
       }
     }
+
+    // update time
+    gettimeofday(&tv_now, NULL);
+    t_diff = (tv_now.tv_usec - tv_last.tv_usec) + (tv_now.tv_sec - tv_last.tv_sec) * 1000000;
 
     // time to update the motors
     if (t_diff > update_timeout) {

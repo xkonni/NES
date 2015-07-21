@@ -16,7 +16,11 @@ Motor::Motor() :
     motor2 { 9, 13, 14, 10, 0, -200, 200 }
 {
   // initialize socket
+#ifdef BBB_CAN
+  sockfd = can_open();
+#else
   sockfd = socket_open(MOTOR_PORT);
+#endif
 }
 
 Motor::~Motor() {
@@ -144,8 +148,10 @@ int main(int argc, char *argv[]) {
   Motor mtr;
   int n;
   char buffer[BUFFERSIZE];
+#ifndef BBB_CAN
   // connected clients
   std::vector<int> *connected = new std::vector<int>();
+#endif
   messages::motorcommand *message = new messages::motorcommand();
   messages::motorstatus *response = new messages::motorstatus();
 
@@ -161,7 +167,11 @@ int main(int argc, char *argv[]) {
   // main loop
   while (1) {
     // listen on socket
+#ifdef BBB_CAN
+    n = can_listen(mtr.sockfd, CAN_MOTORCOMMAND, buffer);
+#else
     n = socket_listen(mtr.sockfd, connected, buffer);
+#endif
     if (n > 0) {
       // parse message
       message->ParseFromArray(buffer, n);

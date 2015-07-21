@@ -21,11 +21,19 @@ Sensor::Sensor() :
 #ifndef BBB_SENSOR2
   printf("built for SENSOR1, using \"/dev/i2c-1\"\n");
   sensor1.id = 1;
+#ifdef BBB_CAN
+  sockfd = can_open();
+#else
   sockfd = socket_open(SENSOR1_PORT);
+#endif
 #else
   printf("built for SENSOR2, using \"/dev/i2c-2\"\n");
   sensor1.id = 2;
+#ifdef BBB_CAN
+  sockfd = can_open();
+#else
   sockfd = socket_open(SENSOR2_PORT);
+#endif
 #endif
 }
 
@@ -85,8 +93,10 @@ int main(void) {
   int n;
   long int t_diff;
   char buffer[BUFFERSIZE];
+#ifndef BBB_CAN
   // connected clients
   std::vector<int> *connected = new std::vector<int>();
+#endif
   messages::sensorcommand *message = new messages::sensorcommand();
   messages::sensordata *response = new messages::sensordata();
 
@@ -127,7 +137,11 @@ int main(void) {
     /*
      * I) listen on socket
      */
+#ifdef BBB_CAN
+    n = can_listen(snsr.sockfd, CAN_SENSORCOMMAND, buffer);
+#else
     n = socket_listen(snsr.sockfd, connected, buffer);
+#endif
     if (n > 0) {
       // initialize message, response
       message->Clear();
@@ -146,7 +160,11 @@ int main(void) {
       printf("sending response\n");
       bzero(buffer, BUFFERSIZE);
       response->SerializeToArray(buffer, response->ByteSize());
+#ifdef BBB_CAN
+      n = can_write(snsr.sockfd, CAN_SENSORDATA, buffer, response->ByteSize());
+#else
       n = socket_write(CONTROLLER_PORT, CONTROLLER_HOST, buffer, response->ByteSize());
+#endif
       if (n > 0) {
         print_sensordata(NET_OUT, response);
         printf("bytesize: %d\n", response->ByteSize());
@@ -174,7 +192,11 @@ int main(void) {
       // printf("timeout: %f, %f\n", snsr.sensor1.theta, snsr.sensor1.phi);
       // send updated values
       n = snsr.get_sensordatabuffer(buffer);
+#ifdef BBB_CAN
+      can_write(snsr.sockfd, CAN_SENSORDATA, buffer, n);
+#else
       socket_write(CONTROLLER_PORT, CONTROLLER_HOST, buffer, n);
+#endif
     }
   }
 

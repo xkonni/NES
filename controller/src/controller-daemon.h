@@ -23,8 +23,11 @@
 #include <netdb.h>
 #include "messages.pb.h"
 #include "nes.h"
-#include "nes-socket.h"
-#include "nes-can.h"
+#ifdef BBB_CAN
+  #include "nes-can.h"
+#else
+  #include "nes-socket.h"
+#endif
 
 class Controller {
   public:

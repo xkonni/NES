@@ -11,7 +11,7 @@
 #include "nes-can.h"
 
 
-int can_listen(int sockfd, char *buffer) {
+int can_listen(int sockfd, int canid, char *buffer) {
   int max_fd;
   int sel;
   int n;
@@ -41,8 +41,11 @@ int can_listen(int sockfd, char *buffer) {
   if (sel > 0) {
     if(FD_ISSET(sockfd, &read_fds)) {
       n = read(sockfd, &frame, sizeof(frame));
-      strncpy(buffer, (char *)frame.data, frame.can_dlc);
-      return(n);
+      if (frame.can_id & canid) {
+        strncpy(buffer, (char *)frame.data, frame.can_dlc);
+        // return sent size
+        return(n);
+      }
     }
   } // if (sel > 0)
   return(0);
@@ -62,6 +65,7 @@ int can_write(int sockfd, int canid, const char *buffer, int size) {
   // Send a message to the CAN bus
   n = write(sockfd, &frame, sizeof(frame));
 
+  // return sent size
   return(n);
 }
 
@@ -81,5 +85,6 @@ int can_open() {
   addr.can_ifindex = ifr.ifr_ifindex;
   bind(sockfd, (struct sockaddr*)&addr, sizeof(addr) );
 
+  // return fd
   return sockfd;
 }
