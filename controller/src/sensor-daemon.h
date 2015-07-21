@@ -25,7 +25,7 @@
 #include "nes-socket.h"
 #include "nes.h"
 
-#ifdef HOST_BBB
+#ifdef BBB_HOST
 #include "LSM303.h"
 #include "I2CBus.h"
 #endif

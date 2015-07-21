@@ -7,7 +7,7 @@
 
 #include "sensor-daemon.h"
 
-#ifdef HOST_BBB
+#ifdef BBB_HOST
 #ifndef BBB_SENSOR2
 LSM303 mag("/dev/i2c-1"); // pin 19,20
 #else
@@ -51,7 +51,7 @@ void Sensor::handle_sensorcommand (messages::sensorcommand *command, messages::s
    */
   else if (command->type() == messages::sensorcommand::CALIBRATE) {
     // read current values
-#ifdef HOST_BBB
+#ifdef BBB_HOST
     mag.readMag();
     convert_coordinates(mag.m[0], mag.m[1], mag.m[2],
         &sensor1.theta_offset, &sensor1.phi_offset);
@@ -90,7 +90,7 @@ int main(void) {
   messages::sensorcommand *message = new messages::sensorcommand();
   messages::sensordata *response = new messages::sensordata();
 
-#ifdef HOST_BBB
+#ifdef BBB_HOST
   // initialize sensors
   mag.enable();
 #endif
@@ -162,7 +162,7 @@ int main(void) {
     if (t_diff > update_timeout) {
       // update last
       gettimeofday(&tv_last, NULL);
-#ifdef HOST_BBB
+#ifdef BBB_HOST
       mag.readMag();
       convert_coordinates(mag.m[0], mag.m[1], mag.m[2],
           &snsr.sensor1.theta, &snsr.sensor1.phi);

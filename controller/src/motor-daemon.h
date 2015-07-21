@@ -28,7 +28,7 @@
 #include "nes.h"
 #include "nes-socket.h"
 
-#ifdef HOST_BBB
+#ifdef BBB_HOST
 #undef HZ
 #include "BBBiolib.h"
 #endif

@@ -89,7 +89,7 @@ void Motor::handle_motorcommand (messages::motorcommand *command, messages::moto
 }
 
 void Motor::motor_step(motor *m, int timeout) {
-#ifdef HOST_BBB
+#ifdef BBB_HOST
   pin_high(m->header, m->step);
   usleep(GPIO_HOLD);
   pin_low(m->header, m->step);
@@ -98,7 +98,7 @@ void Motor::motor_step(motor *m, int timeout) {
 }
 
 void Motor::motor_dir(motor *m, int dir) {
-#ifdef HOST_BBB
+#ifdef BBB_HOST
   if (dir == 0) {
     if (is_high(m->header, m->dir))
       pin_low(m->header, m->dir);
@@ -150,7 +150,7 @@ int main(int argc, char *argv[]) {
   messages::motorstatus *response = new messages::motorstatus();
 
   // initialize GPIOs
-#ifdef HOST_BBB
+#ifdef BBB_HOST
   iolib_init();
   iolib_setdir(mtr.motor1.header, mtr.motor1.step, BBBIO_DIR_OUT);
   iolib_setdir(mtr.motor1.header, mtr.motor1.dir, BBBIO_DIR_OUT);
