@@ -6,7 +6,7 @@ echo "building $FILE_OUT"
 dtc -O dtb -o $FILE_OUT -b 0 -@ $FILE_IN
 
 if [ $? -eq 0 ]; then
-  echo -e "success.\nnow run install.sh"
+  echo -e "success.\nnow run 02_install.sh"
 else
   echo "fail."
 fi

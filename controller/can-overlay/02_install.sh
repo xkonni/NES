@@ -5,7 +5,7 @@ echo "copying $FILE to /lib/firmware"
 sudo cp $FILE /lib/firmware
 
 if [ $? -eq 0 ]; then
-  echo -e "success.\nnow run activate.sh"
+  echo -e "success.\nnow run 03_activate.sh"
 else
   echo "fail."
 fi
