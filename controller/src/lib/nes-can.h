@@ -42,7 +42,7 @@
 #define CAN_SENSORCOMMAND   4
 #define CAN_SENSORDATA      8
 
-/** @fn         int can_listen();
+/** @fn         int can_listen(int sockfd, int canid, char *buffer);
  * @brief       listen on a can socket
  *
  * @param[in]   sockfd    socket to write to
@@ -52,7 +52,7 @@
  */
 int can_listen(int sockfd, int canid, char *buffer);
 
-/** @fn         int can_write
+/** @fn         int can_write(int sockfd, int canid, const char *buffer, int size);
  * @brief       connect to the can bus and write a buffer
  *
  * @param[in]   sockfd    socket to write to
