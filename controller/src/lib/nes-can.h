@@ -37,19 +37,27 @@
 #define AF_CAN PF_CAN
 #endif
 
+enum {
+  CAN_MOTOCOMMAND,
+  CAN_MOTORSTATUS,
+  CAN_SENSORCOMMAND,
+  CAN_SENSORDATA
+};
 
 /** @fn         int can_listen();
   * @brief      listen on a can socket
   */
-int can_listen(int sockfd, std::vector<int> *connected, char *buffer);
+int can_listen(int sockfd, char *buffer);
 
 /** @fn         int can_write
  * @brief       connect to the can bus and write a buffer
  *
+ * @param[in]   sockdf    socket to write to
+ * @param[in]   canid     can message id
  * @param[in]   buffer    data to write
  * @param[in]   size      size of the data
  */
-int can_write(int sockfd, const char *buffer, int size);
+int can_write(int sockfd, int canid, const char *buffer, int size);
 
 /** @fn         int can_open();
   * @brief      open a can socket

@@ -93,13 +93,6 @@ int main(int argc, char *argv[])
 {
   Controller ctrl;
 
-  int cansock = can_open();
-  char buf[BUFFERSIZE];
-  sprintf(buf, "foobar");
-  int size=2;
-  can_write(cansock, buf, size);
-  return(0);
-
   messages::sensordata *sdata1 = new messages::sensordata();
   messages::sensordata *sdata2 = new messages::sensordata();
   messages::motorcommand *mcommand1 = new messages::motorcommand();
@@ -121,6 +114,31 @@ int main(int argc, char *argv[])
   // mcommand1 = new messages::motorcommand();
   // mcommand1->set_type(messages::motorcommand::RESET);
   // mcommand1->set_motor(1);
+
+  /*
+   * CAN
+   */
+  int cansock = can_open();
+  int canid = CAN_SENSORDATA;
+  char buf[BUFFERSIZE];
+  bzero(buf, BUFFERSIZE);
+
+  sdata1->set_sensor(SENSOR1);
+  sdata1->set_theta(123);
+  sdata1->SerializeToArray(buf, sdata1->ByteSize());
+
+  can_write(cansock, canid, buf, sdata1->ByteSize());
+  print_sensordata(NET_OUT, sdata1);
+
+  while(1) {
+    n = can_listen(cansock, buf);
+    if (n > 0) {
+      sdata1->ParseFromArray(buf, n);
+      print_sensordata(NET_IN, sdata1);
+    }
+  }
+  return(0);
+  // CAN
 
   // initialize time
   gettimeofday(&tv_last, NULL);

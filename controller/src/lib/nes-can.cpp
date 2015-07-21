@@ -11,23 +11,57 @@
 #include "nes-can.h"
 
 
-int can_listen(int sockfd, std::vector<int> *connected, char *buffer) {
+int can_listen(int sockfd, char *buffer) {
+  int max_fd;
+  int sel;
+  int n;
+  struct can_frame frame;
+  // timeout {[sec], [usec]}
+  struct timeval waitd = {0, 100};
+  // fds to monitor
+  fd_set read_fds, write_fds;
+
+  FD_ZERO(&read_fds);
+  FD_ZERO(&write_fds);
+  // add sockfd
+  FD_SET(sockfd, &read_fds);
+  FD_SET(sockfd, &write_fds);
+  max_fd = sockfd;
+
+  // check for data
+  sel = select(max_fd+1, &read_fds, &write_fds, (fd_set*)0, &waitd);
+
+  // continue on error
+  if (sel < 0) {
+    perror("select error");
+    return(0);
+  }
+
+  // socket active
+  if (sel > 0) {
+    if(FD_ISSET(sockfd, &read_fds)) {
+      n = read(sockfd, &frame, sizeof(frame));
+      strncpy(buffer, (char *)frame.data, frame.can_dlc);
+      return(n);
+    }
+  } // if (sel > 0)
   return(0);
 }
 
-int can_write(int sockfd, const char *buffer, int size) {
+int can_write(int sockfd, int canid, const char *buffer, int size) {
   int n;
+  int i;
+  struct can_frame frame;
+
+  // fill can_frame
+  frame.can_id = canid;
+  for (i = 0; i < size; i++)
+    frame.data[i] = buffer[i];
+  frame.can_dlc = size;
 
   // Send a message to the CAN bus
-  struct can_frame frame;
-  frame.can_id = 0x123;
-  strcpy((char *)frame.data, buffer);;
-
-  frame.can_dlc = strlen((char *)frame.data);
   n = write(sockfd, &frame, sizeof(frame));
 
-  // // Read a message back from the CAN bus
-  // int bytes_read = read(sockfd, &frame, sizeof(frame));
   return(n);
 }
 
