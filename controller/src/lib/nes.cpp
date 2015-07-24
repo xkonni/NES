@@ -63,6 +63,10 @@ void convert_coordinates(int x, int y, int z, int *theta, int *phi) {
   // angle theta [0; pi]
   if (r != 0) *theta = (int) (acos(z/r)/M_PI*180);
   else *theta = 0;
+  // TODO: fix phi according to
+  // https://de.wikipedia.org/wiki/Kugelkoordinaten#Umrechnungen
   // angle phi [0; 2pi]
   *phi = (int) (atan2(y, x)/M_PI*180);
+
+  // printf("x: %d, y: %d, z: %d -> r: %f, theta: %d, phi: %d\n", x, y, z, r, *theta, *phi);
 }

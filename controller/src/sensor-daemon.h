@@ -34,6 +34,9 @@
 #include "I2CBus.h"
 #endif
 
+#define NUM_SAMPLES 10
+#define SAMPLE_TIMEOUT 100000
+
 class Sensor {
   public:
     /**
@@ -89,6 +92,14 @@ class Sensor {
      * @param[out]  buffer    buffer to hold the data
      */
     int get_sensordatabuffer (char *buffer);
+
+    /** @fn         int sample(int sample_idx, int *samples);
+     * @brief       update sensordata
+     *
+     * @param[in]   sample_idx  current index
+     * @param[out]  samples     array containing up to 10 pairs of samples
+     */
+    int sample(int sample_idx, int *samples);
 
     /// @var sensor1 first LSM303DLHC sensor
     sensor sensor1;

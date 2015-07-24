@@ -9,9 +9,9 @@
 
 #ifdef BBB_HOST
 #ifndef BBB_SENSOR2
-LSM303 mag("/dev/i2c-1"); // pin 19,20
+LSM303 lsm303("/dev/i2c-1"); // pin 19,20
 #else
-LSM303 mag("/dev/i2c-2"); // pin 17,18
+LSM303 lsm303("/dev/i2c-2"); // pin 17,18
 #endif
 #endif
 
@@ -51,8 +51,12 @@ void Sensor::handle_sensorcommand (messages::sensorcommand *command, messages::s
    */
   if (command->type() == messages::sensorcommand::GET) {
     // return the current sensor position minus the saved offset
-    data->set_theta((sensor1.theta - sensor1.theta_offset + 360) % 360);
-    data->set_phi((sensor1.phi - sensor1.phi_offset + 360) % 360);
+    // TODO: we may need to compress the values by making sure they're positive
+    // data->set_theta((sensor1.theta - sensor1.theta_offset + 360) % 360);
+    // data->set_phi((sensor1.phi - sensor1.phi_offset + 360) % 360);
+    // TODO: do that later
+    data->set_theta(sensor1.theta - sensor1.theta_offset);
+    data->set_phi(sensor1.phi - sensor1.phi_offset);
   }
   /*
    * CALIBRATE sensor
@@ -60,8 +64,13 @@ void Sensor::handle_sensorcommand (messages::sensorcommand *command, messages::s
   else if (command->type() == messages::sensorcommand::CALIBRATE) {
     // read current values
 #ifdef BBB_HOST
-    mag.readMag();
-    convert_coordinates(mag.m[0], mag.m[1], mag.m[2],
+    // use MAG
+    // lsm303.readMag();
+    // convert_coordinates(lsm303.m[0], lsm303.m[1], lsm303.m[2],
+    //     &sensor1.theta_offset, &sensor1.phi_offset);
+    // use ACC
+    lsm303.readAcc();
+    convert_coordinates(lsm303.a[0], lsm303.a[1], lsm303.a[2],
         &sensor1.theta_offset, &sensor1.phi_offset);
 #endif
   }
@@ -77,21 +86,68 @@ int Sensor::get_sensordatabuffer (char *buffer) {
 
   messages::sensordata *data = new messages::sensordata();
   data->set_sensor(sensor1.id);
-  data->set_theta((sensor1.theta - sensor1.theta_offset + 360) % 360);
-  data->set_phi((sensor1.phi - sensor1.phi_offset + 360) % 360);
+  // TODO: we may need to compress the values by making sure they're positive
+  // data->set_theta((sensor1.theta - sensor1.theta_offset + 360) % 360);
+  // data->set_phi((sensor1.phi - sensor1.phi_offset + 360) % 360);
+  // TODO: do that later
+  data->set_theta(sensor1.theta - sensor1.theta_offset);
+  data->set_phi(sensor1.phi - sensor1.phi_offset);
   print_sensordata(NET_OUT, data);
   // serialize data
   data->SerializeToArray(buffer, data->ByteSize());
   return data->ByteSize();
 }
 
+int Sensor::sample(int sample_idx, int *samples) {
+  int i;
+
+  // DEBUG
+  // printf("sampling...");
+#ifdef BBB_HOST
+  // use MAG
+  // lsm303.readMag();
+  // convert_coordinates(lsm303.m[0], lsm303.m[1], lsm303.m[2],
+  //     &samples[sample_idx], &samples[NUM_SAMPLES + sample_idx]);
+  // use ACC
+  lsm303.readAcc();
+  convert_coordinates(lsm303.a[0], lsm303.a[1], lsm303.a[2],
+      &samples[sample_idx], &samples[NUM_SAMPLES + sample_idx]);
+#else
+  sensor1.theta++;
+  sensor1.phi++;
+#endif
+  // DEBUG
+  // printf("sample %d, %d\n", samples[sample_idx], samples[NUM_SAMPLES + sample_idx]);
+  sample_idx = (sample_idx + 1) % NUM_SAMPLES;
+
+  if (sample_idx == 0) {
+    // update values to average of sampled data
+    // DEBUG
+    // printf("updating values...");
+    sensor1.theta = 0;
+    sensor1.phi = 0;
+    for (i = 0; i < NUM_SAMPLES; i++) {
+      sensor1.theta += samples[i];
+      sensor1.phi += samples[NUM_SAMPLES + i];
+    }
+    sensor1.theta = sensor1.theta / NUM_SAMPLES;
+    sensor1.phi = sensor1.phi / NUM_SAMPLES;
+    // DEBUG
+    // printf("value %d, %d\n", sensor1.theta, sensor1.phi);
+  }
+
+  return(sample_idx);
+}
+
+
+
 int main(void) {
   Sensor snsr;
-  struct timeval tv_now, tv_last;
-  // update timeout [usec]
-  int update_timeout = 1000000;
+  struct timeval tv_now, tv_last_sample;
+  long int t_diff_sample;
+  int *samples = (int *)malloc(2*NUM_SAMPLES*sizeof(int));
+  int sample_idx;
   int n;
-  long int t_diff;
   char buffer[BUFFERSIZE];
 #ifndef BBB_CAN
   // connected clients
@@ -102,7 +158,7 @@ int main(void) {
 
 #ifdef BBB_HOST
   // initialize sensors
-  mag.enable();
+  lsm303.enable();
 #endif
 
   // messages::sensordata *datafoo = new messages::sensordata();
@@ -131,7 +187,8 @@ int main(void) {
   // exit(0);
 
   // initialize time
-  gettimeofday(&tv_last, NULL);
+  gettimeofday(&tv_last_sample, NULL);
+  sample_idx = 0;
   // main loop
   while (1) {
     /*
@@ -174,29 +231,23 @@ int main(void) {
 
     // update time
     gettimeofday(&tv_now, NULL);
-    t_diff = (tv_now.tv_usec - tv_last.tv_usec) + (tv_now.tv_sec - tv_last.tv_sec) * 1000000;
-    // timeout
-    // update values and send them to the controller
-    if (t_diff > update_timeout) {
-      // update last
-      gettimeofday(&tv_last, NULL);
-#ifdef BBB_HOST
-      mag.readMag();
-      convert_coordinates(mag.m[0], mag.m[1], mag.m[2],
-          &snsr.sensor1.theta, &snsr.sensor1.phi);
-#else
-      snsr.sensor1.theta++;
-      snsr.sensor1.phi++;
-#endif
-      // DEBUG
-      // printf("timeout: %f, %f\n", snsr.sensor1.theta, snsr.sensor1.phi);
-      // send updated values
-      n = snsr.get_sensordatabuffer(buffer);
+    t_diff_sample = (tv_now.tv_usec - tv_last_sample.tv_usec)
+        + (tv_now.tv_sec - tv_last_sample.tv_sec) * 1000000;
+
+    // sample sensor values, maybe update
+    if (t_diff_sample > SAMPLE_TIMEOUT) {
+      sample_idx = snsr.sample(sample_idx, samples);
+
+      if (sample_idx == 0) {
+        // send updated values
+        n = snsr.get_sensordatabuffer(buffer);
 #ifdef BBB_CAN
-      can_write(snsr.sockfd, CAN_SENSORDATA, buffer, n);
+        can_write(snsr.sockfd, CAN_SENSORDATA, buffer, n);
 #else
-      socket_write(CONTROLLER_PORT, CONTROLLER_HOST, buffer, n);
+        socket_write(CONTROLLER_PORT, CONTROLLER_HOST, buffer, n);
 #endif
+      }
+      gettimeofday(&tv_last_sample, NULL);
     }
   }
 
