@@ -60,13 +60,40 @@ void convert_coordinates(int x, int y, int z, int *theta, int *phi) {
 
   // radius
   r = sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
-  // angle theta [0; pi]
-  if (r != 0) *theta = (int) (acos(z/r)/M_PI*180);
-  else *theta = 0;
-  // TODO: fix phi according to
-  // https://de.wikipedia.org/wiki/Kugelkoordinaten#Umrechnungen
-  // angle phi [0; 2pi]
-  *phi = (int) (atan2(y, x)/M_PI*180);
 
+  /*
+   * angle theta [0; pi]
+   */
+  if (r != 0) *theta = (int) acos(z/r);
+  else *theta = 0;
+
+  /*
+   * angle phi [0; 2pi]
+   * see https://de.wikipedia.org/wiki/Kugelkoordinaten#Umrechnungen
+   */
+  // first case
+  if (x > 0) *phi = (int) atan(y/x);
+  // second case
+  else if (x == 0) {
+    // sgn function
+    if (y < 0) *phi = -1 * M_PI_2;
+    else if (y == 0) *phi = 0;
+    else *phi = 1 * M_PI_2;
+  }
+  // third case
+  else if (( x < 0) && (y >= 0))
+    *phi = atan(y/x) + M_PI;
+  // fourth case
+  else if (( x < 0) && (y >= 0))
+    *phi = atan(y/x) - M_PI;
+  else
+    printf("this should never happen!\n");
+
+  // convert to degrees
+  int pi_to_deg = 180/M_PI;
+  *theta = *theta * pi_to_deg;
+  *phi = *phi * pi_to_deg;
+
+  // DEBUG
   // printf("x: %d, y: %d, z: %d -> r: %f, theta: %d, phi: %d\n", x, y, z, r, *theta, *phi);
 }
