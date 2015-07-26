@@ -23,7 +23,7 @@ void print_motorcommand (char inout, messages::motorcommand *command) {
   if(command->has_acc())
     sprintf(msg, "%s acc: %d", msg, command->acc());
   sprintf(msg, "%s [%d byte]\n", msg, command->ByteSize());
-  printf(msg);
+  printf("%s", msg);
 }
 
 void print_motorstatus (char inout, messages::motorstatus *status) {
@@ -32,7 +32,7 @@ void print_motorstatus (char inout, messages::motorstatus *status) {
 
   sprintf(msg, "[%c][MOTOR  | STATUS  | ID %d] pos: %d [%d byte]\n",
       inout, status->motor(), status->pos(), status->ByteSize());
-  printf(msg);
+  printf("%s", msg);
 }
 
 void print_sensorcommand (char inout, messages::sensorcommand *command) {
@@ -43,7 +43,7 @@ void print_sensorcommand (char inout, messages::sensorcommand *command) {
       inout, command->sensor(),
       messages::sensorcommand::commandType_Name(command->type()).c_str(),
       command->ByteSize());
-  printf(msg);
+  printf("%s", msg);
 }
 
 void print_sensordata(char inout, messages::sensordata *data) {
@@ -52,7 +52,7 @@ void print_sensordata(char inout, messages::sensordata *data) {
 
   sprintf(msg, "[%c][SENSOR | DATA    | ID %d] theta: %d, phi: %d [%d bytes]\n",
       inout, data->sensor(), data->theta(), data->phi(), data->ByteSize());
-  printf(msg);
+  printf("%s", msg);
 }
 
 void convert_coordinates(int x, int y, int z, int *theta, int *phi) {

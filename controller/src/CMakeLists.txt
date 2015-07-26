@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 site_name(HOST)
 
 add_subdirectory(lib)
+include_directories(${CMAKE_BINARY_DIR}/src/lib)
 
 ## CONTROLLER-DAEMON
 set(controller-daemon_src controller-daemon.cpp)
