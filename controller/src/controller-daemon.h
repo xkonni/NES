@@ -44,27 +44,28 @@ class Controller {
       */
     ~Controller();
 
-    /** @struct sensors
-      * @brief sensors struct
-      * @details
-      *   holds angles of both sensors
-      */
-    struct sensors {
-      double theta1;          ///< sensor1 theta angle
-      double phi1;            ///< sensor1 phi angle
-      double theta2;          ///< sensor2 theta angle
-      double phi2;            ///< sensor2 phi angle
-      /**
-       * @fn sensor()
-       * @brief default constructor for the sensor struct
-       */
-      sensors() {
-        theta1        = 0;
-        phi1          = 0;
-        theta2        = 0;
-        phi2          = 0;
-      }
-    };
+    // TODO: remove
+    // /** @struct sensors
+    //   * @brief sensors struct
+    //   * @details
+    //   *   holds coordinates of both sensors
+    //   */
+    // struct sensors {
+    //   double x1;    ///< sensor1 x coordinate
+    //   double y1;    ///< sensor1 y coordinate
+    //   double x2;    ///< sensor2 x coordinate
+    //   double y2;    ///< sensor2 y coordinate
+    //   /**
+    //    * @fn sensor()
+    //    * @brief default constructor for the sensor struct
+    //    */
+    //   sensors() {
+    //     x1  = 0;
+    //     y1  = 0;
+    //     x2  = 0;
+    //     y2  = 0;
+    //   }
+    // };
 
     /** @fn void calculate_movement (messages::sensordata *data1,
      *          messages::sensordata *data2);
@@ -102,12 +103,12 @@ class Controller {
      */
     int send_sensorcommand(messages::sensorcommand *command);
 
-    /** @fn int deg2steps(int deg);
-     *  @brief calculate steps from degrees
+    /** @fn int coord2step(int c);
+     *  @brief calculate steps from coordinates
      *
-     *  @param[int]   deg   degrees to turn
+     *  @param[int]   c   coordinate difference
      */
-    int deg2steps(int deg);
+    int coord2step(int c);
 
     /// @var sockfd listening socket
     int sockfd;

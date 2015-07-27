@@ -54,26 +54,25 @@ class Sensor {
     /** @struct sensor
       * @brief sensor struct
       * @details
-      *   describes the angles theta and phi
-      *   resulting from the x, y, z sensor values
+      *   describes the x and y coordinates
       *   as well as offsets due to calibration
       */
     struct sensor {
-      int id;                 ///< sensor id
-      int theta;              ///< current theta angle
-      int phi;                ///< current phi angle
-      int theta_offset;       ///< calibrated theta offset
-      int phi_offset;         ///< calibrated phi offset
+      int id;               ///< sensor id
+      int x;                ///< current x coordinate
+      int y;                ///< current y coordinate
+      int x_offset;         ///< calibrated x offset
+      int y_offset;         ///< calibrated y offset
       /**
        * @fn sensor()
        * @brief default constructor for the sensor struct
        */
       sensor() {
-        id            = 1;
-        theta         = 0;
-        phi           = 0;
-        theta_offset  = 0;
-        phi_offset    = 0;
+        id        = 1;
+        x         = 0;
+        y         = 0;
+        x_offset  = 0;
+        y_offset  = 0;
       }
     };
 

@@ -64,6 +64,6 @@ message sensorcommand {
 // IV SENSORDATA
 message sensordata {
   required int32 sensor = 1;
-  optional int32 theta = 2;
-  optional int32 phi = 3;
+  optional int32 x = 2;
+  optional int32 y = 3;
 }

@@ -49,6 +49,10 @@
 #define NET_IN            '<'
 #define NET_OUT           '>'
 
+#define TOTAL_STEPS       800
+#define SENSOR_MIN        -4000
+#define SENSOR_MAX        4000
+
 /** @fn         void print_error(const char *reply);
   * @brief      print message, error and exit
   *

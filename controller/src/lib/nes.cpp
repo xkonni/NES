@@ -50,8 +50,8 @@ void print_sensordata(char inout, messages::sensordata *data) {
   char *msg = (char *) malloc(BUFFERSIZE*sizeof(char));
   bzero(msg, BUFFERSIZE);
 
-  sprintf(msg, "[%c][SENSOR | DATA    | ID %d] theta: %d, phi: %d [%d bytes]\n",
-      inout, data->sensor(), data->theta(), data->phi(), data->ByteSize());
+  sprintf(msg, "[%c][SENSOR | DATA    | ID %d] x: %d, y: %d [%d bytes]\n",
+      inout, data->sensor(), data->x(), data->y(), data->ByteSize());
   printf("%s", msg);
 }
 

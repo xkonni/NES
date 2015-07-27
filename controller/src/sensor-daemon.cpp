@@ -52,33 +52,34 @@ void Sensor::handle_sensorcommand (messages::sensorcommand *command, messages::s
   if (command->type() == messages::sensorcommand::GET) {
     // return the current sensor position minus the saved offset
     // TODO: we may need to compress the values by making sure they're positive
-    // data->set_theta((sensor1.theta - sensor1.theta_offset + 360) % 360);
-    // data->set_phi((sensor1.phi - sensor1.phi_offset + 360) % 360);
+    // data->set_x((sensor1.x - sensor1.x_offset + 360) % 360);
+    // data->set_y((sensor1.y - sensor1.y_offset + 360) % 360);
     // TODO: do that later
-    data->set_theta(sensor1.theta - sensor1.theta_offset);
-    data->set_phi(sensor1.phi - sensor1.phi_offset);
+    data->set_x(sensor1.x - sensor1.x_offset);
+    data->set_y(sensor1.y - sensor1.y_offset);
   }
   /*
    * CALIBRATE sensor
    */
   else if (command->type() == messages::sensorcommand::CALIBRATE) {
     // read current values
+    // TODO: use average values
 #ifdef BBB_HOST
     // use MAG
     // lsm303.readMag();
     // convert_coordinates(lsm303.m[0], lsm303.m[1], lsm303.m[2],
-    //     &sensor1.theta_offset, &sensor1.phi_offset);
+    //     &sensor1.x_offset, &sensor1.y_offset);
     // use ACC
     lsm303.readAcc();
     convert_coordinates(lsm303.a[0], lsm303.a[1], lsm303.a[2],
-        &sensor1.theta_offset, &sensor1.phi_offset);
+        &sensor1.x_offset, &sensor1.y_offset);
 #endif
   }
 
   // DEBUG
-  // printf("calibrated: theta %d - %d = %d, phi: %d - %d = %d\n",
-  //     sensor1.theta, sensor1.theta_offset, sensor1.theta - sensor1.theta_offset,
-  //     sensor1.phi, sensor1.phi_offset, sensor1.phi - sensor1.phi_offset);
+  // printf("calibrated: x %d - %d = %d, y: %d - %d = %d\n",
+  //     sensor1.x, sensor1.x_offset, sensor1.x - sensor1.x_offset,
+  //     sensor1.y, sensor1.y_offset, sensor1.y - sensor1.y_offset);
 }
 
 int Sensor::get_sensordatabuffer (char *buffer) {
@@ -87,11 +88,11 @@ int Sensor::get_sensordatabuffer (char *buffer) {
   messages::sensordata *data = new messages::sensordata();
   data->set_sensor(sensor1.id);
   // TODO: we may need to compress the values by making sure they're positive
-  // data->set_theta((sensor1.theta - sensor1.theta_offset + 360) % 360);
-  // data->set_phi((sensor1.phi - sensor1.phi_offset + 360) % 360);
+  // data->set_x((sensor1.x - sensor1.x_offset + 360) % 360);
+  // data->set_y((sensor1.y - sensor1.y_offset + 360) % 360);
   // TODO: do that later
-  data->set_theta(sensor1.theta - sensor1.theta_offset);
-  data->set_phi(sensor1.phi - sensor1.phi_offset);
+  data->set_x(sensor1.x - sensor1.x_offset);
+  data->set_y(sensor1.y - sensor1.y_offset);
   print_sensordata(NET_OUT, data);
   // serialize data
   data->SerializeToArray(buffer, data->ByteSize());
@@ -104,17 +105,13 @@ int Sensor::sample(int sample_idx, int *samples) {
   // DEBUG
   // printf("sampling...");
 #ifdef BBB_HOST
-  // use MAG
-  // lsm303.readMag();
-  // convert_coordinates(lsm303.m[0], lsm303.m[1], lsm303.m[2],
-  //     &samples[sample_idx], &samples[NUM_SAMPLES + sample_idx]);
   // use ACC
   lsm303.readAcc();
-  convert_coordinates(lsm303.a[0], lsm303.a[1], lsm303.a[2],
-      &samples[sample_idx], &samples[NUM_SAMPLES + sample_idx]);
+  samples[sample_idx] = lsm303.a[0];
+  samples[NUM_SAMPLES + sample_idx] = lsm303.a[1];
 #else
-  sensor1.theta++;
-  sensor1.phi++;
+  sensor1.x++;
+  sensor1.y++;
 #endif
   // DEBUG
   // printf("sample %d, %d\n", samples[sample_idx], samples[NUM_SAMPLES + sample_idx]);
@@ -124,16 +121,16 @@ int Sensor::sample(int sample_idx, int *samples) {
     // update values to average of sampled data
     // DEBUG
     // printf("updating values...");
-    sensor1.theta = 0;
-    sensor1.phi = 0;
+    sensor1.x = 0;
+    sensor1.y = 0;
     for (i = 0; i < NUM_SAMPLES; i++) {
-      sensor1.theta += samples[i];
-      sensor1.phi += samples[NUM_SAMPLES + i];
+      sensor1.x += samples[i];
+      sensor1.y += samples[NUM_SAMPLES + i];
     }
-    sensor1.theta = sensor1.theta / NUM_SAMPLES;
-    sensor1.phi = sensor1.phi / NUM_SAMPLES;
+    sensor1.x = sensor1.x / NUM_SAMPLES;
+    sensor1.y = sensor1.y / NUM_SAMPLES;
     // DEBUG
-    // printf("value %d, %d\n", sensor1.theta, sensor1.phi);
+    // printf("value %d, %d\n", sensor1.x, sensor1.y);
   }
 
   return(sample_idx);
@@ -160,31 +157,6 @@ int main(void) {
   // initialize sensors
   lsm303.enable();
 #endif
-
-  // messages::sensordata *datafoo = new messages::sensordata();
-  // printf("initialize size: %d\n", datafoo->ByteSize());
-  // datafoo->set_sensor(1);
-  // printf("sensor size: %d\n", datafoo->ByteSize());
-  // datafoo->set_theta(0);
-  // printf("theta 0 %d size: %d\n", datafoo->theta(), datafoo->ByteSize());
-  // datafoo->set_theta(360);
-  // printf("theta 360 %d size: %d\n", datafoo->theta(), datafoo->ByteSize());
-  // datafoo->set_phi(0);
-  // printf("phi 0 %d size: %d\n", datafoo->phi(), datafoo->ByteSize());
-  // datafoo->set_phi(360);
-  // printf("phi 360 %d size: %d\n", datafoo->phi(), datafoo->ByteSize());
-
-  // messages::motorcommand *commandfoo = new messages::motorcommand();
-  // printf("initialize size: %d\n", commandfoo->ByteSize());
-  // commandfoo->set_type(messages::motorcommand::LOOP);
-  // commandfoo->set_motor(1);
-  // printf("type & motor size: %d\n", commandfoo->ByteSize());
-  // commandfoo->set_steps(0);
-  // printf("steps 0 %d size: %d\n", commandfoo->steps(), commandfoo->ByteSize());
-  // commandfoo->set_steps(1600);
-  // printf("steps 1600 %d size: %d\n", commandfoo->steps(), commandfoo->ByteSize());
-
-  // exit(0);
 
   // initialize time
   gettimeofday(&tv_last_sample, NULL);

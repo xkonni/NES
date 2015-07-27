@@ -20,31 +20,33 @@ Controller::~Controller() {
   close(sockfd);
 }
 
-int Controller::deg2steps(int deg) {
-  // TODO: add global parameter
-  int total_steps = 800;
-  return floor(total_steps/360*deg);
+int Controller::coord2step(int c) {
+  int steps = floor(TOTAL_STEPS/(SENSOR_MAX - SENSOR_MIN) *c);
+  printf("c: %d -> steps: %d\n", c, steps);
+  return steps;
 }
 
 void Controller::calculate_movement (
     messages::sensordata *data1, messages::sensordata *data2,
     messages::motorcommand *command1, messages::motorcommand *command2) {
-  double theta_diff, phi_diff;
+  double x_diff, y_diff;
 
-  // motor1 -> theta
-  theta_diff = data1->theta() - data2->theta();
+  // motor1 -> x
+  x_diff = data1->x() - data2->x();
   command1->set_type(messages::motorcommand::LOOP);
   command1->set_motor(1);
+  // TODO
   // modify steps [-800; 800] -> [0; 1600]
-  command1->set_steps(deg2steps(theta_diff) + 800);
+  command1->set_steps(coord2step(x_diff));
 
 
-  // motor2 -> phi
-  phi_diff = data1->phi() - data2->phi();
+  // motor2 -> y
+  y_diff = data1->y() - data2->y();
   command2->set_type(messages::motorcommand::LOOP);
   command2->set_motor(2);
+  // TODO
   // modify steps [-800; 800] -> [0; 1600]
-  command2->set_steps(deg2steps(phi_diff) + 800);
+  command2->set_steps(coord2step(y_diff));
 }
 
 void Controller::move_motor(int motor, int steps, int acc) {
