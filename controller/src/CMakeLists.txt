@@ -68,7 +68,7 @@ if(${HOST} STREQUAL "beaglebone")
     lsm303
     i2cbus
     nes
-    net-socket
+    nes-socket
   )
   endif()
 # NO BEAGLEBONE
@@ -101,7 +101,7 @@ if(${HOST} STREQUAL "beaglebone")
     lsm303
     i2cbus
     nes
-    net-socket
+    nes-socket
   )
   endif()
 # NO BEAGLEBONE
