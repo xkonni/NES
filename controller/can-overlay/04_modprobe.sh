@@ -4,9 +4,12 @@ for m in $MODULES; do
   echo "loading $m"
   sudo modprobe $m
   if [ $? -eq 0 ]; then
-    echo "success.\nnow run 05_set.sh'.
+    echo "success."
   else
     echo "fail."
     break
   fi
 done
+if [ $? -eq 0 ]; then
+  echo "now run 05_set.sh"
+fi
