@@ -57,6 +57,8 @@ void print_sensordata(char inout, messages::sensordata *data) {
 
 void convert_coordinates(int x, int y, int z, int *theta, int *phi) {
   double r;
+  double d_theta;
+  double d_phi;
 
   // radius
   r = sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
@@ -64,36 +66,38 @@ void convert_coordinates(int x, int y, int z, int *theta, int *phi) {
   /*
    * angle theta [0; pi]
    */
-  if (r != 0) *theta = (int) acos(z/r);
-  else *theta = 0;
+  if (r != 0) d_theta = acos(z/r);
+  else d_theta = 0;
 
   /*
    * angle phi [0; 2pi]
    * see https://de.wikipedia.org/wiki/Kugelkoordinaten#Umrechnungen
    */
   // first case
-  if (x > 0) *phi = (int) atan(y/x);
+  if (x > 0)
+    d_phi = atan(y/x);
   // second case
   else if (x == 0) {
     // sgn function
-    if (y < 0) *phi = -1 * M_PI_2;
-    else if (y == 0) *phi = 0;
-    else *phi = 1 * M_PI_2;
+    if (y < 0) d_phi = -1 * M_PI_2;
+    else if (y == 0) d_phi = 0;
+    else d_phi = 1 * M_PI_2;
   }
   // third case
   else if (( x < 0) && (y >= 0))
-    *phi = atan(y/x) + M_PI;
+    d_phi = atan(y/x) + M_PI;
   // fourth case
-  else if (( x < 0) && (y >= 0))
-    *phi = atan(y/x) - M_PI;
+  else if (( x < 0) && (y < 0))
+    d_phi = atan(y/x) - M_PI;
   else
     printf("this should never happen!\n");
 
   // convert to degrees
   int pi_to_deg = 180/M_PI;
-  *theta = *theta * pi_to_deg;
-  *phi = *phi * pi_to_deg;
+  *theta = (int) (d_theta * pi_to_deg);
+  *phi = (int) (d_phi * pi_to_deg);
 
   // DEBUG
-  // printf("x: %d, y: %d, z: %d -> r: %f, theta: %d, phi: %d\n", x, y, z, r, *theta, *phi);
+  // printf("x: %d, y: %d, z: %d -> r: %f, theta: %f / %d, phi: %f / %d\n", x, y, z, r,
+  //     d_theta, *theta, d_phi, *phi);
 }
