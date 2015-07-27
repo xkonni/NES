@@ -83,125 +83,124 @@
   \end{itemize}
 \end{frame}
 
+%\section{Overview}
+%\subsection{Sensing}
+%\begin{frame}
+  %\frametitle{Milestone: Sensing}
+  %\framesubtitle{Read and process MEMS data}
+  %\textbf{Status:}
+  %\begin{itemize}
+    %\item Reading data via I2C works
+    %\item Computing plate position from data works
+    %\item Additional filtering might be required
+  %\end{itemize}
+%\end{frame}
+%
+%\subsection{Actuation}
+%\begin{frame}
+  %\frametitle{Milestone: Actuation}
+  %\framesubtitle{Control stepper motors}
+  %\textbf{Status:}
+  %\begin{itemize}
+    %\item Communication with stepper drivers via SPI works
+    %\item Control of stepper motors works
+    %\item Additional work on control daemon necessary
+  %\end{itemize}
+%\end{frame}
+%
+%\subsection{Mechanics}
+%\begin{frame}
+  %\frametitle{Milestone: Mechanics}
+  %\framesubtitle{Construct movable plate}
+  %\textbf{Status:}
+  %\begin{itemize}
+    %\item First version of plate construction printed
+    %\item Works for now
+    %\item Design on second, refined version in progress
+  %\end{itemize}
+%\end{frame}
+%
+%\subsection{Communication}
+%\begin{frame}
+  %\frametitle{Milestone: Communication}
+  %\framesubtitle{Implement industrial bus}
+  %\textbf{Status:}
+  %\begin{itemize}
+    %\item A lot of research was done
+    %\item EtherCAT selected as most interesting
+    %\item We couldn't get EtherCAT working
+    %\item CAN used as fallback
+  %\end{itemize}
+%\end{frame}
+%
+%\subsection{Controller}
+%\begin{frame}
+  %\frametitle{Milestone: Controller}
+  %\framesubtitle{Bus master, main computational unit}
+  %\textbf{Status:}
+  %\begin{itemize}
+    %\item Modular design to fit CAN and EtherCAT
+    %\item High-level controller class
+      %\begin{itemize}
+        %\item Receives periodic sensor input events
+        %\item Computes angle corrections for all drives
+      %\end{itemize}
+    %\item CAN wrapped into classes to provide the events and send corrections
+    %\item Component interaction via Sockets
+    %\item Built on a BeagleBone Black
+  %\end{itemize}
+%\end{frame}
+
+
+\section{System Specifications}
+\subsection{Functional Overview}
 \begin{frame}
-  \frametitle{Reminder: Functional Overview}
+  \frametitle{Functional Overview}
 \begin{figure}
-\includegraphics[width=\textwidth]{functionalspecification.pdf}
+\includegraphics[width=0.7\textwidth]{functional_specification_can.pdf}
 \caption{Diagram of the Functional Specification}
 \end{figure}
 \end{frame}
 
-\begin{frame}
-  \frametitle{Reminder: Major Milestones}
-  \begin{itemize}
-    \item \textbf{Sensing:} Read and process MEMS data\\
-    \item \textbf{Actuation:} Control stepper motors\\
-    \item \textbf{Mechanics:} Construct movable plate\\
-    \item \textbf{Communication:} Implement industrial bus\\
-    \item \textbf{Controller:} Bus master, main computational unit\\
-  \end{itemize}
-\end{frame}
-
-\section{Overview}
-\subsection{Sensing}
-\begin{frame}
-  \frametitle{Milestone: Sensing}
-  \framesubtitle{Read and process MEMS data}
-  \textbf{Status:}
-  \begin{itemize}
-    \item Reading data via I2C works
-    \item Computing plate position from data works
-    \item Additional filtering might be required
-  \end{itemize}
-\end{frame}
-
-\subsection{Actuation}
-\begin{frame}
-  \frametitle{Milestone: Actuation}
-  \framesubtitle{Control stepper motors}
-  \textbf{Status:}
-  \begin{itemize}
-    \item Communication with stepper drivers via SPI works
-    \item Control of stepper motors works
-    \item Additional work on control daemon necessary
-  \end{itemize}
-\end{frame}
-
-\subsection{Mechanics}
-\begin{frame}
-  \frametitle{Milestone: Mechanics}
-  \framesubtitle{Construct movable plate}
-  \textbf{Status:}
-  \begin{itemize}
-    \item First version of plate construction printed
-    \item Works for now
-    \item Design on second, refined version in progress
-  \end{itemize}
-\end{frame}
-
-\subsection{Communication}
-\begin{frame}
-  \frametitle{Milestone: Communication}
-  \framesubtitle{Implement industrial bus}
-  \textbf{Status:}
-  \begin{itemize}
-    \item A lot of research was done
-    \item EtherCAT selected as most interesting
-    \item We couldn't get EtherCAT working
-    \item CAN used as fallback
-  \end{itemize}
-\end{frame}
-
-\subsection{Controller}
-\begin{frame}
-  \frametitle{Milestone: Controller}
-  \framesubtitle{Bus master, main computational unit}
-  \textbf{Status:}
-  \begin{itemize}
-    \item Modular design to fit CAN and EtherCAT
-    \item High-level controller class
-      \begin{itemize}
-        \item Receives periodic sensor input events
-        \item Computes angle corrections for all drives
-      \end{itemize}
-    \item CAN wrapped into classes to provide the events and send corrections
-    \item Component interaction via Sockets
-    \item Built on a BeagleBone Black
-  \end{itemize}
-\end{frame}
-
-
-\section{System Specifications}
-\subsection{Timing}
-\begin{frame}
-  \frametitle{Timing}
-  \textbf{Timing goal:} Move plate to desired position within 1 second
-
-  \vfill
-
-  \textbf{Fixed timings:}
-  \begin{itemize}
-    \item Sensors
-      \begin{itemize}
-        \item Sample every 10 ms
-        \item Report mean value every 100 ms
-      \end{itemize}
-    \item Actuation takes up to 500 ms
-  \end{itemize}
-
-  \vfill
-
-  \textbf{Delay constraint:} 500 ms to compute \& communicate
-\end{frame}
+%\subsection{Timing}
+%\begin{frame}
+  %\frametitle{Timing}
+  %\textbf{Timing goal:} Move plate to desired position within 1 second
+%
+  %\vfill
+%
+  %\textbf{Fixed timings:}
+  %\begin{itemize}
+    %\item Sensors
+      %\begin{itemize}
+        %\item Sample every 10 ms
+        %\item Report mean value every 100 ms
+      %\end{itemize}
+    %\item Actuation takes up to 500 ms
+  %\end{itemize}
+%
+  %\vfill
+%
+  %\textbf{Delay constraint:} 500 ms to compute \& communicate
+%\end{frame}
 
 \subsection{Bus Design}
 \begin{frame}
   \frametitle{Bus}
   \framesubtitle{Bus specification}
   \begin{itemize}
-    \item EtherCAT could not be implemented
+    \item EtherCAT could not be implemented due to
+		\begin{itemize}
+			\item Unsuccessful installation of SDK on Linux
+			\item Problems with Ethernet NIC incompatibilities 
+		\end{itemize}
+		\vfill
     \item Using fallback option CAN
-    \item ...
+		\begin{itemize}
+			\item All nodes are BeagleBone Blacks
+			\item CAN controller: SN65HVD230
+			%\item Sensor values are periodically fed to the Controller from a buffer
+		\end{itemize}
   \end{itemize}
 \end{frame}
 
@@ -209,12 +208,17 @@
 \begin{frame}
   \frametitle{CAN}
   \framesubtitle{Bus Design}
+	Reminder:
+	\begin{itemize}
+		\item \textbf{Timing goal:} Move plate to desired position within 1 second
+		\item Actuation takes up to 500\,ms
+		\item Sensors report mean value every 100\,ms
+	\end{itemize}
+	\vfill
   \begin{itemize}
     \item Required cycle time: 100\,ms
-    \item All nodes are BeagleBone Blacks
-    \item CAN controller: SN65HVD230
     \item Sensor values are periodically fed to the Controller from a buffer
-    \item Possibly with a communication scheme like TTCAN
+    \item Controller computes movement commandos and sends them to the drivers
   \end{itemize}
 \end{frame}
 
