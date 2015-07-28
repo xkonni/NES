@@ -12,10 +12,19 @@
 LOGFILE=/var/log/nes-daemon.log
 DAEMON_DIR="/home/debian/workspace/NES/controller"
 DAEMON="sensor-daemon"
+TIMEOUT=60
 
 case "$1" in
 start)
-  nohup ${DAEMON_DIR}/${DAEMON} > /dev/null 2> $LOGFILE &
+  # make sure we're up
+  if [ $(ifconfig can0 | grep -c UP) -eq 1 ]; then
+    echo "starting at once" | tee -a $LOGFILE
+    nohup ${DAEMON_DIR}/${DAEMON} > /dev/null 2> $LOGFILE &
+  else
+    echo "waiting $TIMEOUT seconds" | tee -a $LOGFILE
+    sleep $TIMEOUT
+    nohup ${DAEMON_DIR}/${DAEMON} > /dev/null 2> $LOGFILE &
+  fi
   ;;
 reload|force-reload|restart)
   $0 stop
