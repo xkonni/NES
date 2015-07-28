@@ -227,31 +227,14 @@
   \frametitle{Messsage ID Descriptions}
   \begin{table}
 \begin{tabular}{l | c | c }
-Node Name & ID / Priority & Master / Slave \\
+Message Type & ID / Priority & Length \\
 \hline \hline
-Controller & 1 & Master \\
-Source Sensor & 2 & Slave \\
-Target Sensor & 3 & Slave \\
-Stepper Driver & 4 & Slave
+Motor Command & 1 & 8 Byte (TODO)\\
+Motor Status & 2 & 8 Byte (TODO) \\
+Sensor Command & 4 & 8 Byte (TODO) \\
+Sensor Data & 8 & 8 Byte (TODO)
 \end{tabular}
-\caption{Nodes in the network}
-\end{table}
-\end{frame}
-
-\subsection{Messages}
-\begin{frame}
-  \frametitle{Message Description}
-  \framesubtitle{Bus Option 2}
-  \begin{table}
-\begin{tabular}{l | c | c }
-Description & Data Request & Length \\
-\hline \hline
-Sensor Position   & Allowed     & 6 Bytes \\
-Motor Status      & Allowed     & 4 Bytes \\
-Rotation Command  & Not Allowed & 3 Bytes \\
-Reset Command     & Not Allowed & 3 Bytes
-\end{tabular}
-\caption{Possible messages in the network}
+\caption{Messages in the network}
 \end{table}
 \end{frame}
 
@@ -263,12 +246,22 @@ Reset Command     & Not Allowed & 3 Bytes
   \end{itemize}
 \end{frame}
 
+\section{Presentation}
+
+\section{Review}
 \begin{frame}
-  \frametitle{}
-  \framesubtitle{}
-  \begin{itemize}
-    \item ?
-  \end{itemize}
+	\frametitle{Review}
+	\textbf{Goals:}
+	\begin{itemize}
+		\item \textbf{Overall} Mimic position of a plate: \checkmark
+		\vfill
+		\item \textbf{Sensing} Read MEMS sensor data via I2C: \checkmark
+		\item \textbf{Communication} Implement industrial bus: \checkmark \\
+			We had to use the fallback solution, CAN.
+		\item \textbf{Actuation} Move plate around two axes: \checkmark
+		\item \textbf{Timing} Move plate within 1 second: $\thicksim$ \\
+			Initial movement is fast, but system might oscillate
+	\end{itemize}
 \end{frame}
 
 \section{Discussion}
