@@ -1,3 +1,9 @@
+ACTION
+======
+
+canbus running in 4 beaglebones:
+![canbus](https://github.com/xkonni/NES/blob/master/can-running.png)
+
 INSTRUCTIONS
 ============
 
