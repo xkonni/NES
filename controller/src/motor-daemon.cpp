@@ -9,7 +9,7 @@
 
 Motor::Motor() :
     //      hdr, step, dir, pos, steps, minpos, maxpos
-    motor1 {  9,   11,  12,   0,     0,   -200,    200 },
+    motor1 {  9,   11,  12,   0,     0,   -100,    100 },
     motor2 {  9,   13,  14,   0,     0,   -200,    200 }
 {
   // initialize socket

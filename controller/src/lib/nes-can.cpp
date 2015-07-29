@@ -43,8 +43,13 @@ int can_listen(int sockfd, int canid, char *buffer) {
       n = read(sockfd, &frame, sizeof(frame));
       if (frame.can_id & canid) {
         strncpy(buffer, (char *)frame.data, frame.can_dlc);
+        // attach can_id to n [0..255 | 256 .. 2048]
+        n = n | (frame.can_id << 8);
         // return sent size
         return(n);
+      }
+      else {
+        printf("ignored canid: %d\n", frame.can_id);
       }
     }
   } // if (sel > 0)

@@ -105,6 +105,8 @@ int main(int argc, char *argv[])
   // connected clients
   std::vector<int> *connected = new std::vector<int>();
 #endif
+  // message id
+  int msg_id;
 
   // calibrate sensor1
   // scommand1->set_type(messages::sensorcommand::CALIBRATE);
@@ -119,20 +121,39 @@ int main(int argc, char *argv[])
   while (1) {
     // listen on socket
 #ifdef BBB_CAN
-    n = can_listen(ctrl.sockfd, CAN_SENSORDATA, buffer);
+    n = can_listen(ctrl.sockfd, CAN_SENSORDATA | CAN_MOTORSTATUS, buffer);
 #else
     n = socket_listen(ctrl.sockfd, connected, buffer);
 #endif
     if (n > 0) {
-      // message
-      messages::sensordata *message = new messages::sensordata();
-      // parse message
-      message->ParseFromArray(buffer, n);
-      print_sensordata(NET_IN, message);
-      if (message->sensor() == SENSOR1) {
-        sdata1->CopyFrom(*message);
-      } else {
-        sdata2->CopyFrom(*message);
+#ifdef BBB_CAN
+      // extract can id
+      msg_id = n >> 8;
+#else
+      // set to sensordata
+      msg_id = CAN_SENSORDATA;
+#endif
+      // and actual size
+      n = n & 0xff;
+      // motorstatus
+      messages::motorstatus *status = new messages::motorstatus();
+      // sensordata
+      messages::sensordata *data = new messages::sensordata();
+
+      // sensordata
+      if (msg_id == CAN_SENSORDATA) {
+        data->ParseFromArray(buffer, n);
+        print_sensordata(NET_IN, data);
+        if (data->sensor() == SENSOR1) {
+          sdata1->CopyFrom(*data);
+        } else {
+          sdata2->CopyFrom(*data);
+        }
+      }
+      // motorstatus
+      else if (msg_id == CAN_MOTORSTATUS) {
+        status->ParseFromArray(buffer, n);
+        print_motorstatus(NET_IN, status);
       }
     }
 
