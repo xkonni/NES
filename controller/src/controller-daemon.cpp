@@ -108,14 +108,6 @@ int main(int argc, char *argv[])
   // message id
   int msg_id;
 
-  // calibrate sensor1
-  // scommand1->set_type(messages::sensorcommand::CALIBRATE);
-  // scommand1->set_sensor(SENSOR1);
-  //
-  // mcommand1 = new messages::motorcommand();
-  // mcommand1->set_type(messages::motorcommand::RESET);
-  // mcommand1->set_motor(1);
-
   // initialize time
   gettimeofday(&tv_last, NULL);
   while (1) {

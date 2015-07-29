@@ -42,10 +42,6 @@ void Sensor::handle_sensorcommand (messages::sensorcommand *command, messages::s
    * GET current values
    */
   if (command->type() == messages::sensorcommand::GET) {
-    // TODO: we may need to compress the values by making sure they're positive
-    // data->set_theta((sensor1.theta - sensor1.theta_offset + 360) % 360);
-    // data->set_phi((sensor1.phi - sensor1.phi_offset + 360) % 360);
-    // TODO: do that later
     data->set_theta(sensor1.theta - sensor1.theta_offset);
     data->set_phi(sensor1.phi - sensor1.phi_offset);
   }
@@ -55,11 +51,6 @@ void Sensor::handle_sensorcommand (messages::sensorcommand *command, messages::s
   else if (command->type() == messages::sensorcommand::CALIBRATE) {
     // read current values
 #ifdef BBB_HOST
-    // use MAG
-    // lsm303.readMag();
-    // convert_coordinates(lsm303.m[0], lsm303.m[1], lsm303.m[2],
-    //     &sensor1.theta_offset, &sensor1.phi_offset);
-    // use ACC
     lsm303.readAcc();
     convert_coordinates(lsm303.a[0], lsm303.a[1], lsm303.a[2],
         &sensor1.theta_offset, &sensor1.phi_offset);
@@ -77,10 +68,6 @@ int Sensor::get_sensordatabuffer (char *buffer) {
 
   messages::sensordata *data = new messages::sensordata();
   data->set_sensor(sensor1.id);
-  // TODO: we may need to compress the values by making sure they're positive
-  // data->set_theta((sensor1.theta - sensor1.theta_offset + 360) % 360);
-  // data->set_phi((sensor1.phi - sensor1.phi_offset + 360) % 360);
-  // TODO: do that later
   data->set_theta(sensor1.theta - sensor1.theta_offset);
   data->set_phi(sensor1.phi - sensor1.phi_offset);
   print_sensordata(NET_OUT, data);
@@ -181,31 +168,6 @@ int main(void) {
   // initialize sensors
   lsm303.enable();
 #endif
-
-  // messages::sensordata *datafoo = new messages::sensordata();
-  // printf("initialize size: %d\n", datafoo->ByteSize());
-  // datafoo->set_sensor(1);
-  // printf("sensor size: %d\n", datafoo->ByteSize());
-  // datafoo->set_theta(0);
-  // printf("theta 0 %d size: %d\n", datafoo->theta(), datafoo->ByteSize());
-  // datafoo->set_theta(360);
-  // printf("theta 360 %d size: %d\n", datafoo->theta(), datafoo->ByteSize());
-  // datafoo->set_phi(0);
-  // printf("phi 0 %d size: %d\n", datafoo->phi(), datafoo->ByteSize());
-  // datafoo->set_phi(360);
-  // printf("phi 360 %d size: %d\n", datafoo->phi(), datafoo->ByteSize());
-
-  // messages::motorcommand *commandfoo = new messages::motorcommand();
-  // printf("initialize size: %d\n", commandfoo->ByteSize());
-  // commandfoo->set_type(messages::motorcommand::LOOP);
-  // commandfoo->set_motor(1);
-  // printf("type & motor size: %d\n", commandfoo->ByteSize());
-  // commandfoo->set_steps(0);
-  // printf("steps 0 %d size: %d\n", commandfoo->steps(), commandfoo->ByteSize());
-  // commandfoo->set_steps(1600);
-  // printf("steps 1600 %d size: %d\n", commandfoo->steps(), commandfoo->ByteSize());
-
-  // exit(0);
 
   // initialize samples to 90deg
   std::fill_n(samples, 2*NUM_SAMPLES, 90);
