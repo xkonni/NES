@@ -9,8 +9,8 @@
 
 Motor::Motor() :
     //      hdr, step, dir, pos, steps, minpos, maxpos
-    motor1 {  9,   11,  12,   0,     0,   -100,    100 },
-    motor2 {  9,   13,  14,   0,     0,   -200,    200 }
+    motor1 {  9,   11,  12,   0,     0,   -150,    150 },
+    motor2 {  9,   13,  14,   0,     0,   -150,    150 }
 {
   // initialize socket
 #ifdef BBB_CAN
@@ -40,18 +40,18 @@ void Motor::handle_motorcommand (messages::motorcommand *command, messages::moto
     if (steps < STEPS_MIN) steps = STEPS_MIN;
 
     if (m == 1) {
-      motor1.steps = steps;
       // make sure we dont exceed the limits
       if (motor1.pos + motor1.steps > motor1.maxpos) {
-        motor1.steps = motor1.maxpos - motor1.pos;
+        steps = motor1.maxpos - motor1.pos;
         // hit the edge, send back status
         command->set_type(messages::motorcommand::STATUS);
       }
       if (motor1.pos + motor1.steps < motor1.minpos) {
-        motor1.steps = motor1.minpos - motor1.pos;
+        steps = motor1.minpos - motor1.pos;
         // hit the edge, send back status
         command->set_type(messages::motorcommand::STATUS);
       }
+      motor1.steps = steps;
       // printf("motor1 pos: %d/[%d, %d], steps to go: %d\n",
       //     motor1.pos, motor1.minpos, motor1.maxpos, motor1.steps);
     }
@@ -59,15 +59,16 @@ void Motor::handle_motorcommand (messages::motorcommand *command, messages::moto
       motor2.steps = steps;
       // make sure we dont exceed the limits
       if (motor2.pos + motor2.steps > motor2.maxpos) {
-        motor2.steps = motor2.maxpos - motor2.pos;
+        steps = motor2.maxpos - motor2.pos;
         // hit the edge, send back status
         command->set_type(messages::motorcommand::STATUS);
       }
       if (motor2.pos + motor2.steps < motor2.minpos) {
-        motor2.steps = motor2.minpos - motor2.pos;
+        steps = motor2.minpos - motor2.pos;
         // hit the edge, send back status
         command->set_type(messages::motorcommand::STATUS);
       }
+      motor2.steps = steps;
       // printf("motor2 pos: %d/[%d, %d], steps to go: %d\n",
       //     motor2.pos, motor2.minpos, motor2.maxpos, motor2.steps);
     }
@@ -75,14 +76,15 @@ void Motor::handle_motorcommand (messages::motorcommand *command, messages::moto
 
   /*
    * STATUS
+   * ... or hit the edge
    */
   if (command->type() == messages::motorcommand::STATUS) {
     status->set_motor(m);
     if ( m == 1 ) {
-      status->set_pos(motor1.pos);
+      status->set_pos(motor1.pos + 800);
     }
     else if ( m == 2 ) {
-      status->set_pos(motor2.pos);
+      status->set_pos(motor2.pos + 800);
     }
     send_motorstatus(status);
   }
@@ -114,12 +116,12 @@ int Motor::send_motorstatus(messages::motorstatus *status) {
    char buffer[BUFFERSIZE];
    int n;
 
-   status->SerializeToArray(buffer, status->ByteSize());
- #ifdef BBB_CAN
+   status->SerializePartialToArray(buffer, status->ByteSize());
+#ifdef BBB_CAN
    n = can_write(sockfd, CAN_MOTORSTATUS, buffer, status->ByteSize());
- #else
+#else
    n = socket_write(CONTROLLER_PORT, CONTROLLER_HOST, buffer, status->ByteSize());
- #endif
+#endif
    if (n > 0) {
      print_motorstatus(NET_OUT, status);
    }

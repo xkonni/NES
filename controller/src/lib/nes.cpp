@@ -29,8 +29,9 @@ void print_motorstatus (char inout, messages::motorstatus *status) {
   char *msg = (char *) malloc(BUFFERSIZE*sizeof(char));
   bzero(msg, BUFFERSIZE);
 
+  // keep in mind that pos has +800 to be positive
   sprintf(msg, "[%c][MOTOR  | STATUS  | ID %d] pos: %d [%d byte]\n",
-      inout, status->motor(), status->pos(), status->ByteSize());
+      inout, status->motor(), status->pos()-800, status->ByteSize());
   printf("%s", msg);
 }
 
