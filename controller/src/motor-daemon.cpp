@@ -42,20 +42,32 @@ void Motor::handle_motorcommand (messages::motorcommand *command, messages::moto
     if (m == 1) {
       motor1.steps = steps;
       // make sure we dont exceed the limits
-      if (motor1.pos + motor1.steps > motor1.maxpos)
+      if (motor1.pos + motor1.steps > motor1.maxpos) {
         motor1.steps = motor1.maxpos - motor1.pos;
-      if (motor1.pos + motor1.steps < motor1.minpos)
+        // hit the edge, send back status
+        command->set_type(messages::motorcommand::STATUS);
+      }
+      if (motor1.pos + motor1.steps < motor1.minpos) {
         motor1.steps = motor1.minpos - motor1.pos;
+        // hit the edge, send back status
+        command->set_type(messages::motorcommand::STATUS);
+      }
       // printf("motor1 pos: %d/[%d, %d], steps to go: %d\n",
       //     motor1.pos, motor1.minpos, motor1.maxpos, motor1.steps);
     }
     else if (m == 2) {
       motor2.steps = steps;
       // make sure we dont exceed the limits
-      if (motor2.pos + motor2.steps > motor2.maxpos)
+      if (motor2.pos + motor2.steps > motor2.maxpos) {
         motor2.steps = motor2.maxpos - motor2.pos;
-      if (motor2.pos + motor2.steps < motor2.minpos)
+        // hit the edge, send back status
+        command->set_type(messages::motorcommand::STATUS);
+      }
+      if (motor2.pos + motor2.steps < motor2.minpos) {
         motor2.steps = motor2.minpos - motor2.pos;
+        // hit the edge, send back status
+        command->set_type(messages::motorcommand::STATUS);
+      }
       // printf("motor2 pos: %d/[%d, %d], steps to go: %d\n",
       //     motor2.pos, motor2.minpos, motor2.maxpos, motor2.steps);
     }
@@ -64,7 +76,7 @@ void Motor::handle_motorcommand (messages::motorcommand *command, messages::moto
   /*
    * STATUS
    */
-  else if (command->type() == messages::motorcommand::STATUS) {
+  if (command->type() == messages::motorcommand::STATUS) {
     status->set_motor(m);
     if ( m == 1 ) {
       status->set_pos(motor1.pos);
@@ -72,6 +84,7 @@ void Motor::handle_motorcommand (messages::motorcommand *command, messages::moto
     else if ( m == 2 ) {
       status->set_pos(motor2.pos);
     }
+    send_motorstatus(status);
   }
 }
 
@@ -96,6 +109,22 @@ void Motor::motor_dir(motor *m, int dir) {
   }
 #endif
 }
+
+int Motor::send_motorstatus(messages::motorstatus *status) {
+   char buffer[BUFFERSIZE];
+   int n;
+
+   status->SerializeToArray(buffer, status->ByteSize());
+ #ifdef BBB_CAN
+   n = can_write(sockfd, CAN_MOTORSTATUS, buffer, status->ByteSize());
+ #else
+   n = socket_write(CONTROLLER_PORT, CONTROLLER_HOST, buffer, status->ByteSize());
+ #endif
+   if (n > 0) {
+     print_motorstatus(NET_OUT, status);
+   }
+   return(n);
+ }
 
 int main(int argc, char *argv[]) {
   Motor mtr;
