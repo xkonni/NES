@@ -58,6 +58,10 @@ int can_write(int sockfd, int canid, const char *buffer, int size) {
   int i;
   struct can_frame frame;
 
+  // size exceeded?
+  if (size > 7)
+    printf("can_write: WARNING size %d > 7\n", size);
+
   // fill can_frame
   frame.can_id = canid;
   for (i = 0; i < size; i++)
