@@ -229,7 +229,7 @@ int main(void) {
       response->Clear();
 
       // parse message
-      message->ParseFromArray(buffer, n);
+      message->ParsePartialFromArray(buffer, n);
       print_sensorcommand(NET_IN, message);
       snsr.handle_sensorcommand(message, response);
     }

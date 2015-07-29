@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
 
       // sensordata
       if (msg_id == CAN_SENSORDATA) {
-        data->ParseFromArray(buffer, n);
+        data->ParsePartialFromArray(buffer, n);
         print_sensordata(NET_IN, data);
         if (data->sensor() == SENSOR1) {
           sdata1->CopyFrom(*data);
@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
       }
       // motorstatus
       else if (msg_id == CAN_MOTORSTATUS) {
-        status->ParseFromArray(buffer, n);
+        status->ParsePartialFromArray(buffer, n);
         print_motorstatus(NET_IN, status);
       }
     }

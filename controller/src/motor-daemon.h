@@ -117,6 +117,13 @@ class Motor {
       */
     void handle_motorcommand (messages::motorcommand *command, messages::motorstatus *status);
 
+    /** @fn   int send_motorstatus(messages::motorstatus *status);
+     *  @brief send a motorstatus to the controller-daemon
+     *
+     *  @param[in]  status   status to send
+     */
+    int send_motorstatus(messages::motorstatus *status);
+
     /** @fn void motor_step (motor *m, int timeout);
       * @brief do a single step on the motor
       *
