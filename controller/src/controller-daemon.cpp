@@ -24,11 +24,28 @@ int Controller::deg2steps(int deg) {
   int steps;
 
   steps = floor(STEPS_TOTAL / 360 * deg);
-  if ((steps < BLINDSPOT) && (steps > -BLINDSPOT)) {
+  if (abs(steps) > 40) { }
+  if (abs(steps) > 20) {
+    steps = floor(steps * 0.8);
+  }
+  else if (abs(steps) > 10) {
+    steps = floor(steps * 0.7);
+  }
+  else if (abs(steps) > 5) {
+    steps = 2;
+  }
+  else if (abs(steps) > 3) {
+    steps = 1;
+  }
+  else {
     steps = 0;
   }
+
+  // if ((steps < BLINDSPOT) && (steps > -BLINDSPOT)) {
+  //   steps = 0;
+  // }
+
   // dont move too much
-  steps = floor(steps * 0.8);
   return steps;
 }
 
