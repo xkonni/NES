@@ -48,9 +48,6 @@ int can_listen(int sockfd, int canid, char *buffer) {
         // return sent size
         return(n);
       }
-      else {
-        printf("ignored canid: %d\n", frame.can_id);
-      }
     }
   } // if (sel > 0)
   return(0);
