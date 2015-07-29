@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
 #endif
     if (n > 0) {
       // parse message
-      message->ParseFromArray(buffer, n);
+      message->ParsePartialFromArray(buffer, n);
       print_motorcommand(NET_IN, message);
       mtr.handle_motorcommand(message, response);
     }
